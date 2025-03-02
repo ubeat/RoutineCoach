@@ -4,12 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RoutineCoach – Tiny Habits PWA</title>
-  
-  <!-- Manifest einbinden -->
   <link rel="manifest" href="manifest.json">
-  
   <style>
-    /* Einfache, eingebettete CSS-Styles */
+    /* Basis-Styles */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
@@ -42,7 +39,6 @@
       margin-bottom: 15px;
       border: 1px solid #ccc;
       border-radius: 4px;
-      box-sizing: border-box;
     }
     button {
       padding: 10px 20px;
@@ -52,16 +48,16 @@
       border-radius: 4px;
       cursor: pointer;
       font-size: 16px;
+      margin: 5px;
       transition: background 0.3s ease, transform 0.3s ease;
-      margin: 5px 0;
     }
     button:hover {
       background: #0056b3;
       transform: scale(1.02);
     }
-    .goals-section, .checkin-section, .summary-section {
+    .section {
       margin-top: 30px;
-      display: none; /* Wird per JS angezeigt */
+      display: none;
     }
     .fade-in {
       animation: fadeIn 0.7s ease-in;
@@ -70,17 +66,17 @@
       from { opacity: 0; }
       to { opacity: 1; }
     }
-    .progress-table {
+    table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
     }
-    .progress-table th, .progress-table td {
+    th, td {
       border: 1px solid #ddd;
       padding: 8px;
       text-align: center;
     }
-    .progress-table th {
+    th {
       background-color: #f0f0f0;
     }
     .success {
@@ -97,45 +93,55 @@
     <p>Erstelle dir drei kleine Gewohnheiten und checke sie täglich!</p>
     
     <!-- Bereich 1: Zieleingabe -->
-    <div class="goals-section fade-in" id="goalsSection">
+    <div class="section fade-in" id="goalsSection">
       <h2>Wöchentliche Ziele festlegen</h2>
+      <p>
+        <strong>SMART-Ziele</strong> sind Ziele, die spezifisch, messbar, attraktiv, realistisch und terminiert sind.
+        <br><em>S</em> steht für <strong>Spezifisch</strong>: Das Ziel ist klar und eindeutig formuliert.
+        <br><em>M</em> steht für <strong>Messbar</strong>: Es lässt sich überprüfen, ob das Ziel erreicht wurde.
+        <br><em>A</em> steht für <strong>Attraktiv</strong>: Das Ziel motiviert und ist erstrebenswert.
+        <br><em>R</em> steht für <strong>Realistisch</strong>: Das Ziel ist erreichbar und nicht überambitioniert.
+        <br><em>T</em> steht für <strong>Terminiert</strong>: Es gibt einen klaren Zeitrahmen, bis wann das Ziel erreicht sein soll.
+      </p>
       <p>Definiere bis zu drei SMART-Ziele für diese Woche:</p>
       <form id="goalsForm">
         <label for="goal1">Ziel 1</label>
         <input type="text" id="goal1" placeholder="z. B. 10 Minuten Lesen" required>
-        
         <label for="goal2">Ziel 2</label>
         <input type="text" id="goal2" placeholder="z. B. 5 Minuten Meditieren" required>
-        
         <label for="goal3">Ziel 3</label>
         <input type="text" id="goal3" placeholder="z. B. 1 Seite Tagebuch" required>
-        
         <button type="submit">Ziele speichern</button>
       </form>
     </div>
     
-    <!-- Bereich 2: Täglicher Check-In -->
-    <div class="checkin-section fade-in" id="checkinSection">
-      <h2>Täglicher Check-In</h2>
-      <p>Trage ein, ob du heute eines deiner Ziele erfüllt hast:</p>
-      <button id="successBtn">Erfolg (1)</button>
-      <button id="failureBtn">Kein Erfolg (0)</button>
+    <!-- Bereich 2: Täglicher Check-In pro Ziel -->
+    <div class="section fade-in" id="checkinSection">
+      <h2>Täglicher Check-In – Tag <span id="currentDayDisplay"></span></h2>
+      <form id="checkinForm">
+        <div id="checkinGoalsContainer">
+          <!-- Hier werden dynamisch Felder für jedes Ziel erzeugt -->
+        </div>
+        <button type="submit">Tagescheck speichern</button>
+      </form>
       
-      <table class="progress-table" id="progressTable">
+      <table id="progressTable">
         <thead>
           <tr>
             <th>Tag</th>
-            <th>Ergebnis</th>
+            <th>Ziel 1</th>
+            <th>Ziel 2</th>
+            <th>Ziel 3</th>
           </tr>
         </thead>
         <tbody id="progressTableBody">
-          <!-- Dynamische Einträge per JavaScript -->
+          <!-- Fortschritt wird hier angezeigt -->
         </tbody>
       </table>
     </div>
     
     <!-- Bereich 3: Wochen-Zusammenfassung -->
-    <div class="summary-section fade-in" id="summarySection">
+    <div class="section fade-in" id="summarySection">
       <h2>Woche abgeschlossen!</h2>
       <p id="summaryMessage"></p>
       <button id="restartBtn">Neue Woche starten</button>
@@ -144,118 +150,144 @@
     <!-- Button für Test-Benachrichtigung -->
     <button id="notifyBtn">Test-Benachrichtigung</button>
   </div>
-
+  
   <script>
     // Globale Variablen
-    const goalsForm = document.getElementById('goalsForm');
     const goalsSection = document.getElementById('goalsSection');
     const checkinSection = document.getElementById('checkinSection');
     const summarySection = document.getElementById('summarySection');
-    
-    const successBtn = document.getElementById('successBtn');
-    const failureBtn = document.getElementById('failureBtn');
+    const goalsForm = document.getElementById('goalsForm');
+    const checkinForm = document.getElementById('checkinForm');
+    const checkinGoalsContainer = document.getElementById('checkinGoalsContainer');
     const progressTableBody = document.getElementById('progressTableBody');
+    const currentDayDisplay = document.getElementById('currentDayDisplay');
     const summaryMessage = document.getElementById('summaryMessage');
     const restartBtn = document.getElementById('restartBtn');
-    
     const notifyBtn = document.getElementById('notifyBtn');
+    
+    // Motivierende Nachrichten
+    const motivationalMessages = [
+      "Klasse gemacht, weiter so!",
+      "Super, jeder Schritt zählt!",
+      "Toller Fortschritt – bleib dran!",
+      "Du bist auf dem richtigen Weg!",
+      "Fantastisch, deine Gewohnheiten wachsen!"
+    ];
     
     // Datenstruktur für die Woche
     let weekData = {
       goals: [],
       currentDay: 1,
-      totalDays: 6,  // 6 Tage Check-In
-      results: []    // Array aus "1" oder "0"
+      totalDays: 6,
+      results: [] // Array von Tagen, jeder Tag: Array von 3 Antworten ("JA" oder "NEIN")
     };
     
-    // --- SCHRITT 1: PRÜFEN, OB BEREITS ZIELE GESPEICHERT SIND ---
-    // Falls ja, direkt Check-In anzeigen, sonst Zieleingabe.
+    // Initialisierung beim Laden der Seite
     window.addEventListener('load', () => {
       loadWeekData();
-      if (weekData.goals && weekData.goals.length > 0) {
-        // Wir haben bereits Ziele, also Check-In anzeigen
+      if (weekData.goals.length > 0) {
         showCheckinSection();
       } else {
-        // Keine Ziele -> Zieleingabe anzeigen
         goalsSection.style.display = 'block';
       }
     });
     
-    // --- SCHRITT 2: ZIELE SPEICHERN ---
+    // Ziele speichern
     goalsForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const g1 = document.getElementById('goal1').value.trim();
       const g2 = document.getElementById('goal2').value.trim();
       const g3 = document.getElementById('goal3').value.trim();
-      
       if (g1 && g2 && g3) {
         weekData.goals = [g1, g2, g3];
         weekData.currentDay = 1;
         weekData.results = [];
-        
         saveWeekData();
         goalsSection.style.display = 'none';
         showCheckinSection();
       } else {
-        alert('Bitte alle drei Ziele ausfüllen.');
+        alert("Bitte alle drei Ziele ausfüllen.");
       }
     });
     
-    // --- SCHRITT 3: TÄGLICHER CHECK-IN ---
-    successBtn.addEventListener('click', () => {
-      handleCheckIn('1');
-    });
-    failureBtn.addEventListener('click', () => {
-      handleCheckIn('0');
-    });
+    // Generiere das Check-In Formular für den aktuellen Tag
+    function generateCheckinForm() {
+      checkinGoalsContainer.innerHTML = "";
+      currentDayDisplay.textContent = weekData.currentDay;
+      weekData.goals.forEach((goal, index) => {
+        const div = document.createElement('div');
+        div.style.marginBottom = "15px";
+        div.innerHTML = `<p><strong>Ziel ${index + 1}:</strong> ${goal}</p>
+          <label>
+            <input type="radio" name="goal${index}" value="JA" required> JA
+          </label>
+          <label style="margin-left: 10px;">
+            <input type="radio" name="goal${index}" value="NEIN" required> NEIN
+          </label>`;
+        checkinGoalsContainer.appendChild(div);
+      });
+    }
     
-    function handleCheckIn(result) {
-      weekData.results.push(result);
+    // Verarbeite den Check-In des Tages
+    checkinForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const dayResults = [];
+      for (let i = 0; i < weekData.goals.length; i++) {
+        const radios = document.getElementsByName(`goal${i}`);
+        let selectedValue = null;
+        for (const radio of radios) {
+          if (radio.checked) {
+            selectedValue = radio.value;
+            break;
+          }
+        }
+        if (!selectedValue) {
+          alert("Bitte wähle für jedes Ziel JA oder NEIN.");
+          return;
+        }
+        dayResults.push(selectedValue);
+      }
+      weekData.results.push(dayResults);
       saveWeekData();
       updateProgressTable();
       
-      weekData.currentDay++;
-      saveWeekData();
+      // Zeige eine motivierende Nachricht
+      alert(motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)]);
       
-      // Prüfen, ob Woche abgeschlossen ist
+      weekData.currentDay++;
       if (weekData.currentDay > weekData.totalDays) {
         checkinSection.style.display = 'none';
         showSummary();
+      } else {
+        generateCheckinForm();
       }
-    }
+    });
     
+    // Aktualisiere die Fortschrittstabelle
     function updateProgressTable() {
-      progressTableBody.innerHTML = '';
-      for (let i = 0; i < weekData.results.length; i++) {
-        const dayNumber = i + 1;
-        const result = weekData.results[i];
+      progressTableBody.innerHTML = "";
+      weekData.results.forEach((dayResults, dayIndex) => {
         const row = document.createElement('tr');
-        
-        let resultText = '';
-        if (result === '1') {
-          resultText = '<span class="success">Erfolg</span>';
-        } else {
-          resultText = '<span class="failure">Kein Erfolg</span>';
-        }
-        
-        row.innerHTML = `
-          <td>Tag ${dayNumber}</td>
-          <td>${resultText}</td>
-        `;
+        row.innerHTML = `<td>Tag ${dayIndex + 1}</td>
+                         <td>${dayResults[0]}</td>
+                         <td>${dayResults[1]}</td>
+                         <td>${dayResults[2]}</td>`;
         progressTableBody.appendChild(row);
-      }
+      });
     }
     
-    // --- SCHRITT 4: ZUSAMMENFASSUNG ---
+    // Zeige die Wochen-Zusammenfassung
     function showSummary() {
       summarySection.style.display = 'block';
-      const successes = weekData.results.filter(r => r === '1').length;
-      summaryMessage.textContent = 
-        'Du hast ' + successes + ' von ' + weekData.totalDays + ' Tagen erfolgreich gemeistert!';
+      let summaryText = "";
+      weekData.goals.forEach((goal, i) => {
+        let successes = weekData.results.reduce((acc, day) => acc + (day[i] === "JA" ? 1 : 0), 0);
+        summaryText += `Ziel ${i + 1} ("${goal}"): ${successes} von ${weekData.totalDays} Tagen erreicht.<br>`;
+      });
+      summaryMessage.innerHTML = summaryText;
     }
     
     restartBtn.addEventListener('click', () => {
-      // Alles zurücksetzen
       weekData = {
         goals: [],
         currentDay: 1,
@@ -267,59 +299,53 @@
       goalsSection.style.display = 'block';
     });
     
-    // --- SCHRITT 5: BEREICH CHECK-IN ANZEIGEN ---
+    // Check-In Bereich anzeigen
     function showCheckinSection() {
       checkinSection.style.display = 'block';
+      generateCheckinForm();
       updateProgressTable();
     }
     
-    // --- SCHRITT 6: LOKALE SPEICHERUNG ---
+    // Lokale Speicherung
     function saveWeekData() {
-      localStorage.setItem('tinyHabitsWeekData', JSON.stringify(weekData));
+      localStorage.setItem("tinyHabitsWeekData", JSON.stringify(weekData));
     }
     function loadWeekData() {
-      const data = localStorage.getItem('tinyHabitsWeekData');
+      const data = localStorage.getItem("tinyHabitsWeekData");
       if (data) {
         weekData = JSON.parse(data);
       }
     }
     
-    // --- SCHRITT 7: TEST-BENACHRICHTIGUNG ---
-    // Hinweis: Für echte Push-Benachrichtigungen zu einer bestimmten Uhrzeit
-    // brauchst du einen Server oder Dienst, der "Push" auslöst.
-    // Diese Funktion hier löst nur sofort eine Benachrichtigung aus.
-    
-    // Registrierung des Service Workers (falls noch nicht geschehen)
+    // Service Worker und Test-Benachrichtigung
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
-      .then(function(registration) {
+      .then(registration => {
         console.log('Service Worker registriert mit Scope:', registration.scope);
       })
-      .catch(function(error) {
+      .catch(error => {
         console.log('Service Worker Registrierung fehlgeschlagen:', error);
       });
     }
     
-    // Berechtigung für Notifications anfragen
     function askNotificationPermission() {
       if (!('Notification' in window)) {
-        alert('Dieser Browser unterstützt keine Notifications.');
+        alert("Dieser Browser unterstützt keine Notifications.");
       } else {
-        Notification.requestPermission().then(function(permission) {
+        Notification.requestPermission().then(permission => {
           if (permission === 'granted') {
-            console.log('Notification permission granted.');
+            console.log("Notification permission granted.");
           }
         });
       }
     }
     
-    // Button-Klick für Test-Benachrichtigung
-    notifyBtn.addEventListener('click', function() {
+    notifyBtn.addEventListener('click', () => {
       if (Notification.permission === 'granted') {
-        navigator.serviceWorker.getRegistration().then(function(reg) {
-          reg.showNotification('RoutineCoach – Tiny Habits', {
-            body: 'Dies ist eine Test-Benachrichtigung!',
-            icon: 'icon-192.png'
+        navigator.serviceWorker.getRegistration().then(registration => {
+          registration.showNotification("RoutineCoach – Tiny Habits", {
+            body: "Dies ist eine Test-Benachrichtigung!",
+            icon: "icon-192.png"
           });
         });
       } else {
@@ -327,14 +353,12 @@
       }
     });
     
-    // Event für Installation (PWA)
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
-      console.log('App kann installiert werden!');
-      // Hier könntest du z.B. einen eigenen "Installieren"-Button einblenden
-      // und bei Klick e.prompt() aufrufen, um die Installation zu starten.
+      console.log("App kann installiert werden!");
     });
   </script>
 </body>
 </html>
+
 
