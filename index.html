@@ -1,0 +1,105 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2821
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 <!DOCTYPE html>\
+<html lang="de">\
+<head>\
+  <meta charset="UTF-8">\
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">\
+  <title>Tiny Habits PWA</title>\
+  <link rel="manifest" href="manifest.json">\
+  <style>\
+    /* Basis-Styles */\
+    body \{\
+      font-family: Arial, sans-serif;\
+      background-color: #f9f9f9;\
+      color: #333;\
+      padding: 20px;\
+      margin: 0;\
+    \}\
+    .container \{\
+      max-width: 600px;\
+      margin: 0 auto;\
+      background: #fff;\
+      padding: 20px;\
+      border-radius: 8px;\
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);\
+      text-align: center;\
+    \}\
+    button \{\
+      padding: 10px 20px;\
+      background: #007BFF;\
+      color: #fff;\
+      border: none;\
+      border-radius: 4px;\
+      cursor: pointer;\
+      transition: background 0.3s ease, transform 0.3s ease;\
+      font-size: 16px;\
+      margin-top: 20px;\
+    \}\
+    button:hover \{\
+      background: #0056b3;\
+      transform: scale(1.02);\
+    \}\
+  </style>\
+</head>\
+<body>\
+  <div class="container">\
+    <h1>Tiny Habits PWA</h1>\
+    <p>Diese App hilft dir dabei, mit kleinen Schritten neue Gewohnheiten aufzubauen.</p>\
+    <button id="notifyBtn">Test-Benachrichtigung</button>\
+  </div>\
+\
+  <script>\
+    // Registrierung des Service Workers\
+    if ('serviceWorker' in navigator) \{\
+      navigator.serviceWorker.register('service-worker.js')\
+      .then(function(registration) \{\
+        console.log('Service Worker registriert mit Scope:', registration.scope);\
+      \})\
+      .catch(function(error) \{\
+        console.log('Service Worker Registrierung fehlgeschlagen:', error);\
+      \});\
+    \}\
+    \
+    // Funktion, um die Berechtigung f\'fcr Notifications anzufordern\
+    function askNotificationPermission() \{\
+      if (!('Notification' in window)) \{\
+        alert('Dieser Browser unterst\'fctzt keine Notifications.');\
+      \} else \{\
+        Notification.requestPermission().then(function(permission) \{\
+          if (permission === 'granted') \{\
+            console.log('Notification permission granted.');\
+          \}\
+        \});\
+      \}\
+    \}\
+    \
+    // Test-Button f\'fcr eine Notification\
+    document.getElementById('notifyBtn').addEventListener('click', function() \{\
+      if (Notification.permission === 'granted') \{\
+        navigator.serviceWorker.getRegistration().then(function(reg) \{\
+          reg.showNotification('Tiny Habits', \{\
+            body: 'Dies ist eine Test-Benachrichtigung!',\
+            icon: 'icon-192.png'\
+          \});\
+        \});\
+      \} else \{\
+        askNotificationPermission();\
+      \}\
+    \});\
+    \
+    // Optionale Installationserinnerung (f\'fcr den Home-Bildschirm)\
+    window.addEventListener('beforeinstallprompt', (e) => \{\
+      e.preventDefault();\
+      // Hier kannst du einen Installations-Button anzeigen, der das "install prompt" ausl\'f6st\
+      console.log('App kann installiert werden!');\
+    \});\
+  </script>\
+</body>\
+</html>\
+}
