@@ -7,5 +7,6 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-  // Optional: Hier kannst du Caching-Strategien implementieren.
+  // Hier könntest du Caching implementieren, wenn du möchtest.
 });
+
