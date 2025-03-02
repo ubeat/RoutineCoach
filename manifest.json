@@ -1,6 +1,6 @@
 {
-  "name": "Tiny Habits PWA",
-  "short_name": "TinyHabits",
+  "name": "RoutineCoach Tiny Habits",
+  "short_name": "RoutineCoach",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -18,3 +18,4 @@
     }
   ]
 }
+
