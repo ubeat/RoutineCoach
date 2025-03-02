@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RoutineCoach – Tiny Habits PWA</title>
+  <title>Gewohnheits Coach</title>
   <link rel="manifest" href="manifest.json">
   <style>
     /* Basis-Styles */
@@ -89,8 +89,8 @@
 </head>
 <body>
   <div class="container">
-    <h1>RoutineCoach – Tiny Habits</h1>
-    <p>Erstelle dir drei kleine Gewohnheiten und checke sie täglich!</p>
+    <h1>Gewohnheits Coach</h1>
+    <p>Erstelle dir drei kleine neue Gewohnheiten und checke sie täglich!</p>
     
     <!-- Bereich 1: Zieleingabe -->
     <div class="section fade-in" id="goalsSection">
@@ -147,8 +147,8 @@
       <button id="restartBtn">Neue Woche starten</button>
     </div>
     
-    <!-- Button für Test-Benachrichtigung -->
-    <button id="notifyBtn">Test-Benachrichtigung</button>
+    <!-- Button für Tägliche Affiramtion -->
+    <button id="notifyBtn">Tägliche Affirmation</button>
   </div>
   
   <script>
@@ -215,6 +215,64 @@
   "Du bist stark, mutig und erfolgreich!",
   "Dein Fortschritt inspiriert andere!"
 ];
+const dailyAffirmations = [
+  "Ich starte kraftvoll in den Tag.",
+  "Ich bin fokussiert und stark.",
+  "Ich vertraue meinem Weg.",
+  "Ich bin voller Energie.",
+  "Ich lebe meine Ziele.",
+  "Ich bin dankbar.",
+  "Ich strahle Positivität aus.",
+  "Ich bin mutig.",
+  "Ich wachse täglich.",
+  "Ich bin zielstrebig.",
+  "Ich glaube an mich.",
+  "Ich umarme den Tag.",
+  "Ich bin voller Freude.",
+  "Ich bin erfolgreich.",
+  "Ich bin im Einklang.",
+  "Ich bin ausgeglichen.",
+  "Ich bin kreativ.",
+  "Ich bin resilient.",
+  "Ich bin inspiriert.",
+  "Ich bin bereit zu handeln.",
+  "Ich schaffe Herausforderungen.",
+  "Ich bin selbstbewusst.",
+  "Ich genieße jeden Moment.",
+  "Ich bin offen für Neues.",
+  "Ich entscheide mich für Glück.",
+  "Ich wachse an jeder Aufgabe.",
+  "Ich lasse Zweifel los.",
+  "Ich bin klar und stark.",
+  "Ich vertraue meiner Intuition.",
+  "Ich setze Prioritäten.",
+  "Ich bleibe fokussiert.",
+  "Ich genieße den Fortschritt.",
+  "Ich bin voller Optimismus.",
+  "Ich feiere kleine Erfolge.",
+  "Ich bin voller Tatendrang.",
+  "Ich lasse mich inspirieren.",
+  "Ich schätze den Moment.",
+  "Ich bin in Harmonie.",
+  "Ich nehme Herausforderungen an.",
+  "Ich erreiche meine Ziele.",
+  "Ich bin voller Zuversicht.",
+  "Ich bin gelassen.",
+  "Ich bin voller Entschlossenheit.",
+  "Ich wähle Positivität.",
+  "Ich bin bereit für Erfolg.",
+  "Ich lebe im Jetzt.",
+  "Ich bin dankbar für den Tag."
+];
+
+// Beispiel: Anzeige einer zufälligen Affirmation
+function showRandomAffirmation() {
+  const randomIndex = Math.floor(Math.random() * dailyAffirmations.length);
+  alert("Tägliche Affirmation: " + dailyAffirmations[randomIndex]);
+}
+
+// Zum Testen: Beim Klick auf einen Button kannst du die Funktion aufrufen
+document.getElementById('affirmationBtn').addEventListener('click', showRandomAffirmation);
 
     
     // Datenstruktur für die Woche
