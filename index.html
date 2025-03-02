@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gewohnheits Coach</title>
+  <title>RoutineCoach – Tiny Habits PWA</title>
   <link rel="manifest" href="manifest.json">
   <style>
     /* Basis-Styles */
@@ -85,23 +85,27 @@
     .failure {
       color: red;
     }
+    .button-group {
+      text-align: center;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Gewohnheits Coach</h1>
-    <p>Erstelle dir drei kleine neue Gewohnheiten und checke sie täglich!</p>
+    <h1>RoutineCoach – Tiny Habits</h1>
+    <p>Erstelle dir drei kleine Gewohnheiten und checke sie täglich!</p>
     
     <!-- Bereich 1: Zieleingabe -->
     <div class="section fade-in" id="goalsSection">
       <h2>Wöchentliche Ziele festlegen</h2>
       <p>
         <strong>SMART-Ziele</strong> sind Ziele, die spezifisch, messbar, attraktiv, realistisch und terminiert sind.
-        <br><em>S</em> steht für <strong>Spezifisch</strong>: Das Ziel ist klar und eindeutig formuliert.
-        <br><em>M</em> steht für <strong>Messbar</strong>: Es lässt sich überprüfen, ob das Ziel erreicht wurde.
-        <br><em>A</em> steht für <strong>Attraktiv</strong>: Das Ziel motiviert und ist erstrebenswert.
-        <br><em>R</em> steht für <strong>Realistisch</strong>: Das Ziel ist erreichbar und nicht überambitioniert.
-        <br><em>T</em> steht für <strong>Terminiert</strong>: Es gibt einen klaren Zeitrahmen, bis wann das Ziel erreicht sein soll.
+        <br><em>S</em> – Spezifisch: Klar formuliert.
+        <br><em>M</em> – Messbar: Erfolge lassen sich überprüfen.
+        <br><em>A</em> – Attraktiv: Motiviert und erstrebenswert.
+        <br><em>R</em> – Realistisch: Erreichbar und vernünftig.
+        <br><em>T</em> – Terminiert: Mit klarem Zeitrahmen.
       </p>
       <p>Definiere bis zu drei SMART-Ziele für diese Woche:</p>
       <form id="goalsForm">
@@ -120,7 +124,7 @@
       <h2>Täglicher Check-In – Tag <span id="currentDayDisplay"></span></h2>
       <form id="checkinForm">
         <div id="checkinGoalsContainer">
-          <!-- Hier werden dynamisch Felder für jedes Ziel erzeugt -->
+          <!-- Dynamisch erzeugte Felder für jedes Ziel -->
         </div>
         <button type="submit">Tagescheck speichern</button>
       </form>
@@ -147,12 +151,75 @@
       <button id="restartBtn">Neue Woche starten</button>
     </div>
     
-    <!-- Button für Tägliche Affiramtion -->
-    <button id="notifyBtn">Tägliche Affirmation</button>
+    <!-- Button für Test-Benachrichtigung -->
+    <div class="button-group">
+      <button id="notifyBtn">Test-Benachrichtigung</button>
+      <button id="affirmationBtn">Tägliche Affirmation anzeigen</button>
+    </div>
   </div>
   
   <script>
-    // Globale Variablen
+    // Tägliche Affirmationen (47 kurze Botschaften)
+    const dailyAffirmations = [
+      "Ich starte kraftvoll in den Tag.",
+      "Ich bin fokussiert und stark.",
+      "Ich vertraue meinem Weg.",
+      "Ich bin voller Energie.",
+      "Ich lebe meine Ziele.",
+      "Ich bin dankbar.",
+      "Ich strahle Positivität aus.",
+      "Ich bin mutig.",
+      "Ich wachse täglich.",
+      "Ich bin zielstrebig.",
+      "Ich glaube an mich.",
+      "Ich umarme den Tag.",
+      "Ich bin voller Freude.",
+      "Ich bin erfolgreich.",
+      "Ich bin im Einklang.",
+      "Ich bin ausgeglichen.",
+      "Ich bin kreativ.",
+      "Ich bin resilient.",
+      "Ich bin inspiriert.",
+      "Ich bin bereit zu handeln.",
+      "Ich schaffe Herausforderungen.",
+      "Ich bin selbstbewusst.",
+      "Ich genieße jeden Moment.",
+      "Ich bin offen für Neues.",
+      "Ich entscheide mich für Glück.",
+      "Ich wachse an jeder Aufgabe.",
+      "Ich lasse Zweifel los.",
+      "Ich bin klar und stark.",
+      "Ich vertraue meiner Intuition.",
+      "Ich setze Prioritäten.",
+      "Ich bleibe fokussiert.",
+      "Ich genieße den Fortschritt.",
+      "Ich bin voller Optimismus.",
+      "Ich feiere kleine Erfolge.",
+      "Ich bin voller Tatendrang.",
+      "Ich lasse mich inspirieren.",
+      "Ich schätze den Moment.",
+      "Ich bin in Harmonie.",
+      "Ich nehme Herausforderungen an.",
+      "Ich erreiche meine Ziele.",
+      "Ich bin voller Zuversicht.",
+      "Ich bin gelassen.",
+      "Ich bin voller Entschlossenheit.",
+      "Ich wähle Positivität.",
+      "Ich bin bereit für Erfolg.",
+      "Ich lebe im Jetzt.",
+      "Ich bin dankbar für den Tag."
+    ];
+    
+    // Motivierende Nachrichten für den Check-In (können auch zufällig gewählt werden)
+    const motivationalMessages = [
+      "Klasse gemacht, weiter so!",
+      "Super, jeder Schritt zählt!",
+      "Toller Fortschritt – bleib dran!",
+      "Du bist auf dem richtigen Weg!",
+      "Fantastisch, deine Gewohnheiten wachsen!"
+    ];
+    
+    // Globale Variablen und Datenstruktur für die Woche
     const goalsSection = document.getElementById('goalsSection');
     const checkinSection = document.getElementById('checkinSection');
     const summarySection = document.getElementById('summarySection');
@@ -164,123 +231,13 @@
     const summaryMessage = document.getElementById('summaryMessage');
     const restartBtn = document.getElementById('restartBtn');
     const notifyBtn = document.getElementById('notifyBtn');
+    const affirmationBtn = document.getElementById('affirmationBtn');
     
-    // Motivierende Nachrichten
-    const motivationalMessages = [
-  "Klasse gemacht, weiter so!",
-  "Super, jeder Schritt zählt!",
-  "Toller Fortschritt – bleib dran!",
-  "Du bist auf dem richtigen Weg!",
-  "Fantastisch, deine Gewohnheiten wachsen!",
-  "Ausgezeichnete Arbeit!",
-  "Du meisterst das großartig!",
-  "Jeder Erfolg motiviert weiterzumachen!",
-  "Deine Anstrengung zahlt sich aus!",
-  "Du machst wirklich Fortschritte!",
-  "Bleib dran, du schaffst das!",
-  "Deine Disziplin beeindruckt!",
-  "Jeder kleine Schritt bringt dich voran!",
-  "Du bist stark und fokussiert!",
-  "Erfolg ist das Ergebnis deines Einsatzes!",
-  "Deine Entschlossenheit inspiriert!",
-  "Weiter so – du bist auf einem guten Weg!",
-  "Stolz auf dich, mach weiter!",
-  "Mit jedem Tag wirst du besser!",
-  "Dein Fortschritt ist sichtbar!",
-  "Du leistest hervorragende Arbeit!",
-  "Täglich neue Erfolge – weiter so!",
-  "Deine Ziele sind zum Greifen nah!",
-  "Jeder Tag bringt dich deinem Ziel näher!",
-  "Mach weiter, du bist fast am Ziel!",
-  "Du bist ein Vorbild an Beständigkeit!",
-  "Deine Fortschritte sind beeindruckend!",
-  "Ausdauer zahlt sich aus – weiter so!",
-  "Du hast das Zeug dazu, Großes zu erreichen!",
-  "Dein Engagement ist inspirierend!",
-  "Erfolg ist das Ergebnis harter Arbeit!",
-  "Deine Beharrlichkeit wird belohnt!",
-  "Mach weiter, du bist auf Erfolgskurs!",
-  "Jeder Erfolg motiviert dich noch mehr!",
-  "Deine Fortschritte sind bemerkenswert!",
-  "Du bist auf dem Weg zum Erfolg!",
-  "Jeder Tag zählt – mach weiter!",
-  "Dein Durchhaltevermögen ist bewundernswert!",
-  "Du machst jeden Tag einen Unterschied!",
-  "Deine Ziele sind erreichbar – bleib dran!",
-  "Mit Leidenschaft und Fleiß kommst du voran!",
-  "Du bringst deine Träume zum Leben!",
-  "Jeder kleine Erfolg ist ein Schritt nach vorn!",
-  "Dein Einsatz macht den Unterschied!",
-  "Motivation ist der Schlüssel – weiter so!",
-  "Du bist stark, mutig und erfolgreich!",
-  "Dein Fortschritt inspiriert andere!"
-];
-const dailyAffirmations = [
-  "Ich starte kraftvoll in den Tag.",
-  "Ich bin fokussiert und stark.",
-  "Ich vertraue meinem Weg.",
-  "Ich bin voller Energie.",
-  "Ich lebe meine Ziele.",
-  "Ich bin dankbar.",
-  "Ich strahle Positivität aus.",
-  "Ich bin mutig.",
-  "Ich wachse täglich.",
-  "Ich bin zielstrebig.",
-  "Ich glaube an mich.",
-  "Ich umarme den Tag.",
-  "Ich bin voller Freude.",
-  "Ich bin erfolgreich.",
-  "Ich bin im Einklang.",
-  "Ich bin ausgeglichen.",
-  "Ich bin kreativ.",
-  "Ich bin resilient.",
-  "Ich bin inspiriert.",
-  "Ich bin bereit zu handeln.",
-  "Ich schaffe Herausforderungen.",
-  "Ich bin selbstbewusst.",
-  "Ich genieße jeden Moment.",
-  "Ich bin offen für Neues.",
-  "Ich entscheide mich für Glück.",
-  "Ich wachse an jeder Aufgabe.",
-  "Ich lasse Zweifel los.",
-  "Ich bin klar und stark.",
-  "Ich vertraue meiner Intuition.",
-  "Ich setze Prioritäten.",
-  "Ich bleibe fokussiert.",
-  "Ich genieße den Fortschritt.",
-  "Ich bin voller Optimismus.",
-  "Ich feiere kleine Erfolge.",
-  "Ich bin voller Tatendrang.",
-  "Ich lasse mich inspirieren.",
-  "Ich schätze den Moment.",
-  "Ich bin in Harmonie.",
-  "Ich nehme Herausforderungen an.",
-  "Ich erreiche meine Ziele.",
-  "Ich bin voller Zuversicht.",
-  "Ich bin gelassen.",
-  "Ich bin voller Entschlossenheit.",
-  "Ich wähle Positivität.",
-  "Ich bin bereit für Erfolg.",
-  "Ich lebe im Jetzt.",
-  "Ich bin dankbar für den Tag."
-];
-
-// Beispiel: Anzeige einer zufälligen Affirmation
-function showRandomAffirmation() {
-  const randomIndex = Math.floor(Math.random() * dailyAffirmations.length);
-  alert("Tägliche Affirmation: " + dailyAffirmations[randomIndex]);
-}
-
-// Zum Testen: Beim Klick auf einen Button kannst du die Funktion aufrufen
-document.getElementById('affirmationBtn').addEventListener('click', showRandomAffirmation);
-
-    
-    // Datenstruktur für die Woche
     let weekData = {
       goals: [],
       currentDay: 1,
       totalDays: 6,
-      results: [] // Array von Tagen, jeder Tag: Array von 3 Antworten ("JA" oder "NEIN")
+      results: [] // Für jeden Tag ein Array mit drei Einträgen ("JA" oder "NEIN")
     };
     
     // Initialisierung beim Laden der Seite
@@ -352,7 +309,7 @@ document.getElementById('affirmationBtn').addEventListener('click', showRandomAf
       saveWeekData();
       updateProgressTable();
       
-      // Zeige eine motivierende Nachricht
+      // Zeige eine zufällige, motivierende Nachricht für den Tag
       alert(motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)]);
       
       weekData.currentDay++;
@@ -388,6 +345,7 @@ document.getElementById('affirmationBtn').addEventListener('click', showRandomAf
       summaryMessage.innerHTML = summaryText;
     }
     
+    // Neue Woche starten
     restartBtn.addEventListener('click', () => {
       weekData = {
         goals: [],
@@ -418,7 +376,7 @@ document.getElementById('affirmationBtn').addEventListener('click', showRandomAf
       }
     }
     
-    // Service Worker und Test-Benachrichtigung
+    // Service Worker registrieren (für PWA-Funktionalität)
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js')
       .then(registration => {
@@ -429,6 +387,7 @@ document.getElementById('affirmationBtn').addEventListener('click', showRandomAf
       });
     }
     
+    // Test-Benachrichtigung
     function askNotificationPermission() {
       if (!('Notification' in window)) {
         alert("Dieser Browser unterstützt keine Notifications.");
@@ -440,7 +399,6 @@ document.getElementById('affirmationBtn').addEventListener('click', showRandomAf
         });
       }
     }
-    
     notifyBtn.addEventListener('click', () => {
       if (Notification.permission === 'granted') {
         navigator.serviceWorker.getRegistration().then(registration => {
@@ -454,6 +412,13 @@ document.getElementById('affirmationBtn').addEventListener('click', showRandomAf
       }
     });
     
+    // Tägliche Affirmation anzeigen
+    affirmationBtn.addEventListener('click', () => {
+      const randomIndex = Math.floor(Math.random() * dailyAffirmations.length);
+      alert("Tägliche Affirmation: " + dailyAffirmations[randomIndex]);
+    });
+    
+    // Event für Installation (PWA)
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       console.log("App kann installiert werden!");
@@ -461,5 +426,6 @@ document.getElementById('affirmationBtn').addEventListener('click', showRandomAf
   </script>
 </body>
 </html>
+
 
 
