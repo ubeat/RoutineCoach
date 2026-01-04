@@ -11,12 +11,16 @@ import {
   Alert,
   TextInput,
   Modal,
+  Linking,
+  Clipboard,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { COLOR_PALETTES } from '../contexts/SettingsContext';
+import QRCode from 'react-native-qrcode-svg';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
