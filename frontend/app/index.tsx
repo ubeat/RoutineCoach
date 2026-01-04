@@ -103,6 +103,7 @@ export default function HomeScreen() {
   };
 
   useEffect(() => {
+    loadUserName();
     fetchData();
   }, []);
 
