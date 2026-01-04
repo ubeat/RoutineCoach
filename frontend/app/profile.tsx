@@ -474,7 +474,10 @@ export default function ProfileScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Accountability Partner</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Accountability Partner 💜</Text>
+            <Text style={[styles.modalSubtitle, { color: colors.textLight }]}>
+              Gemeinsam ist alles leichter! Lade einen Freund ein.
+            </Text>
             
             <TouchableOpacity
               style={[styles.inviteButton, { backgroundColor: colors.secondary }]}
@@ -486,7 +489,7 @@ export default function ProfileScreen() {
             
             <Text style={[styles.orText, { color: colors.textLight }]}>- oder -</Text>
             
-            <Text style={[styles.inputLabel, { color: colors.text }]}>Code eingeben:</Text>
+            <Text style={[styles.inputLabel, { color: colors.text }]}>Du hast einen Code erhalten?</Text>
             <TextInput
               style={[styles.codeInput, { borderColor: colors.primary, color: colors.text }]}
               value={inviteCode}
@@ -508,7 +511,7 @@ export default function ProfileScreen() {
               style={styles.cancelButton}
               onPress={() => setShowPartnerModal(false)}
             >
-              <Text style={[styles.cancelButtonText, { color: colors.textLight }]}>Abbrechen</Text>
+              <Text style={[styles.cancelButtonText, { color: colors.textLight }]}>Spaeter</Text>
             </TouchableOpacity>
           </View>
         </View>
