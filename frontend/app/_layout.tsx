@@ -45,30 +45,42 @@ export default function RootLayout() {
           }}
         />
         <Tabs.Screen
-          name="progress"
+          name="profile"
           options={{
-            title: 'Fortschritt',
+            title: 'Profil',
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="stats-chart" size={size} color={color} />
+              <Ionicons name="trophy" size={size} color={color} />
             ),
           }}
         />
         <Tabs.Screen
-          name="goals"
+          name="journal"
           options={{
-            title: 'Ziele',
+            title: 'Tagebuch',
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="flag" size={size} color={color} />
+              <Ionicons name="book" size={size} color={color} />
             ),
           }}
         />
         <Tabs.Screen
           name="settings"
           options={{
-            title: 'Einstellungen',
+            title: 'Mehr',
             tabBarIcon: ({ color, size }) => (
-              <Ionicons name="settings" size={size} color={color} />
+              <Ionicons name="ellipsis-horizontal" size={size} color={color} />
             ),
+          }}
+        />
+        <Tabs.Screen
+          name="goals"
+          options={{
+            href: null, // Hide from tab bar but still accessible
+          }}
+        />
+        <Tabs.Screen
+          name="progress"
+          options={{
+            href: null, // Hide from tab bar but still accessible
           }}
         />
       </Tabs>
