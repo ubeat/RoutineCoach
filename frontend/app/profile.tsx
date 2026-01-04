@@ -1054,4 +1054,86 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontSize: 16,
   },
+  // New Partner styles
+  partnerExplainText: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  partnerConnectedText: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  qrCodeContainer: {
+    alignSelf: 'center',
+    padding: 15,
+    borderRadius: 16,
+    marginBottom: 20,
+  },
+  codeDisplayBox: {
+    padding: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  codeLabel: {
+    fontSize: 12,
+    marginBottom: 5,
+  },
+  generatedCodeText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    letterSpacing: 4,
+  },
+  shareMethodsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  shareButtonsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  shareMethodButton: {
+    width: '48%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 10,
+    gap: 8,
+  },
+  shareMethodText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  copyCodeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 2,
+    gap: 8,
+    marginBottom: 10,
+  },
+  copyCodeText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  newCodeButton: {
+    padding: 10,
+    alignItems: 'center',
+  },
+  newCodeText: {
+    fontSize: 14,
+  },
 });
