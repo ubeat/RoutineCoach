@@ -131,15 +131,68 @@ export default function ProfileScreen() {
       const deviceId = await AsyncStorage.getItem('deviceId');
       const response = await axios.post(`${API_URL}/api/social/invite?device_id=${deviceId}`);
       const code = response.data.invite_code;
-      
-      Share.share({
-        message: `💜 Lass uns gemeinsam gute Gewohnheiten aufbauen! Werde mein Accountability Partner bei "Schritt fuer Schritt". Nutze den Code: ${code}`,
-      });
-      
+      setGeneratedCode(code);
       fetchData();
     } catch (error: any) {
       Alert.alert('Hinweis', error.response?.data?.detail || 'Einladung konnte nicht erstellt werden. Versuch es nochmal!');
     }
+  };
+
+  // Verschiedene Einladungsmethoden
+  const shareViaGeneral = async () => {
+    if (!generatedCode) return;
+    Share.share({
+      message: getInviteMessage(generatedCode),
+    });
+  };
+
+  const shareViaWhatsApp = async () => {
+    if (!generatedCode) return;
+    const message = encodeURIComponent(getInviteMessage(generatedCode));
+    const url = `whatsapp://send?text=${message}`;
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert('WhatsApp nicht gefunden', 'WhatsApp ist nicht installiert.');
+      }
+    } catch (error) {
+      Alert.alert('Fehler', 'WhatsApp konnte nicht geoeffnet werden.');
+    }
+  };
+
+  const shareViaSMS = async () => {
+    if (!generatedCode) return;
+    const message = encodeURIComponent(getInviteMessage(generatedCode));
+    const url = Platform.OS === 'ios' 
+      ? `sms:&body=${message}`
+      : `sms:?body=${message}`;
+    try {
+      await Linking.openURL(url);
+    } catch (error) {
+      Alert.alert('Fehler', 'SMS konnte nicht geoeffnet werden.');
+    }
+  };
+
+  const shareViaEmail = async () => {
+    if (!generatedCode) return;
+    const subject = encodeURIComponent('Werde meine Wegbegleiterin bei Schritt fuer Schritt!');
+    const body = encodeURIComponent(getInviteMessage(generatedCode));
+    const url = `mailto:?subject=${subject}&body=${body}`;
+    try {
+      await Linking.openURL(url);
+    } catch (error) {
+      Alert.alert('Fehler', 'E-Mail konnte nicht geoeffnet werden.');
+    }
+  };
+
+  const copyCodeToClipboard = async () => {
+    if (!generatedCode) return;
+    if (Clipboard.setString) {
+      Clipboard.setString(generatedCode);
+    }
+    Alert.alert('Kopiert! 📋', `Der Code "${generatedCode}" wurde in die Zwischenablage kopiert.`);
   };
 
   const acceptInvite = async () => {
