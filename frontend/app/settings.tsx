@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,13 +10,14 @@ import {
   ActivityIndicator,
   Modal,
   Platform,
+  FlatList,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import {
   initializeNotifications,
   scheduleHabitReminder,
@@ -28,9 +29,10 @@ import {
   setupGeofence,
   removeGeofence,
 } from '../services/NotificationService';
-import { COLOR_PALETTES, ColorPalette } from '../contexts/SettingsContext';
+import { COLOR_PALETTES } from '../contexts/SettingsContext';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const WEEKDAYS = [
   { short: 'Mo', full: 'Montag', index: 0 },
@@ -41,6 +43,11 @@ const WEEKDAYS = [
   { short: 'Sa', full: 'Samstag', index: 5 },
   { short: 'So', full: 'Sonntag', index: 6 },
 ];
+
+// Generate hours and minutes arrays
+const HOURS = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+const MINUTES = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
+const ITEM_HEIGHT = 50;
 
 interface LocationSetting {
   enabled: boolean;
@@ -94,6 +101,160 @@ const defaultSettings: Settings = {
   },
 };
 
+// Custom Time Picker Wheel Component
+const TimePickerWheel = ({ 
+  selectedHour, 
+  selectedMinute, 
+  onHourChange, 
+  onMinuteChange,
+  colors 
+}: {
+  selectedHour: string;
+  selectedMinute: string;
+  onHourChange: (hour: string) => void;
+  onMinuteChange: (minute: string) => void;
+  colors: any;
+}) => {
+  const hourListRef = useRef<FlatList>(null);
+  const minuteListRef = useRef<FlatList>(null);
+
+  useEffect(() => {
+    const hourIndex = HOURS.indexOf(selectedHour);
+    const minuteIndex = MINUTES.indexOf(selectedMinute);
+    
+    setTimeout(() => {
+      hourListRef.current?.scrollToIndex({ index: hourIndex, animated: false });
+      minuteListRef.current?.scrollToIndex({ index: minuteIndex, animated: false });
+    }, 100);
+  }, []);
+
+  const renderHourItem = ({ item, index }: { item: string; index: number }) => {
+    const isSelected = item === selectedHour;
+    return (
+      <TouchableOpacity
+        style={[styles.wheelItem, isSelected && { backgroundColor: colors.primary + '20' }]}
+        onPress={() => onHourChange(item)}
+      >
+        <Text style={[
+          styles.wheelItemText,
+          { color: isSelected ? colors.primary : colors.textLight },
+          isSelected && styles.wheelItemTextSelected
+        ]}>
+          {item}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
+  const renderMinuteItem = ({ item, index }: { item: string; index: number }) => {
+    const isSelected = item === selectedMinute;
+    return (
+      <TouchableOpacity
+        style={[styles.wheelItem, isSelected && { backgroundColor: colors.primary + '20' }]}
+        onPress={() => onMinuteChange(item)}
+      >
+        <Text style={[
+          styles.wheelItemText,
+          { color: isSelected ? colors.primary : colors.textLight },
+          isSelected && styles.wheelItemTextSelected
+        ]}>
+          {item}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
+  return (
+    <View style={styles.wheelContainer}>
+      <View style={styles.wheelColumn}>
+        <Text style={[styles.wheelLabel, { color: colors.textLight }]}>Stunde</Text>
+        <View style={[styles.wheelWrapper, { borderColor: colors.primary }]}>
+          <FlatList
+            ref={hourListRef}
+            data={HOURS}
+            renderItem={renderHourItem}
+            keyExtractor={(item) => `hour-${item}`}
+            showsVerticalScrollIndicator={false}
+            snapToInterval={ITEM_HEIGHT}
+            decelerationRate="fast"
+            getItemLayout={(_, index) => ({
+              length: ITEM_HEIGHT,
+              offset: ITEM_HEIGHT * index,
+              index,
+            })}
+            onMomentumScrollEnd={(e) => {
+              const index = Math.round(e.nativeEvent.contentOffset.y / ITEM_HEIGHT);
+              if (HOURS[index]) onHourChange(HOURS[index]);
+            }}
+            style={styles.wheelList}
+          />
+        </View>
+      </View>
+      
+      <Text style={[styles.wheelSeparator, { color: colors.text }]}>:</Text>
+      
+      <View style={styles.wheelColumn}>
+        <Text style={[styles.wheelLabel, { color: colors.textLight }]}>Minute</Text>
+        <View style={[styles.wheelWrapper, { borderColor: colors.primary }]}>
+          <FlatList
+            ref={minuteListRef}
+            data={MINUTES}
+            renderItem={renderMinuteItem}
+            keyExtractor={(item) => `minute-${item}`}
+            showsVerticalScrollIndicator={false}
+            snapToInterval={ITEM_HEIGHT}
+            decelerationRate="fast"
+            getItemLayout={(_, index) => ({
+              length: ITEM_HEIGHT,
+              offset: ITEM_HEIGHT * index,
+              index,
+            })}
+            onMomentumScrollEnd={(e) => {
+              const index = Math.round(e.nativeEvent.contentOffset.y / ITEM_HEIGHT);
+              if (MINUTES[index]) onMinuteChange(MINUTES[index]);
+            }}
+            style={styles.wheelList}
+          />
+        </View>
+      </View>
+    </View>
+  );
+};
+
+// Quick time preset buttons
+const TimePresets = ({ onSelect, colors }: { onSelect: (time: string) => void; colors: any }) => {
+  const presets = [
+    { label: '06:00', icon: 'sunny-outline' },
+    { label: '07:00', icon: 'sunny-outline' },
+    { label: '08:00', icon: 'sunny' },
+    { label: '09:00', icon: 'partly-sunny' },
+    { label: '12:00', icon: 'sunny' },
+    { label: '18:00', icon: 'partly-sunny-outline' },
+    { label: '19:00', icon: 'moon-outline' },
+    { label: '20:00', icon: 'moon' },
+    { label: '21:00', icon: 'moon' },
+    { label: '22:00', icon: 'cloudy-night' },
+  ];
+
+  return (
+    <View style={styles.presetsContainer}>
+      <Text style={[styles.presetsTitle, { color: colors.textLight }]}>Schnellauswahl:</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        {presets.map((preset) => (
+          <TouchableOpacity
+            key={preset.label}
+            style={[styles.presetButton, { backgroundColor: colors.background }]}
+            onPress={() => onSelect(preset.label)}
+          >
+            <Ionicons name={preset.icon as any} size={16} color={colors.primary} />
+            <Text style={[styles.presetText, { color: colors.text }]}>{preset.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+};
+
 export default function SettingsScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -105,6 +266,7 @@ export default function SettingsScreen() {
     type: 'habit' | 'checkin' | 'individual';
     index?: number;
   }>({ visible: false, type: 'habit' });
+  const [tempTime, setTempTime] = useState({ hour: '08', minute: '00' });
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [settingLocation, setSettingLocation] = useState<number | null>(null);
 
@@ -211,35 +373,49 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleTimeChange = (event: any, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
-      setShowTimePicker({ ...showTimePicker, visible: false });
+  const openTimePicker = (type: 'habit' | 'checkin' | 'individual', index?: number) => {
+    let currentTime = '08:00';
+    if (type === 'habit') {
+      currentTime = settings.habit_reminders.time;
+    } else if (type === 'checkin') {
+      currentTime = settings.checkin_reminder.time;
+    } else if (type === 'individual' && index !== undefined) {
+      currentTime = settings.habit_reminders.individual_times[index];
     }
     
-    if (selectedDate) {
-      const hours = selectedDate.getHours().toString().padStart(2, '0');
-      const minutes = selectedDate.getMinutes().toString().padStart(2, '0');
-      const timeString = `${hours}:${minutes}`;
+    const [hour, minute] = currentTime.split(':');
+    setTempTime({ hour, minute });
+    setShowTimePicker({ visible: true, type, index });
+  };
 
-      if (showTimePicker.type === 'habit') {
-        setSettings({
-          ...settings,
-          habit_reminders: { ...settings.habit_reminders, time: timeString },
-        });
-      } else if (showTimePicker.type === 'checkin') {
-        setSettings({
-          ...settings,
-          checkin_reminder: { ...settings.checkin_reminder, time: timeString },
-        });
-      } else if (showTimePicker.type === 'individual' && showTimePicker.index !== undefined) {
-        const newTimes = [...settings.habit_reminders.individual_times];
-        newTimes[showTimePicker.index] = timeString;
-        setSettings({
-          ...settings,
-          habit_reminders: { ...settings.habit_reminders, individual_times: newTimes },
-        });
-      }
+  const confirmTime = () => {
+    const timeString = `${tempTime.hour}:${tempTime.minute}`;
+    
+    if (showTimePicker.type === 'habit') {
+      setSettings({
+        ...settings,
+        habit_reminders: { ...settings.habit_reminders, time: timeString },
+      });
+    } else if (showTimePicker.type === 'checkin') {
+      setSettings({
+        ...settings,
+        checkin_reminder: { ...settings.checkin_reminder, time: timeString },
+      });
+    } else if (showTimePicker.type === 'individual' && showTimePicker.index !== undefined) {
+      const newTimes = [...settings.habit_reminders.individual_times];
+      newTimes[showTimePicker.index] = timeString;
+      setSettings({
+        ...settings,
+        habit_reminders: { ...settings.habit_reminders, individual_times: newTimes },
+      });
     }
+    
+    setShowTimePicker({ ...showTimePicker, visible: false });
+  };
+
+  const selectPresetTime = (time: string) => {
+    const [hour, minute] = time.split(':');
+    setTempTime({ hour, minute });
   };
 
   const toggleDay = (dayIndex: number, type: 'habit' | 'checkin') => {
@@ -302,13 +478,6 @@ export default function SettingsScreen() {
     }
   };
 
-  const parseTime = (timeStr: string): Date => {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    const date = new Date();
-    date.setHours(hours, minutes, 0, 0);
-    return date;
-  };
-
   if (loading) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
@@ -364,32 +533,38 @@ export default function SettingsScreen() {
               {settings.habit_reminders.use_same_time ? (
                 <TouchableOpacity
                   style={[styles.timeButton, { backgroundColor: colors.background }]}
-                  onPress={() => setShowTimePicker({ visible: true, type: 'habit' })}
+                  onPress={() => openTimePicker('habit')}
                 >
-                  <Ionicons name="time" size={20} color={colors.primary} />
-                  <Text style={[styles.timeText, { color: colors.text }]}>
-                    {settings.habit_reminders.time} Uhr
-                  </Text>
+                  <Ionicons name="alarm" size={24} color={colors.primary} />
+                  <View style={styles.timeButtonContent}>
+                    <Text style={[styles.timeLabel, { color: colors.textLight }]}>Erinnerungszeit</Text>
+                    <Text style={[styles.timeText, { color: colors.text }]}>
+                      {settings.habit_reminders.time} Uhr
+                    </Text>
+                  </View>
+                  <Ionicons name="chevron-forward" size={20} color={colors.textLight} />
                 </TouchableOpacity>
               ) : (
                 <View style={styles.individualTimes}>
                   {goals.map((goal, index) => (
-                    <View key={index} style={styles.individualTimeRow}>
+                    <TouchableOpacity
+                      key={index}
+                      style={[styles.individualTimeRow, { backgroundColor: colors.background }]}
+                      onPress={() => openTimePicker('individual', index)}
+                    >
                       <View style={[styles.goalBadge, { backgroundColor: [colors.primary, colors.secondary, colors.accent][index % 3] }]}>
                         <Text style={styles.goalBadgeText}>{index + 1}</Text>
                       </View>
-                      <Text style={[styles.goalText, { color: colors.text }]} numberOfLines={1}>
-                        {goal || `Ziel ${index + 1}`}
-                      </Text>
-                      <TouchableOpacity
-                        style={[styles.smallTimeButton, { backgroundColor: colors.background }]}
-                        onPress={() => setShowTimePicker({ visible: true, type: 'individual', index })}
-                      >
-                        <Text style={[styles.smallTimeText, { color: colors.primary }]}>
-                          {settings.habit_reminders.individual_times[index]}
+                      <View style={styles.individualTimeContent}>
+                        <Text style={[styles.goalText, { color: colors.text }]} numberOfLines={1}>
+                          {goal || `Ziel ${index + 1}`}
                         </Text>
-                      </TouchableOpacity>
-                    </View>
+                        <Text style={[styles.individualTimeText, { color: colors.primary }]}>
+                          {settings.habit_reminders.individual_times[index]} Uhr
+                        </Text>
+                      </View>
+                      <Ionicons name="alarm" size={20} color={colors.primary} />
+                    </TouchableOpacity>
                   ))}
                 </View>
               )}
@@ -511,12 +686,16 @@ export default function SettingsScreen() {
             <>
               <TouchableOpacity
                 style={[styles.timeButton, { backgroundColor: colors.background }]}
-                onPress={() => setShowTimePicker({ visible: true, type: 'checkin' })}
+                onPress={() => openTimePicker('checkin')}
               >
-                <Ionicons name="time" size={20} color={colors.secondary} />
-                <Text style={[styles.timeText, { color: colors.text }]}>
-                  {settings.checkin_reminder.time} Uhr
-                </Text>
+                <Ionicons name="alarm" size={24} color={colors.secondary} />
+                <View style={styles.timeButtonContent}>
+                  <Text style={[styles.timeLabel, { color: colors.textLight }]}>Erinnerungszeit</Text>
+                  <Text style={[styles.timeText, { color: colors.text }]}>
+                    {settings.checkin_reminder.time} Uhr
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={colors.textLight} />
               </TouchableOpacity>
 
               <Text style={[styles.subLabel, { color: colors.textLight }]}>
@@ -609,40 +788,47 @@ export default function SettingsScreen() {
         <View style={styles.bottomSpacer} />
       </ScrollView>
 
-      {/* Time Picker Modal */}
-      {showTimePicker.visible && (
-        <Modal
-          transparent
-          animationType="slide"
-          visible={showTimePicker.visible}
-          onRequestClose={() => setShowTimePicker({ ...showTimePicker, visible: false })}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
+      {/* Custom Time Picker Modal */}
+      <Modal
+        transparent
+        animationType="slide"
+        visible={showTimePicker.visible}
+        onRequestClose={() => setShowTimePicker({ ...showTimePicker, visible: false })}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.timeModalContent, { backgroundColor: colors.card }]}>
+            <View style={styles.timeModalHeader}>
+              <TouchableOpacity onPress={() => setShowTimePicker({ ...showTimePicker, visible: false })}>
+                <Text style={[styles.modalCancelText, { color: colors.textLight }]}>Abbrechen</Text>
+              </TouchableOpacity>
               <Text style={[styles.modalTitle, { color: colors.text }]}>Zeit waehlen</Text>
-              <DateTimePicker
-                value={parseTime(
-                  showTimePicker.type === 'habit'
-                    ? settings.habit_reminders.time
-                    : showTimePicker.type === 'checkin'
-                    ? settings.checkin_reminder.time
-                    : settings.habit_reminders.individual_times[showTimePicker.index || 0]
-                )}
-                mode="time"
-                is24Hour={true}
-                display="spinner"
-                onChange={handleTimeChange}
-              />
-              <TouchableOpacity
-                style={[styles.modalButton, { backgroundColor: colors.primary }]}
-                onPress={() => setShowTimePicker({ ...showTimePicker, visible: false })}
-              >
-                <Text style={styles.modalButtonText}>Fertig</Text>
+              <TouchableOpacity onPress={confirmTime}>
+                <Text style={[styles.modalConfirmText, { color: colors.primary }]}>Fertig</Text>
               </TouchableOpacity>
             </View>
+
+            {/* Large Time Display */}
+            <View style={[styles.timeDisplay, { backgroundColor: colors.background }]}>
+              <Text style={[styles.timeDisplayText, { color: colors.primary }]}>
+                {tempTime.hour}:{tempTime.minute}
+              </Text>
+              <Text style={[styles.timeDisplayLabel, { color: colors.textLight }]}>Uhr</Text>
+            </View>
+
+            {/* Time Picker Wheels */}
+            <TimePickerWheel
+              selectedHour={tempTime.hour}
+              selectedMinute={tempTime.minute}
+              onHourChange={(hour) => setTempTime({ ...tempTime, hour })}
+              onMinuteChange={(minute) => setTempTime({ ...tempTime, minute })}
+              colors={colors}
+            />
+
+            {/* Presets */}
+            <TimePresets onSelect={selectPresetTime} colors={colors} />
           </View>
-        </Modal>
-      )}
+        </View>
+      </Modal>
 
       {/* Color Picker Modal */}
       <Modal
@@ -754,14 +940,20 @@ const styles = StyleSheet.create({
   timeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 14,
+    padding: 16,
     borderRadius: 12,
     marginBottom: 15,
   },
+  timeButtonContent: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  timeLabel: {
+    fontSize: 12,
+  },
   timeText: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 10,
+    fontSize: 20,
+    fontWeight: '700',
   },
   individualTimes: {
     marginBottom: 15,
@@ -769,33 +961,32 @@ const styles = StyleSheet.create({
   individualTimeRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    padding: 12,
+    borderRadius: 12,
     marginBottom: 10,
   },
+  individualTimeContent: {
+    flex: 1,
+    marginLeft: 10,
+  },
+  individualTimeText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
   goalBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
   },
   goalBadgeText: {
     color: '#FFF',
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   goalText: {
-    flex: 1,
-    marginLeft: 10,
     fontSize: 14,
-  },
-  smallTimeButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  smallTimeText: {
-    fontSize: 14,
-    fontWeight: '600',
   },
   subLabel: {
     fontSize: 13,
@@ -913,11 +1104,101 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
   },
-  modalContent: {
+  timeModalContent: {
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
+  },
+  timeModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalCancelText: {
+    fontSize: 16,
+  },
+  modalConfirmText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  timeDisplay: {
+    alignItems: 'center',
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 20,
+  },
+  timeDisplayText: {
+    fontSize: 56,
+    fontWeight: 'bold',
+  },
+  timeDisplayLabel: {
+    fontSize: 14,
+    marginTop: 4,
+  },
+  wheelContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  wheelColumn: {
+    alignItems: 'center',
+  },
+  wheelLabel: {
+    fontSize: 12,
+    marginBottom: 8,
+  },
+  wheelWrapper: {
+    height: 150,
+    width: 80,
+    borderRadius: 12,
+    borderWidth: 2,
+    overflow: 'hidden',
+  },
+  wheelList: {
+    height: 150,
+  },
+  wheelItem: {
+    height: ITEM_HEIGHT,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  wheelItemText: {
+    fontSize: 24,
+  },
+  wheelItemTextSelected: {
+    fontWeight: 'bold',
+    fontSize: 28,
+  },
+  wheelSeparator: {
+    fontSize: 40,
+    fontWeight: 'bold',
+    marginHorizontal: 15,
+  },
+  presetsContainer: {
+    marginTop: 10,
+  },
+  presetsTitle: {
+    fontSize: 13,
+    marginBottom: 10,
+  },
+  presetButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  presetText: {
+    marginLeft: 6,
+    fontSize: 14,
+    fontWeight: '600',
   },
   colorModalContent: {
     borderTopLeftRadius: 24,
@@ -925,16 +1206,12 @@ const styles = StyleSheet.create({
     padding: 20,
     maxHeight: '80%',
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 15,
-  },
   modalButton: {
     paddingHorizontal: 40,
     paddingVertical: 14,
     borderRadius: 12,
     marginTop: 10,
+    alignSelf: 'center',
   },
   modalButtonText: {
     color: '#FFF',
