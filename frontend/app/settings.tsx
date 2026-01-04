@@ -261,6 +261,7 @@ export default function SettingsScreen() {
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [goals, setGoals] = useState<string[]>([]);
+  const [userName, setUserName] = useState<string>('');
   const [showTimePicker, setShowTimePicker] = useState<{
     visible: boolean;
     type: 'habit' | 'checkin' | 'individual';
@@ -274,7 +275,20 @@ export default function SettingsScreen() {
 
   useEffect(() => {
     loadSettings();
+    loadUserName();
   }, []);
+
+  const loadUserName = async () => {
+    const storedName = await AsyncStorage.getItem('userName');
+    if (storedName) {
+      setUserName(storedName);
+    }
+  };
+
+  const saveUserName = async (name: string) => {
+    await AsyncStorage.setItem('userName', name);
+    setUserName(name);
+  };
 
   const loadSettings = async () => {
     try {
