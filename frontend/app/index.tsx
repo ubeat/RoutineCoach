@@ -104,8 +104,9 @@ export default function HomeScreen() {
         }
       >
         <View style={styles.header}>
-          <Text style={styles.greeting}>Hallo!</Text>
-          <Text style={styles.dayText}>{dayName}</Text>
+          <Text style={styles.appName}>Schritt für Schritt</Text>
+          <Text style={styles.greeting}>Hallo, du! 💜</Text>
+          <Text style={styles.dayText}>{dayName} - Dein Tag voller Moeglichkeiten</Text>
         </View>
 
         {isSunday && (
@@ -113,8 +114,8 @@ export default function HomeScreen() {
             <View style={styles.sundayContent}>
               <Ionicons name="sparkles" size={28} color="#FFF" />
               <View style={styles.sundayTextContainer}>
-                <Text style={styles.sundayTitle}>Neuer Wochenstart!</Text>
-                <Text style={styles.sundaySubtitle}>Zeit fuer neue Tiny Habits</Text>
+                <Text style={styles.sundayTitle}>Neuer Wochenstart! 🌟</Text>
+                <Text style={styles.sundaySubtitle}>Zeit fuer deine Wenn-Dann Plaene</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -135,11 +136,16 @@ export default function HomeScreen() {
                   <Text style={styles.goalText}>{goal}</Text>
                 </View>
               ))}
+              <TouchableOpacity style={styles.editGoalsLink} onPress={() => router.push('/goals')}>
+                <Ionicons name="pencil" size={14} color={COLORS.primary} />
+                <Text style={styles.editGoalsText}>Ziele bearbeiten</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <TouchableOpacity style={styles.noGoalsButton} onPress={() => router.push('/goals')}>
-              <Ionicons name="add-circle" size={40} color={COLORS.primary} />
-              <Text style={styles.noGoalsText}>Ziele fuer diese Woche setzen</Text>
+              <Ionicons name="heart-circle" size={50} color={COLORS.primary} />
+              <Text style={styles.noGoalsText}>Deine Reise beginnt hier</Text>
+              <Text style={styles.noGoalsHint}>Setze deine ersten Wenn-Dann Ziele</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -227,8 +233,15 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 10,
   },
+  appName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textLight,
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
   greeting: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
     color: COLORS.text,
   },
@@ -320,7 +333,27 @@ const styles = StyleSheet.create({
   },
   noGoalsText: {
     marginTop: 10,
-    fontSize: 16,
+    fontSize: 18,
+    color: COLORS.primary,
+    fontWeight: '700',
+  },
+  noGoalsHint: {
+    marginTop: 6,
+    fontSize: 14,
+    color: COLORS.textLight,
+  },
+  editGoalsLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E8E8E8',
+    gap: 6,
+  },
+  editGoalsText: {
+    fontSize: 14,
     color: COLORS.primary,
     fontWeight: '600',
   },
