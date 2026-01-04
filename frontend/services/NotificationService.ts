@@ -1,13 +1,10 @@
 import * as Notifications from 'expo-notifications';
 import * as Location from 'expo-location';
-import * as TaskManager from 'expo-task-manager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Platform } from 'react-native';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-const LOCATION_TASK_NAME = 'background-location-task';
-const GEOFENCE_TASK_NAME = 'geofence-task';
 
 // Configure notification behavior
 Notifications.setNotificationHandler({
