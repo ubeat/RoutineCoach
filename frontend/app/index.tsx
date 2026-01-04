@@ -108,7 +108,7 @@ export default function HomeScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.greeting}>Hallo! \u{1F44B}</Text>
+          <Text style={styles.greeting}>Hallo! 👋</Text>
           <Text style={styles.dayText}>{dayName}</Text>
         </View>
 
@@ -119,7 +119,7 @@ export default function HomeScreen() {
               <Ionicons name="sparkles" size={28} color="#FFF" />
               <View style={styles.sundayTextContainer}>
                 <Text style={styles.sundayTitle}>Neuer Wochenstart!</Text>
-                <Text style={styles.sundaySubtitle}>Zeit f\u00fcr neue Tiny Habits \u2192</Text>
+                <Text style={styles.sundaySubtitle}>Zeit für neue Tiny Habits →</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -145,7 +145,7 @@ export default function HomeScreen() {
           ) : (
             <TouchableOpacity style={styles.noGoalsButton} onPress={() => router.push('/goals')}>
               <Ionicons name="add-circle" size={40} color={COLORS.primary} />
-              <Text style={styles.noGoalsText}>Ziele f\u00fcr diese Woche setzen</Text>
+              <Text style={styles.noGoalsText}>Ziele für diese Woche setzen</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -191,7 +191,7 @@ export default function HomeScreen() {
           </View>
           {daysTracked >= 7 && (
             <TouchableOpacity style={styles.viewResultsButton} onPress={() => router.push('/progress')}>
-              <Text style={styles.viewResultsText}>Wochenergebnis ansehen \u2192</Text>
+              <Text style={styles.viewResultsText}>Wochenergebnis ansehen →</Text>
             </TouchableOpacity>
           )}
         </View>
