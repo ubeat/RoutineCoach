@@ -134,7 +134,7 @@ export default function HomeScreen() {
       >
         <View style={styles.header}>
           <Text style={styles.appName}>Schritt für Schritt</Text>
-          <Text style={styles.greeting}>Hallo, du! 💜</Text>
+          <Text style={styles.greeting}>Hallo, {userName || 'du'}! 💜</Text>
           <Text style={styles.dayText}>{dayName} - Dein Tag voller Moeglichkeiten</Text>
         </View>
 
