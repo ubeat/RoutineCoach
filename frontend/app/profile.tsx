@@ -124,12 +124,12 @@ export default function ProfileScreen() {
       const code = response.data.invite_code;
       
       Share.share({
-        message: `Werde mein Accountability Partner bei Tiny Habits! Nutze den Code: ${code}`,
+        message: `💜 Lass uns gemeinsam gute Gewohnheiten aufbauen! Werde mein Accountability Partner bei "Schritt fuer Schritt". Nutze den Code: ${code}`,
       });
       
       fetchData();
     } catch (error: any) {
-      Alert.alert('Fehler', error.response?.data?.detail || 'Einladung konnte nicht erstellt werden');
+      Alert.alert('Hinweis', error.response?.data?.detail || 'Einladung konnte nicht erstellt werden. Versuch es nochmal!');
     }
   };
 
