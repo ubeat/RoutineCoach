@@ -1,10 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Tabs } from 'expo-router';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { initializeNotifications, pregenerateNotifications } from '../services/NotificationService';
 
 export default function RootLayout() {
+  useEffect(() => {
+    // Initialize notifications on app start
+    const init = async () => {
+      await initializeNotifications();
+      await pregenerateNotifications();
+    };
+    init();
+  }, []);
+
   return (
     <SafeAreaProvider>
       <Tabs
@@ -52,6 +62,15 @@ export default function RootLayout() {
             ),
           }}
         />
+        <Tabs.Screen
+          name="settings"
+          options={{
+            title: 'Einstellungen',
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name="settings" size={size} color={color} />
+            ),
+          }}
+        />
       </Tabs>
     </SafeAreaProvider>
   );
@@ -66,12 +85,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 10,
-    height: 65,
-    paddingBottom: 8,
+    height: 70,
+    paddingBottom: 10,
     paddingTop: 8,
   },
   tabLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '600',
   },
 });
