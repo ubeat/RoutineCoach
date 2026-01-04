@@ -362,7 +362,7 @@ async def get_week_checkins(device_id: str):
         "date": {"$gte": week_start}
     }).sort("date", 1).to_list(7)
     
-    return {"checkins": checkins}
+    return {"checkins": serialize_doc(checkins)}
 
 @api_router.get("/today/{device_id}")
 async def get_today_checkin(device_id: str):
@@ -375,7 +375,7 @@ async def get_today_checkin(device_id: str):
     })
     
     if checkin:
-        return {"checkin": checkin, "completed_today": True}
+        return {"checkin": serialize_doc(checkin), "completed_today": True}
     return {"checkin": None, "completed_today": False}
 
 # Weekly Summary
