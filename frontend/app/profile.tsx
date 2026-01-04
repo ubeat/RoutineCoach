@@ -58,6 +58,7 @@ export default function ProfileScreen() {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [inviteCode, setInviteCode] = useState('');
   const [settings, setSettings] = useState<any>(null);
+  const [userName, setUserName] = useState<string>('');
 
   const colors = settings?.appearance?.color_palette 
     ? (COLOR_PALETTES[settings.appearance.color_palette] || COLOR_PALETTES.sonnenuntergang)
@@ -66,6 +67,8 @@ export default function ProfileScreen() {
   const fetchData = useCallback(async () => {
     try {
       const deviceId = await AsyncStorage.getItem('deviceId');
+      const storedName = await AsyncStorage.getItem('userName');
+      if (storedName) setUserName(storedName);
       if (!deviceId) return;
 
       const [gamRes, challengesRes, partnerRes, leaderboardRes, settingsRes] = await Promise.all([
