@@ -56,17 +56,14 @@ export default function HomeScreen() {
       const id = await getDeviceId();
       setDeviceId(id);
 
-      // Fetch current goals
       const goalsRes = await axios.get(`${API_URL}/api/goals/${id}`);
       if (goalsRes.data.goals) {
         setGoals(goalsRes.data.goals);
       }
 
-      // Fetch today's check-in
       const todayRes = await axios.get(`${API_URL}/api/today/${id}`);
       setTodayCheckin(todayRes.data);
 
-      // Fetch week summary
       const summaryRes = await axios.get(`${API_URL}/api/summary/${id}`);
       setWeekSummary(summaryRes.data);
     } catch (error) {
@@ -106,26 +103,23 @@ export default function HomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.primary]} />
         }
       >
-        {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.greeting}>Hallo! 👋</Text>
+          <Text style={styles.greeting}>Hallo!</Text>
           <Text style={styles.dayText}>{dayName}</Text>
         </View>
 
-        {/* Sunday Banner */}
         {isSunday && (
           <TouchableOpacity style={styles.sundayBanner} onPress={() => router.push('/goals')}>
             <View style={styles.sundayContent}>
               <Ionicons name="sparkles" size={28} color="#FFF" />
               <View style={styles.sundayTextContainer}>
                 <Text style={styles.sundayTitle}>Neuer Wochenstart!</Text>
-                <Text style={styles.sundaySubtitle}>Zeit für neue Tiny Habits →</Text>
+                <Text style={styles.sundaySubtitle}>Zeit fuer neue Tiny Habits</Text>
               </View>
             </View>
           </TouchableOpacity>
         )}
 
-        {/* Goals Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Ionicons name="flag" size={24} color={COLORS.primary} />
@@ -145,12 +139,11 @@ export default function HomeScreen() {
           ) : (
             <TouchableOpacity style={styles.noGoalsButton} onPress={() => router.push('/goals')}>
               <Ionicons name="add-circle" size={40} color={COLORS.primary} />
-              <Text style={styles.noGoalsText}>Ziele für diese Woche setzen</Text>
+              <Text style={styles.noGoalsText}>Ziele fuer diese Woche setzen</Text>
             </TouchableOpacity>
           )}
         </View>
 
-        {/* Today's Status */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Ionicons name="today" size={24} color={COLORS.secondary} />
@@ -176,7 +169,6 @@ export default function HomeScreen() {
           )}
         </View>
 
-        {/* Week Progress Mini */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Ionicons name="calendar" size={24} color={COLORS.purple} />
@@ -191,12 +183,11 @@ export default function HomeScreen() {
           </View>
           {daysTracked >= 7 && (
             <TouchableOpacity style={styles.viewResultsButton} onPress={() => router.push('/progress')}>
-              <Text style={styles.viewResultsText}>Wochenergebnis ansehen →</Text>
+              <Text style={styles.viewResultsText}>Wochenergebnis ansehen</Text>
             </TouchableOpacity>
           )}
         </View>
 
-        {/* AI Coach Response (if checked in today) */}
         {todayCheckin?.checkin?.ai_response && (
           <View style={[styles.card, styles.coachCard]}>
             <View style={styles.cardHeader}>
