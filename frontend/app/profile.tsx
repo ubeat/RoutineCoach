@@ -135,19 +135,19 @@ export default function ProfileScreen() {
 
   const acceptInvite = async () => {
     if (!inviteCode.trim()) {
-      Alert.alert('Fehler', 'Bitte gib einen Code ein');
+      Alert.alert('Moment mal 💭', 'Bitte gib einen Code ein');
       return;
     }
     
     try {
       const deviceId = await AsyncStorage.getItem('deviceId');
       await axios.post(`${API_URL}/api/social/accept-invite?device_id=${deviceId}&invite_code=${inviteCode}`);
-      Alert.alert('Verbunden!', 'Du hast jetzt einen Accountability Partner!');
+      Alert.alert('Wunderbar! 🎉', 'Ihr seid jetzt verbunden! Gemeinsam schafft ihr das!');
       setShowPartnerModal(false);
       setInviteCode('');
       fetchData();
     } catch (error: any) {
-      Alert.alert('Fehler', error.response?.data?.detail || 'Code ungueltig');
+      Alert.alert('Hmm 🤔', error.response?.data?.detail || 'Der Code scheint nicht zu stimmen. Pruef ihn nochmal!');
     }
   };
 
