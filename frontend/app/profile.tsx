@@ -196,7 +196,12 @@ export default function ProfileScreen() {
         }
       >
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>Dein Profil</Text>
+          <Text style={[styles.title, { color: colors.text }]}>
+            {userName ? `${userName}s Erfolge` : 'Deine Erfolge'} 🏆
+          </Text>
+          <Text style={[styles.subtitle, { color: colors.textLight }]}>
+            Jeder kleine Schritt zaehlt - du machst das grossartig!
+          </Text>
         </View>
 
         {/* Level & XP Card */}
