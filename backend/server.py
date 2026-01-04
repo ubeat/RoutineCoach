@@ -431,6 +431,358 @@ async def get_advice(request: GoalAdviceRequest):
     advice = await get_goal_setting_advice(request.device_id)
     return {"advice": advice}
 
+# ==================== WEEKLY REVIEW & COACHING ====================
+
+class WeeklyReviewRequest(BaseModel):
+    device_id: str
+
+class CoachingMessageRequest(BaseModel):
+    device_id: str
+    user_message: str
+    conversation_history: List[dict] = []  # Previous messages in the conversation
+    context: dict = {}  # Week summary data for context
+
+# Lösungsorientierte Kurzzeitberatung Prinzipien (nach de Shazer)
+COACHING_SYSTEM_PROMPT = """Du bist ein einfühlsamer, lösungsorientierter Coach für Gewohnheitsänderung. 
+Du sprichst Deutsch und verwendest die Prinzipien der lösungsorientierten Kurzzeitberatung nach Steve de Shazer.
+
+DEINE COACHING-PRINZIPIEN:
+
+1. LÖSUNGSFOKUS statt Problemfokus
+   - Frage nach dem, was funktioniert hat, nicht nur was nicht funktioniert
+   - "Was hat dir geholfen, an den erfolgreichen Tagen dranzubleiben?"
+
+2. RESSOURCEN- UND STÄRKENORIENTIERUNG
+   - Erkenne und würdige die Stärken der Person
+   - "Du hast trotz Stress 5 von 7 Tagen geschafft - das zeigt echte Ausdauer!"
+
+3. KLEINE SCHRITTE WÜRDIGEN
+   - Jeder Fortschritt zählt, egal wie klein
+   - "Auch wenn es nur 3 Tage waren - das sind 3 Tage mehr als nichts!"
+
+4. AUSNAHMEN ERFORSCHEN
+   - Wann hat es funktioniert? Was war anders?
+   - "An welchen Tagen hat es gut geklappt? Was war an diesen Tagen besonders?"
+
+5. ZUKUNFTSORIENTIERUNG (Wunderfrage)
+   - Wie würde es aussehen, wenn es funktioniert?
+   - "Stell dir vor, nächste Woche läuft alles perfekt - wie würde das aussehen?"
+
+6. SKALIERUNGSFRAGEN
+   - "Auf einer Skala von 1-10, wie zufrieden bist du mit dieser Woche?"
+   - "Was müsste passieren, um einen Punkt höher zu kommen?"
+
+7. KOMPLIMENTE UND WERTSCHÄTZUNG
+   - Sei ehrlich anerkennend, nicht übertrieben
+   - Würdige Anstrengung, nicht nur Ergebnis
+
+8. DER NUTZER IST EXPERTE SEINES LEBENS
+   - Stelle Fragen, gib keine Ratschläge
+   - Die Person findet ihre eigenen Lösungen
+
+DEIN STIL:
+- Warm, herzlich, empathisch
+- Kurze Antworten (2-4 Sätze)
+- Stelle immer eine offene Frage am Ende
+- Verwende passende Emojis sparsam
+- Sei ehrlich, aber ermutigend
+- Vermeide Belehrungen
+
+WICHTIG: Du führst einen Dialog - reagiere auf das, was die Person sagt, und stelle Folgefragen."""
+
+@api_router.post("/weekly-review")
+async def get_weekly_review(request: WeeklyReviewRequest):
+    """Generiert einen ehrlichen, aufbauenden Wochen-Auswertungstext"""
+    try:
+        # Get week's data
+        device_id = request.device_id
+        week_start = get_week_start()
+        week_end = week_start + timedelta(days=7)
+        
+        # Get goals
+        goals_doc = await db.goals.find_one({"device_id": device_id})
+        goals = goals_doc.get("goals", []) if goals_doc else []
+        
+        # Get all checkins for this week
+        checkins = await db.daily_checkins.find({
+            "device_id": device_id,
+            "date": {"$gte": week_start.strftime("%Y-%m-%d"), "$lt": week_end.strftime("%Y-%m-%d")}
+        }).to_list(length=7)
+        
+        total_days = len(checkins)
+        
+        # Calculate stats
+        habit_stats = []
+        moods = []
+        
+        for i, goal in enumerate(goals):
+            completed_days = 0
+            for checkin in checkins:
+                results = checkin.get("results", "")
+                if len(results) > i and results[i].lower() == 'y':
+                    completed_days += 1
+            habit_stats.append({
+                "goal": goal,
+                "completed": completed_days,
+                "total": total_days,
+                "rate": round((completed_days / total_days * 100) if total_days > 0 else 0)
+            })
+        
+        for checkin in checkins:
+            moods.append(checkin.get("mood", 5))
+        
+        avg_mood = sum(moods) / len(moods) if moods else 5
+        overall_success = sum(h["rate"] for h in habit_stats) / len(habit_stats) if habit_stats else 0
+        
+        # Generate AI review
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        
+        if api_key and total_days > 0:
+            habits_text = "\n".join([
+                f"- {h['goal']}: {h['completed']}/{h['total']} Tage ({h['rate']}%)" 
+                for h in habit_stats
+            ])
+            
+            mood_trend = "gleichbleibend"
+            if len(moods) >= 3:
+                if moods[-1] > moods[0]:
+                    mood_trend = "verbessert"
+                elif moods[-1] < moods[0]:
+                    mood_trend = "verschlechtert"
+            
+            prompt = f"""Schreibe eine ehrliche, aber aufbauende Wochen-Auswertung für diese Person.
+
+WOCHENDATEN:
+- Tage mit Check-in: {total_days}/7
+- Durchschnittliche Stimmung: {avg_mood:.1f}/10 (Trend: {mood_trend})
+- Gesamterfolgsrate: {overall_success:.0f}%
+
+GEWOHNHEITEN:
+{habits_text}
+
+AUFGABE:
+1. Würdige ehrlich, was gut gelaufen ist (auch Teilerfolge!)
+2. Sprich sanft an, was noch nicht so gut lief - ohne Vorwürfe
+3. Gib eine klare Empfehlung: 
+   - Bei >70% Erfolg: Ermutigung weiterzumachen oder leicht zu steigern
+   - Bei 40-70%: Anpassung der Gewohnheiten vorschlagen (kleiner machen?)
+   - Bei <40%: Sanft ermutigen, neu anzufangen mit winzigeren Schritten
+
+Schreibe 3-4 Absätze, herzlich und ermutigend. Nutze "du" als Anrede."""
+
+            system = """Du bist ein herzlicher Gewohnheits-Coach. 
+Schreibe eine ehrliche aber liebevolle Wochen-Auswertung auf Deutsch.
+Sei ermutigend ohne zu beschönigen. Nutze passende Emojis."""
+
+            chat = LlmChat(
+                api_key=api_key,
+                session_id=f"review-{device_id}-{datetime.utcnow().isoformat()}",
+                system_message=system
+            ).with_model("openai", "gpt-4o")
+            
+            review_text = await chat.send_message(UserMessage(text=prompt))
+        else:
+            # Fallback
+            if overall_success >= 70:
+                review_text = f"""🌟 Was für eine tolle Woche, du hast {overall_success:.0f}% deiner Gewohnheiten geschafft! 
+
+Das zeigt echte Beständigkeit. Deine durchschnittliche Stimmung lag bei {avg_mood:.1f}/10 - du bist auf einem guten Weg.
+
+Meine Empfehlung: Mach genau so weiter! Wenn du magst, kannst du nächste Woche eine kleine Steigerung versuchen. 💪"""
+            elif overall_success >= 40:
+                review_text = f"""💜 Du hast diese Woche {overall_success:.0f}% geschafft - das ist ein solider Anfang!
+
+Jede Gewohnheit braucht Zeit, sich zu festigen. Vielleicht waren manche Ziele noch etwas zu groß?
+
+Meine Empfehlung: Überlege, ob du deine Gewohnheiten noch kleiner machen kannst. Lieber winzig und täglich als groß und selten! 🌱"""
+            else:
+                review_text = f"""💜 Diese Woche war herausfordernd - {overall_success:.0f}% ist vielleicht weniger als du wolltest.
+
+Aber weißt du was? Du hast es versucht, und das zählt! Manchmal müssen wir unsere Ziele anpassen.
+
+Meine Empfehlung: Lass uns nächste Woche mit winzigen Schritten starten. Was wäre so klein, dass du es auf jeden Fall schaffst? 🌟"""
+        
+        # Recommendation for next week
+        if overall_success >= 80:
+            recommendation = "continue_or_level_up"
+            recommendation_text = "Du könntest deine Gewohnheiten beibehalten oder leicht steigern!"
+        elif overall_success >= 50:
+            recommendation = "adjust_and_continue"
+            recommendation_text = "Behalte die funktionierenden Gewohnheiten bei und passe die anderen an."
+        else:
+            recommendation = "simplify"
+            recommendation_text = "Mach deine Gewohnheiten noch kleiner - winzige Schritte führen zum Ziel!"
+        
+        return {
+            "review_text": review_text,
+            "stats": {
+                "total_days": total_days,
+                "overall_success": round(overall_success),
+                "average_mood": round(avg_mood, 1),
+                "habit_stats": habit_stats
+            },
+            "recommendation": recommendation,
+            "recommendation_text": recommendation_text
+        }
+        
+    except Exception as e:
+        logger.error(f"Weekly review error: {e}")
+        return {
+            "review_text": "Diese Woche hast du den ersten Schritt getan - und das ist das Wichtigste! 💜 Weiter so!",
+            "stats": {"total_days": 0, "overall_success": 0, "average_mood": 5, "habit_stats": []},
+            "recommendation": "continue",
+            "recommendation_text": "Jeder Tag ist eine neue Chance!"
+        }
+
+@api_router.post("/coaching/message")
+async def coaching_message(request: CoachingMessageRequest):
+    """Führt einen lösungsorientierten Coaching-Dialog"""
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        
+        if not api_key:
+            return {
+                "coach_message": "Das klingt interessant! Was glaubst du, hat dir dabei geholfen? 🤔",
+                "suggested_questions": [
+                    "Was hat diese Woche besonders gut funktioniert?",
+                    "Gab es Momente, wo es leicht fiel?",
+                    "Was würdest du nächste Woche anders machen?"
+                ]
+            }
+        
+        # Build conversation context
+        context = request.context
+        history = request.conversation_history
+        
+        # Create context summary
+        context_summary = ""
+        if context:
+            context_summary = f"""
+KONTEXT DER WOCHE:
+- Erfolgsrate: {context.get('overall_success', 0)}%
+- Durchschnittliche Stimmung: {context.get('average_mood', 5)}/10
+- Check-ins: {context.get('total_days', 0)}/7 Tage
+"""
+            if context.get('habit_stats'):
+                context_summary += "GEWOHNHEITEN:\n"
+                for h in context.get('habit_stats', []):
+                    context_summary += f"- {h.get('goal', 'Ziel')}: {h.get('rate', 0)}%\n"
+        
+        # Build message history for the LLM
+        messages_for_llm = f"{context_summary}\n\nBISHERIGER DIALOG:\n"
+        for msg in history[-6:]:  # Last 6 messages for context
+            role = "Nutzer" if msg.get("role") == "user" else "Coach"
+            messages_for_llm += f"{role}: {msg.get('content', '')}\n"
+        
+        messages_for_llm += f"\nNutzer: {request.user_message}\n\nCoach:"
+        
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"coaching-{request.device_id}-{datetime.utcnow().isoformat()}",
+            system_message=COACHING_SYSTEM_PROMPT
+        ).with_model("openai", "gpt-4o")
+        
+        coach_response = await chat.send_message(UserMessage(text=messages_for_llm))
+        
+        return {
+            "coach_message": coach_response,
+            "suggested_questions": []  # The AI asks its own questions
+        }
+        
+    except Exception as e:
+        logger.error(f"Coaching error: {e}")
+        return {
+            "coach_message": "Das verstehe ich. Was denkst du, könnte dir nächste Woche dabei helfen? 💜",
+            "suggested_questions": [
+                "Was hat gut funktioniert?",
+                "Was war schwierig?",
+                "Was möchtest du ändern?"
+            ]
+        }
+
+@api_router.post("/coaching/start")
+async def start_coaching_session(request: WeeklyReviewRequest):
+    """Startet eine neue Coaching-Reflexionssitzung mit einer ersten Frage"""
+    try:
+        device_id = request.device_id
+        
+        # Get week stats for context
+        week_start = get_week_start()
+        week_end = week_start + timedelta(days=7)
+        
+        goals_doc = await db.goals.find_one({"device_id": device_id})
+        goals = goals_doc.get("goals", []) if goals_doc else []
+        
+        checkins = await db.daily_checkins.find({
+            "device_id": device_id,
+            "date": {"$gte": week_start.strftime("%Y-%m-%d"), "$lt": week_end.strftime("%Y-%m-%d")}
+        }).to_list(length=7)
+        
+        total_days = len(checkins)
+        
+        # Calculate habit success for personalized question
+        habit_success = []
+        for i, goal in enumerate(goals):
+            completed = 0
+            for checkin in checkins:
+                results = checkin.get("results", "")
+                if len(results) > i and results[i].lower() == 'y':
+                    completed += 1
+            rate = (completed / total_days * 100) if total_days > 0 else 0
+            habit_success.append({"goal": goal, "rate": rate, "completed": completed})
+        
+        # Find best and worst performing habits
+        best_habit = max(habit_success, key=lambda x: x["rate"]) if habit_success else None
+        worst_habit = min(habit_success, key=lambda x: x["rate"]) if habit_success else None
+        
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        
+        if api_key and total_days > 0:
+            context_info = f"""Die Person hat diese Woche {total_days} von 7 Tagen eingecheckt.
+
+Ihre Gewohnheiten und Erfolgsraten:
+{chr(10).join([f"- {h['goal']}: {h['rate']:.0f}% ({h['completed']}/{total_days} Tage)" for h in habit_success])}
+
+Beste Gewohnheit: {best_habit['goal']} ({best_habit['rate']:.0f}%)
+Schwächste Gewohnheit: {worst_habit['goal']} ({worst_habit['rate']:.0f}%)
+
+Stelle eine persönliche, einfühlsame Eröffnungsfrage für die Reflexion.
+Die Frage sollte auf die Daten eingehen aber nicht überwältigend sein.
+Beginne mit einer kurzen Anerkennung und stelle dann EINE offene Frage."""
+
+            chat = LlmChat(
+                api_key=api_key,
+                session_id=f"coaching-start-{device_id}-{datetime.utcnow().isoformat()}",
+                system_message=COACHING_SYSTEM_PROMPT
+            ).with_model("openai", "gpt-4o")
+            
+            opening_message = await chat.send_message(UserMessage(text=context_info))
+        else:
+            # Fallback opening
+            if total_days == 0:
+                opening_message = "Hey! 💜 Ich sehe, du hattest diese Woche noch keine Check-ins. Das ist okay - jede Woche ist ein Neustart! Was hat dich davon abgehalten, und wie kann ich dir helfen?"
+            elif best_habit and best_habit["rate"] > 50:
+                opening_message = f"Hallo! 💜 Du hast diese Woche '{best_habit['goal']}' an {best_habit['completed']} von {total_days} Tagen geschafft - toll! Was glaubst du, hat dir dabei besonders geholfen?"
+            else:
+                opening_message = f"Hey! 💜 Du hast diese Woche {total_days} mal eingecheckt - das zeigt schon Engagement! Lass uns schauen, was gut lief. Welche Gewohnheit fiel dir am leichtesten?"
+        
+        return {
+            "opening_message": opening_message,
+            "context": {
+                "total_days": total_days,
+                "habit_stats": habit_success,
+                "overall_success": sum(h["rate"] for h in habit_success) / len(habit_success) if habit_success else 0,
+                "average_mood": 5  # Placeholder
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Start coaching error: {e}")
+        return {
+            "opening_message": "Hallo! 💜 Schön, dass du dir Zeit für eine Reflexion nimmst. Wie fühlst du dich, wenn du an diese Woche zurückdenkst?",
+            "context": {}
+        }
+
 # ==================== SETTINGS & NOTIFICATIONS ====================
 
 class LocationSettings(BaseModel):
