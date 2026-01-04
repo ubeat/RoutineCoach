@@ -83,10 +83,9 @@ export default function GoalsScreen() {
   };
 
   const saveGoals = async () => {
-    // Validate goals
     const trimmedGoals = goals.map(g => g.trim());
     if (trimmedGoals.some(g => g === '')) {
-      Alert.alert('Hinweis', 'Bitte f\u00fclle alle 3 Ziele aus');
+      Alert.alert('Hinweis', 'Bitte fuelle alle 3 Ziele aus');
       return;
     }
 
@@ -99,7 +98,7 @@ export default function GoalsScreen() {
       });
 
       Alert.alert(
-        'Gespeichert! \u{1F389}',
+        'Gespeichert!',
         'Deine Wochenziele wurden gespeichert. Viel Erfolg!',
         [{ text: 'Super!', onPress: () => router.push('/') }]
       );
@@ -132,13 +131,12 @@ export default function GoalsScreen() {
       >
         <ScrollView style={styles.scrollView}>
           <View style={styles.header}>
-            <Text style={styles.title}>Wochenziele \u{1F3AF}</Text>
+            <Text style={styles.title}>Wochenziele</Text>
             <Text style={styles.subtitle}>
-              {isSunday ? 'Perfekter Tag f\u00fcr neue Ziele!' : 'Setze oder bearbeite deine Ziele'}
+              {isSunday ? 'Perfekter Tag fuer neue Ziele!' : 'Setze oder bearbeite deine Ziele'}
             </Text>
           </View>
 
-          {/* Advice Banner for Sunday */}
           {isSunday && (
             <TouchableOpacity 
               style={styles.adviceBanner} 
@@ -148,9 +146,9 @@ export default function GoalsScreen() {
               <View style={styles.adviceBannerContent}>
                 <Ionicons name="bulb" size={28} color="#FFF" />
                 <View style={styles.adviceBannerText}>
-                  <Text style={styles.adviceBannerTitle}>Tipps f\u00fcr Tiny Habits</Text>
+                  <Text style={styles.adviceBannerTitle}>Tipps fuer Tiny Habits</Text>
                   <Text style={styles.adviceBannerSubtitle}>
-                    {loadingAdvice ? 'Wird geladen...' : 'Tippe f\u00fcr hilfreiche Ratschl\u00e4ge'}
+                    {loadingAdvice ? 'Wird geladen...' : 'Tippe fuer hilfreiche Ratschlaege'}
                   </Text>
                 </View>
                 {loadingAdvice && <ActivityIndicator color="#FFF" />}
@@ -158,7 +156,6 @@ export default function GoalsScreen() {
             </TouchableOpacity>
           )}
 
-          {/* Advice Card */}
           {showAdvice && (
             <View style={styles.adviceCard}>
               <View style={styles.adviceHeader}>
@@ -172,11 +169,10 @@ export default function GoalsScreen() {
             </View>
           )}
 
-          {/* Goal Inputs */}
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Deine 3 kleinen Gewohnheiten</Text>
             <Text style={styles.sectionHint}>
-              W\u00e4hle Gewohnheiten, die so klein sind, dass du sie nicht ablehnen kannst!
+              Waehle Gewohnheiten, die so klein sind, dass du sie nicht ablehnen kannst!
             </Text>
 
             {[0, 1, 2].map((index) => (
@@ -191,7 +187,7 @@ export default function GoalsScreen() {
                   style={styles.goalInput}
                   placeholder={[
                     'z.B. Nach dem Aufstehen ein Glas Wasser trinken',
-                    'z.B. Nach dem Z\u00e4hneputzen 2 Kniebeugen machen',
+                    'z.B. Nach dem Zaehneputzen 2 Kniebeugen machen',
                     'z.B. Vor dem Schlafengehen 3 Dinge aufschreiben',
                   ][index]}
                   placeholderTextColor="#AAA"
@@ -204,24 +200,22 @@ export default function GoalsScreen() {
             ))}
           </View>
 
-          {/* Tips Card */}
           <View style={styles.tipsCard}>
-            <Text style={styles.tipsTitle}>\u{1F4A1} Tipps f\u00fcr effektive Tiny Habits</Text>
+            <Text style={styles.tipsTitle}>Tipps fuer effektive Tiny Habits</Text>
             <View style={styles.tipItem}>
               <Ionicons name="time-outline" size={20} color={COLORS.secondary} />
               <Text style={styles.tipText}>Dauert weniger als 30 Sekunden</Text>
             </View>
             <View style={styles.tipItem}>
               <Ionicons name="link-outline" size={20} color={COLORS.secondary} />
-              <Text style={styles.tipText}>Verkn\u00fcpfe mit bestehender Routine</Text>
+              <Text style={styles.tipText}>Verknuepfe mit bestehender Routine</Text>
             </View>
             <View style={styles.tipItem}>
               <Ionicons name="heart-outline" size={20} color={COLORS.secondary} />
-              <Text style={styles.tipText}>F\u00fchlt sich gut an nach dem Erledigen</Text>
+              <Text style={styles.tipText}>Fuehlt sich gut an nach dem Erledigen</Text>
             </View>
           </View>
 
-          {/* Save Button */}
           <TouchableOpacity
             style={[styles.saveButton, saving && styles.saveButtonDisabled]}
             onPress={saveGoals}
