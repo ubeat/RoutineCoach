@@ -215,12 +215,12 @@ export default function ProfileScreen() {
 
   const removePartner = async () => {
     Alert.alert(
-      'Partner entfernen?',
-      'Moechtest du die Verbindung wirklich loesen?',
+      'Verbindung loesen?',
+      'Moechtest du die Verbindung zu deiner Wegbegleiterin wirklich loesen?',
       [
         { text: 'Abbrechen', style: 'cancel' },
         {
-          text: 'Entfernen',
+          text: 'Ja, loesen',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -228,7 +228,7 @@ export default function ProfileScreen() {
               await axios.delete(`${API_URL}/api/social/partner/${deviceId}`);
               fetchData();
             } catch (error) {
-              Alert.alert('Fehler', 'Konnte nicht entfernt werden');
+              Alert.alert('Hmm', 'Konnte nicht entfernt werden. Versuch es nochmal!');
             }
           },
         },
