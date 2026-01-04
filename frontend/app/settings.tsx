@@ -1290,4 +1290,39 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  // Profile Name Styles
+  profileNameContainer: {
+    paddingTop: 5,
+  },
+  profileNameLabel: {
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  profileNameInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  profileNameInput: {
+    flex: 1,
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  profileNameIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileNameEmoji: {
+    fontSize: 24,
+  },
+  profileNameHint: {
+    fontSize: 12,
+    marginTop: 8,
+    fontStyle: 'italic',
+  },
 });
