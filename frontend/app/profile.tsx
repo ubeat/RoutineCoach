@@ -397,15 +397,18 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Accountability Partner */}
+        {/* Wegbegleiter/in */}
         <View style={[styles.card, { backgroundColor: colors.card }]}>
           <View style={styles.cardHeader}>
             <Ionicons name="people" size={24} color={colors.secondary} />
-            <Text style={[styles.cardTitle, { color: colors.text }]}>Accountability Partner</Text>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>Deine Wegbegleiterin 💜</Text>
           </View>
           
           {partnerInfo?.has_partner ? (
             <View style={styles.partnerInfo}>
+              <Text style={[styles.partnerConnectedText, { color: colors.text }]}>
+                Ihr seid verbunden! Gemeinsam schafft ihr das.
+              </Text>
               <View style={styles.partnerStats}>
                 <View style={styles.partnerStat}>
                   <Ionicons name="flame" size={20} color="#FF4500" />
@@ -434,11 +437,15 @@ export default function ProfileScreen() {
                 style={[styles.removePartnerButton, { borderColor: colors.primary }]}
                 onPress={removePartner}
               >
-                <Text style={[styles.removePartnerText, { color: colors.primary }]}>Partner entfernen</Text>
+                <Text style={[styles.removePartnerText, { color: colors.primary }]}>Verbindung loesen</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View>
+              <Text style={[styles.partnerExplainText, { color: colors.textLight }]}>
+                Eine Wegbegleiterin motiviert dich und ihr unterstuetzt euch gegenseitig. 
+                Gemeinsam bleibt ihr eher dran!
+              </Text>
               {partnerInfo?.pending_invite && (
                 <View style={[styles.pendingInvite, { backgroundColor: colors.background }]}>
                   <Text style={[styles.pendingText, { color: colors.textLight }]}>
@@ -454,10 +461,10 @@ export default function ProfileScreen() {
                 onPress={() => setShowPartnerModal(true)}
               >
                 <Ionicons name="person-add" size={20} color="#FFF" />
-                <Text style={styles.partnerButtonText}>Partner einladen oder Code eingeben</Text>
+                <Text style={styles.partnerButtonText}>Wegbegleiterin einladen</Text>
               </TouchableOpacity>
             </View>
-          )}
+          )}}
         </View>
 
         {/* Leaderboard */}
