@@ -509,4 +509,84 @@ const styles = StyleSheet.create({
   bottomSpacer: {
     height: 20,
   },
+  // Welcome Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  welcomeModalContent: {
+    backgroundColor: COLORS.card,
+    borderRadius: 24,
+    padding: 30,
+    width: '100%',
+    maxWidth: 340,
+    alignItems: 'center',
+  },
+  welcomeEmoji: {
+    fontSize: 50,
+    marginBottom: 10,
+  },
+  welcomeTitle: {
+    fontSize: 16,
+    color: COLORS.textLight,
+    fontWeight: '500',
+  },
+  welcomeAppName: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: COLORS.text,
+    marginTop: 4,
+  },
+  welcomeSubtitle: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    marginTop: 4,
+  },
+  welcomeDivider: {
+    width: 60,
+    height: 3,
+    backgroundColor: COLORS.primary,
+    borderRadius: 2,
+    marginVertical: 24,
+  },
+  welcomeQuestion: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 16,
+  },
+  nameInput: {
+    width: '100%',
+    backgroundColor: COLORS.background,
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 18,
+    textAlign: 'center',
+    color: COLORS.text,
+    marginBottom: 16,
+  },
+  welcomeButton: {
+    width: '100%',
+    backgroundColor: COLORS.primary,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  welcomeButtonDisabled: {
+    opacity: 0.5,
+  },
+  welcomeButtonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  welcomeNote: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    marginTop: 16,
+    textAlign: 'center',
+  },
 });
