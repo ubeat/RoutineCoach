@@ -33,16 +33,16 @@ const COLORS = {
 };
 
 const MOOD_EMOJIS = [
-  { emoji: '😭', label: 'Sehr traurig' },
-  { emoji: '😔', label: 'Traurig' },
-  { emoji: '🙁', label: 'Nicht gut' },
-  { emoji: '😕', label: 'Verwirrt' },
-  { emoji: '😐', label: 'Neutral' },
-  { emoji: '🙂', label: 'Okay' },
-  { emoji: '😊', label: 'Gut' },
-  { emoji: '😄', label: 'Sehr gut' },
-  { emoji: '🤩', label: 'Fantastisch' },
-  { emoji: '🥰', label: 'Verliebt' },
+  { emoji: String.fromCodePoint(0x1F62D), label: 'Sehr traurig' },
+  { emoji: String.fromCodePoint(0x1F614), label: 'Traurig' },
+  { emoji: String.fromCodePoint(0x1F641), label: 'Nicht gut' },
+  { emoji: String.fromCodePoint(0x1F615), label: 'Verwirrt' },
+  { emoji: String.fromCodePoint(0x1F610), label: 'Neutral' },
+  { emoji: String.fromCodePoint(0x1F642), label: 'Okay' },
+  { emoji: String.fromCodePoint(0x1F60A), label: 'Gut' },
+  { emoji: String.fromCodePoint(0x1F604), label: 'Sehr gut' },
+  { emoji: String.fromCodePoint(0x1F929), label: 'Fantastisch' },
+  { emoji: String.fromCodePoint(0x1F970), label: 'Verliebt' },
 ];
 
 export default function CheckinScreen() {
@@ -69,14 +69,12 @@ export default function CheckinScreen() {
         return;
       }
 
-      // Check if already checked in today
       const todayRes = await axios.get(`${API_URL}/api/today/${deviceId}`);
       if (todayRes.data.completed_today) {
         setAlreadyCheckedIn(true);
         setAiResponse(todayRes.data.checkin?.ai_response || '');
       }
 
-      // Fetch goals
       const goalsRes = await axios.get(`${API_URL}/api/goals/${deviceId}`);
       if (goalsRes.data.goals) {
         setGoals(goalsRes.data.goals);
@@ -97,7 +95,7 @@ export default function CheckinScreen() {
 
   const submitCheckin = async () => {
     if (!selectedMoodEmoji) {
-      Alert.alert('Hinweis', 'Bitte wähle deine Stimmung aus');
+      Alert.alert('Hinweis', 'Bitte waehle deine Stimmung aus');
       return;
     }
 
@@ -151,7 +149,7 @@ export default function CheckinScreen() {
       <SafeAreaView style={styles.container}>
         <ScrollView style={styles.scrollView}>
           <View style={styles.header}>
-            <Text style={styles.title}>Erledigt! ✨</Text>
+            <Text style={styles.title}>Erledigt!</Text>
             <Text style={styles.subtitle}>Du hast heute schon eingecheckt</Text>
           </View>
 
@@ -173,7 +171,7 @@ export default function CheckinScreen() {
           )}
 
           <TouchableOpacity style={styles.backButton} onPress={() => router.push('/')}>
-            <Text style={styles.backButtonText}>Zurück zur Übersicht</Text>
+            <Text style={styles.backButtonText}>Zurueck zur Uebersicht</Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
@@ -188,11 +186,10 @@ export default function CheckinScreen() {
       >
         <ScrollView style={styles.scrollView}>
           <View style={styles.header}>
-            <Text style={styles.title}>Täglicher Check-In 📝</Text>
+            <Text style={styles.title}>Taeglicher Check-In</Text>
             <Text style={styles.subtitle}>Wie lief dein Tag?</Text>
           </View>
 
-          {/* Habits Check */}
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Hast du deine Gewohnheiten erledigt?</Text>
             <Text style={styles.sectionHint}>Tippe auf die Gewohnheit zum Markieren</Text>
@@ -230,9 +227,8 @@ export default function CheckinScreen() {
             </View>
           </View>
 
-          {/* Mood Selection */}
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Wie fühlst du dich heute?</Text>
+            <Text style={styles.sectionTitle}>Wie fuehlst du dich heute?</Text>
             
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.emojiScroll}>
               {MOOD_EMOJIS.map((mood, index) => (
@@ -251,7 +247,6 @@ export default function CheckinScreen() {
             </ScrollView>
           </View>
 
-          {/* Mood Scale */}
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Stimmung auf einer Skala von 1-10</Text>
             <Text style={styles.scaleValue}>{moodScale}</Text>
@@ -276,7 +271,6 @@ export default function CheckinScreen() {
             </View>
           </View>
 
-          {/* Submit Button */}
           <TouchableOpacity
             style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
             onPress={submitCheckin}
