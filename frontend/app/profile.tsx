@@ -534,55 +534,132 @@ export default function ProfileScreen() {
         </View>
       </Modal>
 
-      {/* Partner Modal */}
+      {/* Wegbegleiter/in Modal */}
       <Modal
         transparent
         animationType="slide"
         visible={showPartnerModal}
-        onRequestClose={() => setShowPartnerModal(false)}
+        onRequestClose={() => { setShowPartnerModal(false); setGeneratedCode(null); }}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Accountability Partner 💜</Text>
-            <Text style={[styles.modalSubtitle, { color: colors.textLight }]}>
-              Gemeinsam ist alles leichter! Lade einen Freund ein.
-            </Text>
-            
-            <TouchableOpacity
-              style={[styles.inviteButton, { backgroundColor: colors.secondary }]}
-              onPress={createInvite}
-            >
-              <Ionicons name="share" size={20} color="#FFF" />
-              <Text style={styles.inviteButtonText}>Einladung erstellen & teilen</Text>
-            </TouchableOpacity>
-            
-            <Text style={[styles.orText, { color: colors.textLight }]}>- oder -</Text>
-            
-            <Text style={[styles.inputLabel, { color: colors.text }]}>Du hast einen Code erhalten?</Text>
-            <TextInput
-              style={[styles.codeInput, { borderColor: colors.primary, color: colors.text }]}
-              value={inviteCode}
-              onChangeText={setInviteCode}
-              placeholder="z.B. ABC123"
-              placeholderTextColor={colors.textLight}
-              autoCapitalize="characters"
-              maxLength={8}
-            />
-            
-            <TouchableOpacity
-              style={[styles.acceptButton, { backgroundColor: colors.primary }]}
-              onPress={acceptInvite}
-            >
-              <Text style={styles.acceptButtonText}>Code einloesen</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => setShowPartnerModal(false)}
-            >
-              <Text style={[styles.cancelButtonText, { color: colors.textLight }]}>Spaeter</Text>
-            </TouchableOpacity>
-          </View>
+          <ScrollView>
+            <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Wegbegleiterin einladen 💜</Text>
+              <Text style={[styles.modalSubtitle, { color: colors.textLight }]}>
+                Gemeinsam macht es mehr Spass und ihr bleibt eher dran!
+              </Text>
+              
+              {!generatedCode ? (
+                // Schritt 1: Code generieren oder eingeben
+                <>
+                  <TouchableOpacity
+                    style={[styles.inviteButton, { backgroundColor: colors.secondary }]}
+                    onPress={createInvite}
+                  >
+                    <Ionicons name="sparkles" size={20} color="#FFF" />
+                    <Text style={styles.inviteButtonText}>Einladungscode erstellen</Text>
+                  </TouchableOpacity>
+                  
+                  <Text style={[styles.orText, { color: colors.textLight }]}>- oder -</Text>
+                  
+                  <Text style={[styles.inputLabel, { color: colors.text }]}>Du hast einen Code erhalten?</Text>
+                  <TextInput
+                    style={[styles.codeInput, { borderColor: colors.primary, color: colors.text }]}
+                    value={inviteCode}
+                    onChangeText={setInviteCode}
+                    placeholder="z.B. ABC123"
+                    placeholderTextColor={colors.textLight}
+                    autoCapitalize="characters"
+                    maxLength={8}
+                  />
+                  
+                  <TouchableOpacity
+                    style={[styles.acceptButton, { backgroundColor: colors.primary }]}
+                    onPress={acceptInvite}
+                  >
+                    <Text style={styles.acceptButtonText}>Code einloesen</Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                // Schritt 2: Code teilen mit allen Optionen
+                <>
+                  <View style={[styles.qrCodeContainer, { backgroundColor: '#FFF' }]}>
+                    <QRCode
+                      value={generatedCode}
+                      size={150}
+                      color={colors.primary}
+                      backgroundColor="#FFF"
+                    />
+                  </View>
+                  
+                  <View style={[styles.codeDisplayBox, { backgroundColor: colors.background }]}>
+                    <Text style={[styles.codeLabel, { color: colors.textLight }]}>Dein Einladungscode:</Text>
+                    <Text style={[styles.generatedCodeText, { color: colors.primary }]}>{generatedCode}</Text>
+                  </View>
+                  
+                  <Text style={[styles.shareMethodsTitle, { color: colors.text }]}>
+                    Teilen via:
+                  </Text>
+                  
+                  <View style={styles.shareButtonsGrid}>
+                    <TouchableOpacity
+                      style={[styles.shareMethodButton, { backgroundColor: '#25D366' }]}
+                      onPress={shareViaWhatsApp}
+                    >
+                      <Ionicons name="logo-whatsapp" size={24} color="#FFF" />
+                      <Text style={styles.shareMethodText}>WhatsApp</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity
+                      style={[styles.shareMethodButton, { backgroundColor: '#007AFF' }]}
+                      onPress={shareViaSMS}
+                    >
+                      <Ionicons name="chatbubble" size={24} color="#FFF" />
+                      <Text style={styles.shareMethodText}>SMS</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity
+                      style={[styles.shareMethodButton, { backgroundColor: '#EA4335' }]}
+                      onPress={shareViaEmail}
+                    >
+                      <Ionicons name="mail" size={24} color="#FFF" />
+                      <Text style={styles.shareMethodText}>E-Mail</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity
+                      style={[styles.shareMethodButton, { backgroundColor: colors.secondary }]}
+                      onPress={shareViaGeneral}
+                    >
+                      <Ionicons name="share-social" size={24} color="#FFF" />
+                      <Text style={styles.shareMethodText}>Mehr...</Text>
+                    </TouchableOpacity>
+                  </View>
+                  
+                  <TouchableOpacity
+                    style={[styles.copyCodeButton, { borderColor: colors.primary }]}
+                    onPress={copyCodeToClipboard}
+                  >
+                    <Ionicons name="copy-outline" size={20} color={colors.primary} />
+                    <Text style={[styles.copyCodeText, { color: colors.primary }]}>Code kopieren</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    style={styles.newCodeButton}
+                    onPress={() => setGeneratedCode(null)}
+                  >
+                    <Text style={[styles.newCodeText, { color: colors.textLight }]}>Neuen Code erstellen</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+              
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => { setShowPartnerModal(false); setGeneratedCode(null); }}
+              >
+                <Text style={[styles.cancelButtonText, { color: colors.textLight }]}>Spaeter</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         </View>
       </Modal>
     </SafeAreaView>
