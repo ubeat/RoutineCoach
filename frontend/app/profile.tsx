@@ -537,6 +537,10 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
   },
+  subtitle: {
+    fontSize: 14,
+    marginTop: 4,
+  },
   levelCard: {
     marginHorizontal: 20,
     marginBottom: 15,
