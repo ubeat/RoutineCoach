@@ -41,6 +41,11 @@ export default function HomeScreen() {
   const [goals, setGoals] = useState<string[] | null>(null);
   const [todayCheckin, setTodayCheckin] = useState<any>(null);
   const [weekSummary, setWeekSummary] = useState<any>(null);
+  
+  // Name modal state
+  const [userName, setUserName] = useState<string | null>(null);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [nameInput, setNameInput] = useState('');
 
   const today = new Date();
   const dayName = WEEKDAYS[today.getDay()];
@@ -53,6 +58,25 @@ export default function HomeScreen() {
       await AsyncStorage.setItem('deviceId', id);
     }
     return id;
+  };
+
+  const loadUserName = async () => {
+    const storedName = await AsyncStorage.getItem('userName');
+    if (storedName) {
+      setUserName(storedName);
+    } else {
+      setShowWelcomeModal(true);
+    }
+  };
+
+  const saveUserName = async () => {
+    const trimmedName = nameInput.trim();
+    if (trimmedName.length < 1) {
+      return;
+    }
+    await AsyncStorage.setItem('userName', trimmedName);
+    setUserName(trimmedName);
+    setShowWelcomeModal(false);
   };
 
   const fetchData = async () => {
