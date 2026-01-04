@@ -775,6 +775,644 @@ async def get_cached_notifications(device_id: str):
     messages = await pregenerate_notifications(device_id)
     return {"messages": messages["messages"], "cached": False}
 
+# ==================== GAMIFICATION ====================
+
+# Badge definitions
+BADGES = {
+    "first_checkin": {
+        "id": "first_checkin",
+        "name": "Erster Schritt",
+        "description": "Dein erster Check-In!",
+        "icon": "footsteps",
+        "color": "#4ECDC4"
+    },
+    "week_warrior": {
+        "id": "week_warrior",
+        "name": "Wochen-Krieger",
+        "description": "7 Tage am Stueck eingecheckt",
+        "icon": "shield",
+        "color": "#FF6B6B"
+    },
+    "perfect_week": {
+        "id": "perfect_week",
+        "name": "Perfekte Woche",
+        "description": "Alle Habits eine Woche lang erledigt",
+        "icon": "trophy",
+        "color": "#FFE66D"
+    },
+    "morning_person": {
+        "id": "morning_person",
+        "name": "Fruehaufsteher",
+        "description": "10x vor 8 Uhr eingecheckt",
+        "icon": "sunny",
+        "color": "#FFA500"
+    },
+    "streak_master_7": {
+        "id": "streak_master_7",
+        "name": "Streak-Meister",
+        "description": "7-Tage-Streak erreicht",
+        "icon": "flame",
+        "color": "#FF4500"
+    },
+    "streak_master_14": {
+        "id": "streak_master_14",
+        "name": "Streak-Legende",
+        "description": "14-Tage-Streak erreicht",
+        "icon": "flame",
+        "color": "#FF6347"
+    },
+    "streak_master_30": {
+        "id": "streak_master_30",
+        "name": "Streak-Gott",
+        "description": "30-Tage-Streak erreicht",
+        "icon": "flame",
+        "color": "#DC143C"
+    },
+    "habit_hero": {
+        "id": "habit_hero",
+        "name": "Habit-Held",
+        "description": "50 Habits insgesamt erledigt",
+        "icon": "star",
+        "color": "#A78BFA"
+    },
+    "journal_writer": {
+        "id": "journal_writer",
+        "name": "Tagebuch-Schreiber",
+        "description": "10 Journal-Eintraege geschrieben",
+        "icon": "book",
+        "color": "#F472B6"
+    },
+    "gratitude_guru": {
+        "id": "gratitude_guru",
+        "name": "Dankbarkeits-Guru",
+        "description": "30 Dankbarkeiten aufgeschrieben",
+        "icon": "heart",
+        "color": "#EC4899"
+    },
+    "social_butterfly": {
+        "id": "social_butterfly",
+        "name": "Sozialer Schmetterling",
+        "description": "Einen Partner eingeladen",
+        "icon": "people",
+        "color": "#06B6D4"
+    },
+    "challenger": {
+        "id": "challenger",
+        "name": "Herausforderer",
+        "description": "Erste Wochen-Challenge abgeschlossen",
+        "icon": "flag",
+        "color": "#8B5CF6"
+    }
+}
+
+# Level definitions
+LEVELS = [
+    {"level": 1, "name": "Anfaenger", "xp_required": 0, "icon": "leaf"},
+    {"level": 2, "name": "Lehrling", "xp_required": 100, "icon": "fitness"},
+    {"level": 3, "name": "Fortgeschritten", "xp_required": 300, "icon": "rocket"},
+    {"level": 4, "name": "Experte", "xp_required": 600, "icon": "star"},
+    {"level": 5, "name": "Meister", "xp_required": 1000, "icon": "trophy"},
+    {"level": 6, "name": "Grossmeister", "xp_required": 1500, "icon": "medal"},
+    {"level": 7, "name": "Legende", "xp_required": 2500, "icon": "diamond"},
+    {"level": 8, "name": "Champion", "xp_required": 4000, "icon": "ribbon"},
+    {"level": 9, "name": "Held", "xp_required": 6000, "icon": "shield"},
+    {"level": 10, "name": "Unsterblich", "xp_required": 10000, "icon": "infinite"}
+]
+
+# Weekly Challenges
+WEEKLY_CHALLENGES = [
+    {
+        "id": "early_bird",
+        "name": "Fruehaufsteher-Challenge",
+        "description": "Check 5x vor 7:00 Uhr ein",
+        "target": 5,
+        "xp_reward": 50,
+        "type": "early_checkin"
+    },
+    {
+        "id": "perfect_3",
+        "name": "Perfekte 3 Tage",
+        "description": "Erledige alle Habits an 3 aufeinanderfolgenden Tagen",
+        "target": 3,
+        "xp_reward": 75,
+        "type": "perfect_days"
+    },
+    {
+        "id": "mood_tracker",
+        "name": "Stimmungs-Tracker",
+        "description": "Tracke deine Stimmung 7 Tage lang",
+        "target": 7,
+        "xp_reward": 40,
+        "type": "mood_tracking"
+    },
+    {
+        "id": "journal_week",
+        "name": "Reflexions-Woche",
+        "description": "Schreibe 5 Journal-Eintraege",
+        "target": 5,
+        "xp_reward": 60,
+        "type": "journal_entries"
+    },
+    {
+        "id": "gratitude_master",
+        "name": "Dankbarkeits-Meister",
+        "description": "Schreibe 10 Dankbarkeiten auf",
+        "target": 10,
+        "xp_reward": 50,
+        "type": "gratitudes"
+    }
+]
+
+class GamificationProfile(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    device_id: str
+    xp: int = 0
+    level: int = 1
+    current_streak: int = 0
+    longest_streak: int = 0
+    total_checkins: int = 0
+    total_habits_completed: int = 0
+    badges: List[str] = []
+    active_challenge: Optional[str] = None
+    challenge_progress: int = 0
+    challenge_start_date: Optional[datetime] = None
+    last_checkin_date: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+@api_router.get("/gamification/{device_id}")
+async def get_gamification_profile(device_id: str):
+    profile = await db.gamification.find_one({"device_id": device_id})
+    
+    if not profile:
+        # Create new profile
+        new_profile = GamificationProfile(device_id=device_id)
+        await db.gamification.insert_one(new_profile.dict())
+        profile = new_profile.dict()
+    
+    # Calculate level info
+    current_level = None
+    next_level = None
+    for i, lvl in enumerate(LEVELS):
+        if profile.get("xp", 0) >= lvl["xp_required"]:
+            current_level = lvl
+            if i + 1 < len(LEVELS):
+                next_level = LEVELS[i + 1]
+    
+    return {
+        "profile": serialize_doc(profile),
+        "current_level": current_level,
+        "next_level": next_level,
+        "badges_earned": [BADGES[b] for b in profile.get("badges", []) if b in BADGES],
+        "all_badges": list(BADGES.values()),
+        "levels": LEVELS
+    }
+
+@api_router.post("/gamification/{device_id}/add-xp")
+async def add_xp(device_id: str, xp: int):
+    profile = await db.gamification.find_one({"device_id": device_id})
+    if not profile:
+        new_profile = GamificationProfile(device_id=device_id)
+        await db.gamification.insert_one(new_profile.dict())
+        profile = new_profile.dict()
+    
+    new_xp = profile.get("xp", 0) + xp
+    
+    # Calculate new level
+    new_level = 1
+    for lvl in LEVELS:
+        if new_xp >= lvl["xp_required"]:
+            new_level = lvl["level"]
+    
+    level_up = new_level > profile.get("level", 1)
+    
+    await db.gamification.update_one(
+        {"device_id": device_id},
+        {"$set": {"xp": new_xp, "level": new_level}}
+    )
+    
+    return {"new_xp": new_xp, "new_level": new_level, "level_up": level_up, "xp_added": xp}
+
+@api_router.post("/gamification/{device_id}/update-streak")
+async def update_streak(device_id: str, all_habits_completed: bool):
+    profile = await db.gamification.find_one({"device_id": device_id})
+    if not profile:
+        new_profile = GamificationProfile(device_id=device_id)
+        await db.gamification.insert_one(new_profile.dict())
+        profile = new_profile.dict()
+    
+    today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    last_checkin = profile.get("last_checkin_date")
+    current_streak = profile.get("current_streak", 0)
+    longest_streak = profile.get("longest_streak", 0)
+    
+    if all_habits_completed:
+        if last_checkin:
+            last_date = last_checkin if isinstance(last_checkin, datetime) else datetime.fromisoformat(str(last_checkin))
+            last_date = last_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            days_diff = (today - last_date).days
+            
+            if days_diff == 1:
+                current_streak += 1
+            elif days_diff > 1:
+                current_streak = 1
+            # Same day = no change to streak
+        else:
+            current_streak = 1
+        
+        longest_streak = max(longest_streak, current_streak)
+    else:
+        # Streak broken if not all habits completed
+        if last_checkin:
+            last_date = last_checkin if isinstance(last_checkin, datetime) else datetime.fromisoformat(str(last_checkin))
+            last_date = last_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            if (today - last_date).days >= 1:
+                current_streak = 0
+    
+    # Check for streak badges
+    new_badges = list(profile.get("badges", []))
+    if current_streak >= 7 and "streak_master_7" not in new_badges:
+        new_badges.append("streak_master_7")
+    if current_streak >= 14 and "streak_master_14" not in new_badges:
+        new_badges.append("streak_master_14")
+    if current_streak >= 30 and "streak_master_30" not in new_badges:
+        new_badges.append("streak_master_30")
+    
+    await db.gamification.update_one(
+        {"device_id": device_id},
+        {"$set": {
+            "current_streak": current_streak,
+            "longest_streak": longest_streak,
+            "last_checkin_date": today,
+            "badges": new_badges
+        }}
+    )
+    
+    return {
+        "current_streak": current_streak,
+        "longest_streak": longest_streak,
+        "new_badges": [b for b in new_badges if b not in profile.get("badges", [])]
+    }
+
+@api_router.post("/gamification/{device_id}/award-badge")
+async def award_badge(device_id: str, badge_id: str):
+    if badge_id not in BADGES:
+        raise HTTPException(status_code=400, detail="Badge nicht gefunden")
+    
+    await db.gamification.update_one(
+        {"device_id": device_id},
+        {"$addToSet": {"badges": badge_id}}
+    )
+    
+    return {"badge": BADGES[badge_id], "awarded": True}
+
+@api_router.get("/challenges")
+async def get_available_challenges():
+    return {"challenges": WEEKLY_CHALLENGES}
+
+@api_router.post("/gamification/{device_id}/start-challenge")
+async def start_challenge(device_id: str, challenge_id: str):
+    challenge = next((c for c in WEEKLY_CHALLENGES if c["id"] == challenge_id), None)
+    if not challenge:
+        raise HTTPException(status_code=400, detail="Challenge nicht gefunden")
+    
+    await db.gamification.update_one(
+        {"device_id": device_id},
+        {"$set": {
+            "active_challenge": challenge_id,
+            "challenge_progress": 0,
+            "challenge_start_date": datetime.utcnow()
+        }},
+        upsert=True
+    )
+    
+    return {"challenge": challenge, "started": True}
+
+@api_router.post("/gamification/{device_id}/update-challenge")
+async def update_challenge_progress(device_id: str, progress_increment: int = 1):
+    profile = await db.gamification.find_one({"device_id": device_id})
+    if not profile or not profile.get("active_challenge"):
+        return {"active": False}
+    
+    challenge = next((c for c in WEEKLY_CHALLENGES if c["id"] == profile["active_challenge"]), None)
+    if not challenge:
+        return {"active": False}
+    
+    new_progress = profile.get("challenge_progress", 0) + progress_increment
+    completed = new_progress >= challenge["target"]
+    
+    update_data = {"challenge_progress": new_progress}
+    xp_earned = 0
+    
+    if completed:
+        xp_earned = challenge["xp_reward"]
+        update_data["active_challenge"] = None
+        update_data["challenge_progress"] = 0
+        update_data["xp"] = profile.get("xp", 0) + xp_earned
+        
+        # Award challenger badge if first challenge
+        if "challenger" not in profile.get("badges", []):
+            update_data["badges"] = profile.get("badges", []) + ["challenger"]
+    
+    await db.gamification.update_one(
+        {"device_id": device_id},
+        {"$set": update_data}
+    )
+    
+    return {
+        "progress": new_progress,
+        "target": challenge["target"],
+        "completed": completed,
+        "xp_earned": xp_earned
+    }
+
+# ==================== JOURNAL ====================
+
+class JournalEntry(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    device_id: str
+    date: datetime = Field(default_factory=datetime.utcnow)
+    note: Optional[str] = None
+    reflection_question: Optional[str] = None
+    reflection_answer: Optional[str] = None
+    gratitudes: List[str] = []
+    mood_note: Optional[str] = None
+
+class JournalEntryCreate(BaseModel):
+    device_id: str
+    note: Optional[str] = None
+    reflection_answer: Optional[str] = None
+    gratitudes: List[str] = []
+    mood_note: Optional[str] = None
+
+REFLECTION_QUESTIONS = [
+    "Was war heute dein groesster Erfolg?",
+    "Wofuer bist du heute dankbar?",
+    "Was hast du heute gelernt?",
+    "Was haettest du heute anders machen koennen?",
+    "Wer hat dir heute geholfen oder dich inspiriert?",
+    "Was hat dich heute gluecklich gemacht?",
+    "Welche Herausforderung hast du heute gemeistert?",
+    "Was moechtest du morgen erreichen?",
+    "Wie hast du heute fuer dich selbst gesorgt?",
+    "Was war der beste Moment des Tages?"
+]
+
+@api_router.get("/journal/{device_id}")
+async def get_journal_entries(device_id: str, limit: int = 30):
+    entries = await db.journal.find(
+        {"device_id": device_id}
+    ).sort("date", -1).limit(limit).to_list(limit)
+    
+    return {"entries": serialize_doc(entries)}
+
+@api_router.get("/journal/{device_id}/today")
+async def get_today_journal(device_id: str):
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1)
+    
+    entry = await db.journal.find_one({
+        "device_id": device_id,
+        "date": {"$gte": today_start, "$lt": today_end}
+    })
+    
+    # Get a random reflection question
+    import random
+    question = random.choice(REFLECTION_QUESTIONS)
+    
+    return {
+        "entry": serialize_doc(entry),
+        "reflection_question": question,
+        "has_entry": entry is not None
+    }
+
+@api_router.post("/journal")
+async def create_or_update_journal(input: JournalEntryCreate):
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1)
+    
+    existing = await db.journal.find_one({
+        "device_id": input.device_id,
+        "date": {"$gte": today_start, "$lt": today_end}
+    })
+    
+    import random
+    question = random.choice(REFLECTION_QUESTIONS)
+    
+    if existing:
+        await db.journal.update_one(
+            {"_id": existing["_id"]},
+            {"$set": {
+                "note": input.note,
+                "reflection_answer": input.reflection_answer,
+                "gratitudes": input.gratitudes,
+                "mood_note": input.mood_note
+            }}
+        )
+        entry = await db.journal.find_one({"_id": existing["_id"]})
+    else:
+        entry = JournalEntry(
+            device_id=input.device_id,
+            note=input.note,
+            reflection_question=question,
+            reflection_answer=input.reflection_answer,
+            gratitudes=input.gratitudes,
+            mood_note=input.mood_note
+        )
+        await db.journal.insert_one(entry.dict())
+        entry = entry.dict()
+    
+    # Update gamification - journal writer badge
+    profile = await db.gamification.find_one({"device_id": input.device_id})
+    if profile:
+        journal_count = await db.journal.count_documents({"device_id": input.device_id})
+        gratitude_count = await db.journal.aggregate([
+            {"$match": {"device_id": input.device_id}},
+            {"$project": {"count": {"$size": {"$ifNull": ["$gratitudes", []]}}}},
+            {"$group": {"_id": None, "total": {"$sum": "$count"}}}
+        ]).to_list(1)
+        total_gratitudes = gratitude_count[0]["total"] if gratitude_count else 0
+        
+        new_badges = list(profile.get("badges", []))
+        if journal_count >= 10 and "journal_writer" not in new_badges:
+            new_badges.append("journal_writer")
+        if total_gratitudes >= 30 and "gratitude_guru" not in new_badges:
+            new_badges.append("gratitude_guru")
+        
+        if new_badges != profile.get("badges", []):
+            await db.gamification.update_one(
+                {"device_id": input.device_id},
+                {"$set": {"badges": new_badges}}
+            )
+    
+    return {"entry": serialize_doc(entry)}
+
+# ==================== SOCIAL / ACCOUNTABILITY ====================
+
+class PartnerInvite(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    inviter_device_id: str
+    invite_code: str = Field(default_factory=lambda: str(uuid.uuid4())[:8].upper())
+    invitee_device_id: Optional[str] = None
+    status: str = "pending"  # pending, accepted, declined
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PartnerConnection(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    device_id_1: str
+    device_id_2: str
+    connected_at: datetime = Field(default_factory=datetime.utcnow)
+
+@api_router.post("/social/invite")
+async def create_partner_invite(device_id: str):
+    # Check if user already has a partner
+    existing = await db.partner_connections.find_one({
+        "$or": [{"device_id_1": device_id}, {"device_id_2": device_id}]
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Du hast bereits einen Partner")
+    
+    # Create invite
+    invite = PartnerInvite(inviter_device_id=device_id)
+    await db.partner_invites.insert_one(invite.dict())
+    
+    # Award social butterfly badge
+    await db.gamification.update_one(
+        {"device_id": device_id},
+        {"$addToSet": {"badges": "social_butterfly"}},
+        upsert=True
+    )
+    
+    return {"invite_code": invite.invite_code, "invite": serialize_doc(invite.dict())}
+
+@api_router.post("/social/accept-invite")
+async def accept_partner_invite(device_id: str, invite_code: str):
+    invite = await db.partner_invites.find_one({
+        "invite_code": invite_code.upper(),
+        "status": "pending"
+    })
+    
+    if not invite:
+        raise HTTPException(status_code=404, detail="Einladung nicht gefunden oder bereits verwendet")
+    
+    if invite["inviter_device_id"] == device_id:
+        raise HTTPException(status_code=400, detail="Du kannst deine eigene Einladung nicht annehmen")
+    
+    # Create connection
+    connection = PartnerConnection(
+        device_id_1=invite["inviter_device_id"],
+        device_id_2=device_id
+    )
+    await db.partner_connections.insert_one(connection.dict())
+    
+    # Update invite status
+    await db.partner_invites.update_one(
+        {"_id": invite["_id"]},
+        {"$set": {"status": "accepted", "invitee_device_id": device_id}}
+    )
+    
+    return {"connected": True, "partner_device_id": invite["inviter_device_id"]}
+
+@api_router.get("/social/partner/{device_id}")
+async def get_partner_info(device_id: str):
+    connection = await db.partner_connections.find_one({
+        "$or": [{"device_id_1": device_id}, {"device_id_2": device_id}]
+    })
+    
+    if not connection:
+        # Check for pending invites
+        invite = await db.partner_invites.find_one({
+            "inviter_device_id": device_id,
+            "status": "pending"
+        })
+        return {
+            "has_partner": False,
+            "pending_invite": serialize_doc(invite) if invite else None
+        }
+    
+    partner_id = connection["device_id_2"] if connection["device_id_1"] == device_id else connection["device_id_1"]
+    
+    # Get partner's gamification profile
+    partner_profile = await db.gamification.find_one({"device_id": partner_id})
+    
+    # Get partner's recent activity (today's check-in)
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    partner_checkin = await db.daily_checkins.find_one({
+        "device_id": partner_id,
+        "date": {"$gte": today_start}
+    })
+    
+    return {
+        "has_partner": True,
+        "partner": {
+            "streak": partner_profile.get("current_streak", 0) if partner_profile else 0,
+            "level": partner_profile.get("level", 1) if partner_profile else 1,
+            "xp": partner_profile.get("xp", 0) if partner_profile else 0,
+            "checked_in_today": partner_checkin is not None,
+            "habits_today": partner_checkin.get("habits_completed", "") if partner_checkin else ""
+        }
+    }
+
+@api_router.delete("/social/partner/{device_id}")
+async def remove_partner(device_id: str):
+    await db.partner_connections.delete_one({
+        "$or": [{"device_id_1": device_id}, {"device_id_2": device_id}]
+    })
+    return {"removed": True}
+
+# Anonymous Group Comparison
+@api_router.get("/social/leaderboard")
+async def get_anonymous_leaderboard(device_id: str):
+    # Get top 20 users by XP
+    top_users = await db.gamification.find().sort("xp", -1).limit(20).to_list(20)
+    
+    # Find user's rank
+    user_profile = await db.gamification.find_one({"device_id": device_id})
+    user_xp = user_profile.get("xp", 0) if user_profile else 0
+    user_rank = await db.gamification.count_documents({"xp": {"$gt": user_xp}}) + 1
+    
+    # Anonymize leaderboard
+    leaderboard = []
+    for i, user in enumerate(top_users):
+        is_current_user = user.get("device_id") == device_id
+        leaderboard.append({
+            "rank": i + 1,
+            "name": "Du" if is_current_user else f"Spieler {i + 1}",
+            "xp": user.get("xp", 0),
+            "level": user.get("level", 1),
+            "streak": user.get("current_streak", 0),
+            "is_you": is_current_user
+        })
+    
+    return {
+        "leaderboard": leaderboard,
+        "your_rank": user_rank,
+        "total_players": await db.gamification.count_documents({})
+    }
+
+# ==================== SMART FEATURES SETTINGS ====================
+
+class SmartFeaturesSettings(BaseModel):
+    widget_enabled: bool = False
+    watch_enabled: bool = False
+    assistant_enabled: bool = False
+    assistant_type: str = "none"  # none, siri, google, alexa
+
+@api_router.get("/smart-features/{device_id}")
+async def get_smart_features(device_id: str):
+    settings = await db.smart_features.find_one({"device_id": device_id})
+    if not settings:
+        return SmartFeaturesSettings().dict()
+    return serialize_doc(settings)
+
+@api_router.post("/smart-features/{device_id}")
+async def update_smart_features(device_id: str, settings: SmartFeaturesSettings):
+    await db.smart_features.update_one(
+        {"device_id": device_id},
+        {"$set": {**settings.dict(), "device_id": device_id}},
+        upsert=True
+    )
+    return {"updated": True, "settings": settings.dict()}
+
 # Include the router in the main app
 app.include_router(api_router)
 
