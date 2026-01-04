@@ -1,30 +1,411 @@
-import { Text, View, StyleSheet, Image } from "react-native";
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { useRouter } from 'expo-router';
 
-const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-export default function Index() {
-  console.log(EXPO_PUBLIC_BACKEND_URL, "EXPO_PUBLIC_BACKEND_URL");
+const WEEKDAYS = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+const COLORS = {
+  primary: '#FF6B6B',
+  secondary: '#4ECDC4',
+  accent: '#FFE66D',
+  purple: '#A78BFA',
+  pink: '#F472B6',
+  background: '#FFF9F0',
+  card: '#FFFFFF',
+  text: '#2D3436',
+  textLight: '#636E72',
+};
+
+export default function HomeScreen() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [deviceId, setDeviceId] = useState('');
+  const [goals, setGoals] = useState<string[] | null>(null);
+  const [todayCheckin, setTodayCheckin] = useState<any>(null);
+  const [weekSummary, setWeekSummary] = useState<any>(null);
+
+  const today = new Date();
+  const dayName = WEEKDAYS[today.getDay()];
+  const isSunday = today.getDay() === 0;
+
+  const getDeviceId = async () => {
+    let id = await AsyncStorage.getItem('deviceId');
+    if (!id) {
+      id = 'device_' + Math.random().toString(36).substring(7);
+      await AsyncStorage.setItem('deviceId', id);
+    }
+    return id;
+  };
+
+  const fetchData = async () => {
+    try {
+      const id = await getDeviceId();
+      setDeviceId(id);
+
+      // Fetch current goals
+      const goalsRes = await axios.get(`${API_URL}/api/goals/${id}`);
+      if (goalsRes.data.goals) {
+        setGoals(goalsRes.data.goals);
+      }
+
+      // Fetch today's check-in
+      const todayRes = await axios.get(`${API_URL}/api/today/${id}`);
+      setTodayCheckin(todayRes.data);
+
+      // Fetch week summary
+      const summaryRes = await axios.get(`${API_URL}/api/summary/${id}`);
+      setWeekSummary(summaryRes.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text style={styles.loadingText}>Wird geladen...</Text>
+      </View>
+    );
+  }
+
+  const completedToday = todayCheckin?.completed_today;
+  const daysTracked = weekSummary?.total_days_tracked || 0;
 
   return (
-    <View style={styles.container}>
-      <Image
-        source={require("../assets/images/app-image.png")}
-        style={styles.image}
-      />
-    </View>
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.primary]} />
+        }
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.greeting}>Hallo! \u{1F44B}</Text>
+          <Text style={styles.dayText}>{dayName}</Text>
+        </View>
+
+        {/* Sunday Banner */}
+        {isSunday && (
+          <TouchableOpacity style={styles.sundayBanner} onPress={() => router.push('/goals')}>
+            <View style={styles.sundayContent}>
+              <Ionicons name="sparkles" size={28} color="#FFF" />
+              <View style={styles.sundayTextContainer}>
+                <Text style={styles.sundayTitle}>Neuer Wochenstart!</Text>
+                <Text style={styles.sundaySubtitle}>Zeit f\u00fcr neue Tiny Habits \u2192</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        )}
+
+        {/* Goals Card */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Ionicons name="flag" size={24} color={COLORS.primary} />
+            <Text style={styles.cardTitle}>Deine Wochenziele</Text>
+          </View>
+          {goals ? (
+            <View style={styles.goalsContainer}>
+              {goals.map((goal, index) => (
+                <View key={index} style={styles.goalItem}>
+                  <View style={[styles.goalNumber, { backgroundColor: [COLORS.primary, COLORS.secondary, COLORS.purple][index] }]}>
+                    <Text style={styles.goalNumberText}>{index + 1}</Text>
+                  </View>
+                  <Text style={styles.goalText}>{goal}</Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <TouchableOpacity style={styles.noGoalsButton} onPress={() => router.push('/goals')}>
+              <Ionicons name="add-circle" size={40} color={COLORS.primary} />
+              <Text style={styles.noGoalsText}>Ziele f\u00fcr diese Woche setzen</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Today's Status */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Ionicons name="today" size={24} color={COLORS.secondary} />
+            <Text style={styles.cardTitle}>Heute</Text>
+          </View>
+          {completedToday ? (
+            <View style={styles.completedContainer}>
+              <Ionicons name="checkmark-circle" size={60} color={COLORS.secondary} />
+              <Text style={styles.completedText}>Check-In erledigt!</Text>
+              {todayCheckin?.checkin?.mood_emoji && (
+                <Text style={styles.moodDisplay}>
+                  Stimmung: {todayCheckin.checkin.mood_emoji} ({todayCheckin.checkin.mood_scale}/10)
+                </Text>
+              )}
+            </View>
+          ) : goals ? (
+            <TouchableOpacity style={styles.checkinButton} onPress={() => router.push('/checkin')}>
+              <Ionicons name="hand-right" size={32} color="#FFF" />
+              <Text style={styles.checkinButtonText}>Jetzt einchecken!</Text>
+            </TouchableOpacity>
+          ) : (
+            <Text style={styles.setGoalsFirst}>Setze erst deine Wochenziele</Text>
+          )}
+        </View>
+
+        {/* Week Progress Mini */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Ionicons name="calendar" size={24} color={COLORS.purple} />
+            <Text style={styles.cardTitle}>Diese Woche</Text>
+          </View>
+          <View style={styles.weekProgress}>
+            <Text style={styles.progressNumber}>{daysTracked}/7</Text>
+            <Text style={styles.progressLabel}>Tage erfasst</Text>
+          </View>
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: `${(daysTracked / 7) * 100}%` }]} />
+          </View>
+          {daysTracked >= 7 && (
+            <TouchableOpacity style={styles.viewResultsButton} onPress={() => router.push('/progress')}>
+              <Text style={styles.viewResultsText}>Wochenergebnis ansehen \u2192</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* AI Coach Response (if checked in today) */}
+        {todayCheckin?.checkin?.ai_response && (
+          <View style={[styles.card, styles.coachCard]}>
+            <View style={styles.cardHeader}>
+              <Ionicons name="chatbubble-ellipses" size={24} color={COLORS.pink} />
+              <Text style={styles.cardTitle}>Dein Coach sagt</Text>
+            </View>
+            <Text style={styles.coachMessage}>{todayCheckin.checkin.ai_response}</Text>
+          </View>
+        )}
+
+        <View style={styles.bottomSpacer} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0c0c0c",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: COLORS.background,
   },
-  image: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
+  scrollView: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+  },
+  loadingText: {
+    marginTop: 10,
+    color: COLORS.textLight,
+    fontSize: 16,
+  },
+  header: {
+    padding: 20,
+    paddingTop: 10,
+  },
+  greeting: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: COLORS.text,
+  },
+  dayText: {
+    fontSize: 18,
+    color: COLORS.textLight,
+    marginTop: 4,
+  },
+  sundayBanner: {
+    marginHorizontal: 20,
+    marginBottom: 15,
+    backgroundColor: COLORS.purple,
+    borderRadius: 16,
+    padding: 16,
+  },
+  sundayContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sundayTextContainer: {
+    marginLeft: 12,
+  },
+  sundayTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFF',
+  },
+  sundaySubtitle: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.9)',
+    marginTop: 2,
+  },
+  card: {
+    backgroundColor: COLORS.card,
+    marginHorizontal: 20,
+    marginBottom: 15,
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  coachCard: {
+    backgroundColor: '#FFF0F5',
+    borderWidth: 1,
+    borderColor: COLORS.pink,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginLeft: 10,
+  },
+  goalsContainer: {
+    gap: 12,
+  },
+  goalItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  goalNumber: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  goalNumberText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  goalText: {
+    fontSize: 15,
+    color: COLORS.text,
+    flex: 1,
+  },
+  noGoalsButton: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  noGoalsText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: COLORS.primary,
+    fontWeight: '600',
+  },
+  completedContainer: {
+    alignItems: 'center',
+    padding: 10,
+  },
+  completedText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.secondary,
+    marginTop: 10,
+  },
+  moodDisplay: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    marginTop: 8,
+  },
+  checkinButton: {
+    backgroundColor: COLORS.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
+    gap: 10,
+  },
+  checkinButtonText: {
+    color: '#FFF',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  setGoalsFirst: {
+    textAlign: 'center',
+    color: COLORS.textLight,
+    fontSize: 15,
+  },
+  weekProgress: {
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  progressNumber: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: COLORS.purple,
+  },
+  progressLabel: {
+    fontSize: 14,
+    color: COLORS.textLight,
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: '#E8E8E8',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: COLORS.purple,
+    borderRadius: 4,
+  },
+  viewResultsButton: {
+    marginTop: 15,
+    alignItems: 'center',
+  },
+  viewResultsText: {
+    color: COLORS.purple,
+    fontWeight: '600',
+    fontSize: 15,
+  },
+  coachMessage: {
+    fontSize: 15,
+    color: COLORS.text,
+    lineHeight: 22,
+  },
+  bottomSpacer: {
+    height: 20,
   },
 });
