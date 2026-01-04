@@ -431,6 +431,350 @@ async def get_advice(request: GoalAdviceRequest):
     advice = await get_goal_setting_advice(request.device_id)
     return {"advice": advice}
 
+# ==================== SETTINGS & NOTIFICATIONS ====================
+
+class LocationSettings(BaseModel):
+    enabled: bool = False
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    address: Optional[str] = None
+    radius: int = 100  # meters
+
+class HabitReminderSettings(BaseModel):
+    enabled: bool = True
+    use_same_time: bool = True
+    time: str = "08:00"  # Default time for all
+    individual_times: List[str] = ["08:00", "12:00", "18:00"]  # Individual times
+    days: List[int] = [0, 1, 2, 3, 4, 5, 6]  # 0=Monday, 6=Sunday
+    locations: List[LocationSettings] = []  # One per goal
+
+class CheckinReminderSettings(BaseModel):
+    enabled: bool = True
+    time: str = "20:00"
+    days: List[int] = [0, 1, 2, 3, 4, 5, 6]
+
+class AppearanceSettings(BaseModel):
+    color_palette: str = "sonnenuntergang"
+    notification_sound: str = "default"
+
+class UserSettings(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    device_id: str
+    habit_reminders: HabitReminderSettings = HabitReminderSettings()
+    checkin_reminder: CheckinReminderSettings = CheckinReminderSettings()
+    appearance: AppearanceSettings = AppearanceSettings()
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class UserSettingsUpdate(BaseModel):
+    habit_reminders: Optional[HabitReminderSettings] = None
+    checkin_reminder: Optional[CheckinReminderSettings] = None
+    appearance: Optional[AppearanceSettings] = None
+
+class NotificationMessageRequest(BaseModel):
+    device_id: str
+    notification_type: str  # "habit_reminder" or "checkin_reminder"
+    goal_index: Optional[int] = None  # For individual habit reminders
+
+# Color Palettes
+COLOR_PALETTES = {
+    "sonnenuntergang": {
+        "name": "Sonnenuntergang",
+        "primary": "#FF6B6B",
+        "secondary": "#4ECDC4",
+        "accent": "#FFE66D",
+        "background": "#FFF9F0",
+        "card": "#FFFFFF",
+        "text": "#2D3436"
+    },
+    "ozean": {
+        "name": "Ozean",
+        "primary": "#0077B6",
+        "secondary": "#00B4D8",
+        "accent": "#90E0EF",
+        "background": "#CAF0F8",
+        "card": "#FFFFFF",
+        "text": "#03045E"
+    },
+    "wald": {
+        "name": "Wald",
+        "primary": "#2D6A4F",
+        "secondary": "#40916C",
+        "accent": "#95D5B2",
+        "background": "#D8F3DC",
+        "card": "#FFFFFF",
+        "text": "#1B4332"
+    },
+    "nacht": {
+        "name": "Nacht",
+        "primary": "#7B2CBF",
+        "secondary": "#9D4EDD",
+        "accent": "#C77DFF",
+        "background": "#10002B",
+        "card": "#240046",
+        "text": "#E0AAFF"
+    },
+    "lavendel": {
+        "name": "Lavendel",
+        "primary": "#7251B5",
+        "secondary": "#9B7ED9",
+        "accent": "#D4C1EC",
+        "background": "#F5F0FF",
+        "card": "#FFFFFF",
+        "text": "#4A3072"
+    },
+    "koralle": {
+        "name": "Koralle",
+        "primary": "#FF7F50",
+        "secondary": "#FF6B6B",
+        "accent": "#FFB4A2",
+        "background": "#FFF5F3",
+        "card": "#FFFFFF",
+        "text": "#8B4513"
+    },
+    "minze": {
+        "name": "Minze",
+        "primary": "#00A896",
+        "secondary": "#02C39A",
+        "accent": "#80ED99",
+        "background": "#E8FFF5",
+        "card": "#FFFFFF",
+        "text": "#004E45"
+    },
+    "monochrom_grau": {
+        "name": "Elegantes Grau",
+        "primary": "#4A4A4A",
+        "secondary": "#6B6B6B",
+        "accent": "#9E9E9E",
+        "background": "#F5F5F5",
+        "card": "#FFFFFF",
+        "text": "#2C2C2C"
+    },
+    "monochrom_blau": {
+        "name": "Tiefes Blau",
+        "primary": "#1A365D",
+        "secondary": "#2C5282",
+        "accent": "#4299E1",
+        "background": "#EBF8FF",
+        "card": "#FFFFFF",
+        "text": "#1A202C"
+    },
+    "regenbogen": {
+        "name": "Regenbogen",
+        "primary": "#FF6B6B",
+        "secondary": "#4ECDC4",
+        "accent": "#FFE66D",
+        "background": "#FFF0F5",
+        "card": "#FFFFFF",
+        "text": "#2D3436",
+        "extra": ["#A78BFA", "#F472B6", "#34D399"]
+    },
+    "fruehling": {
+        "name": "Fruehling",
+        "primary": "#F472B6",
+        "secondary": "#A78BFA",
+        "accent": "#FBBF24",
+        "background": "#FDF2F8",
+        "card": "#FFFFFF",
+        "text": "#831843"
+    }
+}
+
+@api_router.get("/settings/{device_id}")
+async def get_settings(device_id: str):
+    settings = await db.user_settings.find_one({"device_id": device_id})
+    
+    if not settings:
+        # Return default settings
+        default = UserSettings(device_id=device_id)
+        return serialize_doc(default.dict())
+    
+    return serialize_doc(settings)
+
+@api_router.post("/settings/{device_id}")
+async def update_settings(device_id: str, update: UserSettingsUpdate):
+    existing = await db.user_settings.find_one({"device_id": device_id})
+    
+    if existing:
+        update_data = {"updated_at": datetime.utcnow()}
+        if update.habit_reminders:
+            update_data["habit_reminders"] = update.habit_reminders.dict()
+        if update.checkin_reminder:
+            update_data["checkin_reminder"] = update.checkin_reminder.dict()
+        if update.appearance:
+            update_data["appearance"] = update.appearance.dict()
+        
+        await db.user_settings.update_one(
+            {"_id": existing["_id"]},
+            {"$set": update_data}
+        )
+        updated = await db.user_settings.find_one({"_id": existing["_id"]})
+        return serialize_doc(updated)
+    else:
+        new_settings = UserSettings(device_id=device_id)
+        if update.habit_reminders:
+            new_settings.habit_reminders = update.habit_reminders
+        if update.checkin_reminder:
+            new_settings.checkin_reminder = update.checkin_reminder
+        if update.appearance:
+            new_settings.appearance = update.appearance
+        
+        await db.user_settings.insert_one(new_settings.dict())
+        return serialize_doc(new_settings.dict())
+
+@api_router.get("/color-palettes")
+async def get_color_palettes():
+    return {"palettes": COLOR_PALETTES}
+
+# Generate personalized notification message
+async def generate_notification_message(device_id: str, notification_type: str, goal_index: Optional[int] = None) -> str:
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            return get_fallback_notification(notification_type)
+        
+        # Get user's goals and progress
+        week_start = get_week_start()
+        goals_doc = await db.weekly_goals.find_one({
+            "device_id": device_id,
+            "week_start": week_start
+        })
+        goals = goals_doc["goals"] if goals_doc else []
+        
+        # Get this week's check-ins
+        checkins = await db.daily_checkins.find({
+            "device_id": device_id,
+            "date": {"$gte": week_start}
+        }).to_list(7)
+        
+        # Calculate progress
+        total_days = len(checkins)
+        habit_success = [0, 0, 0]
+        for checkin in checkins:
+            habits = checkin.get("habits_completed", "nnn").lower()
+            for i, h in enumerate(habits[:3]):
+                if h == 'y':
+                    habit_success[i] += 1
+        
+        success_rates = [(count / max(total_days, 1)) * 100 for count in habit_success]
+        overall_success = sum(success_rates) / 3 if success_rates else 0
+        
+        # Build context for AI
+        if notification_type == "habit_reminder":
+            if goal_index is not None and goal_index < len(goals):
+                specific_goal = goals[goal_index]
+                specific_rate = success_rates[goal_index] if goal_index < len(success_rates) else 0
+                context = f"Erinnerung an spezifische Gewohnheit: '{specific_goal}' (Erfolgsrate diese Woche: {specific_rate:.0f}%)"
+            else:
+                context = f"Erinnerung an alle 3 Gewohnheiten. Gesamterfolg diese Woche: {overall_success:.0f}%"
+        else:
+            context = f"Erinnerung an den taeglichen Check-In. Bereits {total_days} von 7 Tagen erfasst. Gesamterfolg: {overall_success:.0f}%"
+        
+        goals_text = "\n".join([f"- {g}" for g in goals]) if goals else "Keine Ziele gesetzt"
+        
+        performance = "sehr gut" if overall_success >= 80 else \
+                     "gut" if overall_success >= 60 else \
+                     "okay" if overall_success >= 40 else "ausbaufaehig"
+        
+        system_message = """Du bist ein warmherziger, persoenlicher Gewohnheits-Coach.
+Schreibe SEHR KURZE Push-Benachrichtigungen (max 1-2 Saetze, unter 100 Zeichen wenn moeglich).
+Sei ermutigend und persoenlich. Verwende gelegentlich ein Emoji.
+Variiere stark zwischen:
+- Motivierenden Nachrichten
+- Kurzen weisen Zitaten
+- Persoenlichen Ermutigungen
+- Sanften Erinnerungen
+Beziehe dich auf den Fortschritt des Nutzers."""
+
+        user_prompt = f"""Erstelle eine kurze Push-Benachrichtigung.
+
+Kontext: {context}
+Ziele des Nutzers:
+{goals_text}
+Bisherige Leistung: {performance}
+
+Schreibe NUR die Benachrichtigung, nichts anderes. Max 100 Zeichen."""
+
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"notification-{device_id}-{datetime.utcnow().isoformat()}",
+            system_message=system_message
+        ).with_model("openai", "gpt-4o")
+        
+        response = await chat.send_message(UserMessage(text=user_prompt))
+        return response.strip()
+        
+    except Exception as e:
+        logger.error(f"Notification generation error: {e}")
+        return get_fallback_notification(notification_type)
+
+def get_fallback_notification(notification_type: str) -> str:
+    import random
+    if notification_type == "habit_reminder":
+        messages = [
+            "Zeit fuer deine Tiny Habits! Du schaffst das!",
+            "Kleine Schritte, grosse Wirkung. Los geht's!",
+            "Deine Gewohnheiten warten auf dich!",
+            "Jetzt ist der perfekte Moment!",
+            "Ein kleiner Schritt fuer dich, ein grosser fuer deine Ziele!"
+        ]
+    else:
+        messages = [
+            "Zeit fuer deinen Check-In!",
+            "Wie lief dein Tag? Check jetzt ein!",
+            "Vergiss nicht einzuchecken!",
+            "Dein Coach wartet auf deinen Tagesbericht!",
+            "Noch schnell einchecken vor dem Schlafengehen?"
+        ]
+    return random.choice(messages)
+
+@api_router.post("/notification-message")
+async def get_notification_message(request: NotificationMessageRequest):
+    message = await generate_notification_message(
+        request.device_id,
+        request.notification_type,
+        request.goal_index
+    )
+    return {"message": message}
+
+# Batch pre-generate notification messages for the day
+@api_router.post("/pregenerate-notifications/{device_id}")
+async def pregenerate_notifications(device_id: str):
+    messages = {
+        "habit_all": await generate_notification_message(device_id, "habit_reminder"),
+        "habit_0": await generate_notification_message(device_id, "habit_reminder", 0),
+        "habit_1": await generate_notification_message(device_id, "habit_reminder", 1),
+        "habit_2": await generate_notification_message(device_id, "habit_reminder", 2),
+        "checkin": await generate_notification_message(device_id, "checkin_reminder")
+    }
+    
+    # Store in database for quick retrieval
+    await db.notification_cache.update_one(
+        {"device_id": device_id, "date": datetime.utcnow().strftime("%Y-%m-%d")},
+        {"$set": {
+            "messages": messages,
+            "generated_at": datetime.utcnow()
+        }},
+        upsert=True
+    )
+    
+    return {"messages": messages}
+
+@api_router.get("/cached-notifications/{device_id}")
+async def get_cached_notifications(device_id: str):
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    cached = await db.notification_cache.find_one({
+        "device_id": device_id,
+        "date": today
+    })
+    
+    if cached:
+        return {"messages": cached["messages"], "cached": True}
+    
+    # Generate if not cached
+    messages = await pregenerate_notifications(device_id)
+    return {"messages": messages["messages"], "cached": False}
+
 # Include the router in the main app
 app.include_router(api_router)
 
