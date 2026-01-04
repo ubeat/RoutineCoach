@@ -508,6 +508,36 @@ export default function SettingsScreen() {
           <Text style={[styles.title, { color: colors.text }]}>Einstellungen</Text>
         </View>
 
+        {/* Profile Section - Name */}
+        <View style={[styles.section, { backgroundColor: colors.card }]}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="person-circle" size={24} color={colors.primary} />
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Dein Profil</Text>
+          </View>
+          
+          <View style={styles.profileNameContainer}>
+            <Text style={[styles.profileNameLabel, { color: colors.textLight }]}>
+              Wie sollen wir dich nennen?
+            </Text>
+            <View style={styles.profileNameInputRow}>
+              <TextInput
+                style={[styles.profileNameInput, { backgroundColor: colors.background, color: colors.text }]}
+                value={userName}
+                onChangeText={saveUserName}
+                placeholder="Dein Name"
+                placeholderTextColor={colors.textLight}
+                maxLength={20}
+              />
+              <View style={[styles.profileNameIcon, { backgroundColor: colors.primary + '20' }]}>
+                <Text style={styles.profileNameEmoji}>💜</Text>
+              </View>
+            </View>
+            <Text style={[styles.profileNameHint, { color: colors.textLight }]}>
+              Mit diesem Namen wirst du auf der Startseite begruesst
+            </Text>
+          </View>
+        </View>
+
         {/* Habit Reminders Section */}
         <View style={[styles.section, { backgroundColor: colors.card }]}>
           <View style={styles.sectionHeader}>
