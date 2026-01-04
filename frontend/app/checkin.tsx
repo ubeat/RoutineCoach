@@ -33,16 +33,16 @@ const COLORS = {
 };
 
 const MOOD_EMOJIS = [
-  { emoji: '\u{1F62D}', label: 'Sehr traurig' },
-  { emoji: '\u{1F614}', label: 'Traurig' },
-  { emoji: '\u{1F641}', label: 'Nicht gut' },
-  { emoji: '\u{1F615}', label: 'Verwirrt' },
-  { emoji: '\u{1F610}', label: 'Neutral' },
-  { emoji: '\u{1F642}', label: 'Okay' },
-  { emoji: '\u{1F60A}', label: 'Gut' },
-  { emoji: '\u{1F604}', label: 'Sehr gut' },
-  { emoji: '\u{1F929}', label: 'Fantastisch' },
-  { emoji: '\u{1F970}', label: 'Verliebt' },
+  { emoji: '😭', label: 'Sehr traurig' },
+  { emoji: '😔', label: 'Traurig' },
+  { emoji: '🙁', label: 'Nicht gut' },
+  { emoji: '😕', label: 'Verwirrt' },
+  { emoji: '😐', label: 'Neutral' },
+  { emoji: '🙂', label: 'Okay' },
+  { emoji: '😊', label: 'Gut' },
+  { emoji: '😄', label: 'Sehr gut' },
+  { emoji: '🤩', label: 'Fantastisch' },
+  { emoji: '🥰', label: 'Verliebt' },
 ];
 
 export default function CheckinScreen() {
@@ -97,7 +97,7 @@ export default function CheckinScreen() {
 
   const submitCheckin = async () => {
     if (!selectedMoodEmoji) {
-      Alert.alert('Hinweis', 'Bitte w\u00e4hle deine Stimmung aus');
+      Alert.alert('Hinweis', 'Bitte wähle deine Stimmung aus');
       return;
     }
 
@@ -151,7 +151,7 @@ export default function CheckinScreen() {
       <SafeAreaView style={styles.container}>
         <ScrollView style={styles.scrollView}>
           <View style={styles.header}>
-            <Text style={styles.title}>Erledigt! \u2728</Text>
+            <Text style={styles.title}>Erledigt! ✨</Text>
             <Text style={styles.subtitle}>Du hast heute schon eingecheckt</Text>
           </View>
 
@@ -173,7 +173,7 @@ export default function CheckinScreen() {
           )}
 
           <TouchableOpacity style={styles.backButton} onPress={() => router.push('/')}>
-            <Text style={styles.backButtonText}>Zur\u00fcck zur \u00dcbersicht</Text>
+            <Text style={styles.backButtonText}>Zurück zur Übersicht</Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
@@ -188,7 +188,7 @@ export default function CheckinScreen() {
       >
         <ScrollView style={styles.scrollView}>
           <View style={styles.header}>
-            <Text style={styles.title}>T\u00e4glicher Check-In \u{1F4DD}</Text>
+            <Text style={styles.title}>Täglicher Check-In 📝</Text>
             <Text style={styles.subtitle}>Wie lief dein Tag?</Text>
           </View>
 
@@ -232,7 +232,7 @@ export default function CheckinScreen() {
 
           {/* Mood Selection */}
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Wie f\u00fchlst du dich heute?</Text>
+            <Text style={styles.sectionTitle}>Wie fühlst du dich heute?</Text>
             
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.emojiScroll}>
               {MOOD_EMOJIS.map((mood, index) => (
