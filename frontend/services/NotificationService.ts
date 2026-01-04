@@ -27,6 +27,11 @@ let cachedMessages: CachedMessages | null = null;
 
 // Request notification permissions
 export async function requestNotificationPermissions(): Promise<boolean> {
+  if (Platform.OS === 'web') {
+    // Web notifications require different handling
+    return true;
+  }
+  
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
   let finalStatus = existingStatus;
   
@@ -40,16 +45,25 @@ export async function requestNotificationPermissions(): Promise<boolean> {
 
 // Request location permissions
 export async function requestLocationPermissions(): Promise<boolean> {
+  if (Platform.OS === 'web') {
+    return false; // Geolocation works differently on web
+  }
+  
   const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
   
   if (foregroundStatus !== 'granted') {
     return false;
   }
   
-  // Request background location for geofencing
+  // Request background location for geofencing on mobile
   if (Platform.OS !== 'web') {
-    const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
-    return backgroundStatus === 'granted';
+    try {
+      const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+      return backgroundStatus === 'granted';
+    } catch (e) {
+      console.log('Background location not available');
+      return true; // Still allow foreground
+    }
   }
   
   return true;
@@ -115,6 +129,11 @@ export async function scheduleNotification(
   trigger: Notifications.NotificationTriggerInput,
   identifier?: string
 ): Promise<string> {
+  if (Platform.OS === 'web') {
+    console.log('Scheduled notification (web):', { title, body });
+    return 'web-' + Date.now();
+  }
+  
   return await Notifications.scheduleNotificationAsync({
     content: {
       title,
@@ -129,9 +148,14 @@ export async function scheduleNotification(
 // Schedule daily habit reminder
 export async function scheduleHabitReminder(
   time: string, // "HH:MM" format
-  days: number[], // 0=Sunday, 1=Monday, etc.
+  days: number[], // 0=Monday, 1=Tuesday, etc.
   goalIndex?: number // undefined = all goals, 0-2 = specific goal
 ): Promise<string[]> {
+  if (Platform.OS === 'web') {
+    console.log('Habit reminder scheduled (web):', { time, days, goalIndex });
+    return [];
+  }
+  
   const [hours, minutes] = time.split(':').map(Number);
   const identifiers: string[] = [];
   
@@ -139,11 +163,11 @@ export async function scheduleHabitReminder(
   const message = await getCachedMessage(messageType);
   
   for (const day of days) {
-    // Convert our day format (0=Monday) to JS format (0=Sunday)
-    const jsDay = (day + 1) % 7;
+    // Convert our day format (0=Monday) to JS format (1=Sunday, 2=Monday, etc.)
+    const expoDay = day === 6 ? 1 : day + 2; // Convert: 0(Mon)->2, 6(Sun)->1
     
     const trigger: Notifications.WeeklyTriggerInput = {
-      weekday: jsDay + 1, // 1-7 in Expo
+      weekday: expoDay,
       hour: hours,
       minute: minutes,
       repeats: true,
@@ -167,16 +191,21 @@ export async function scheduleCheckinReminder(
   time: string,
   days: number[]
 ): Promise<string[]> {
+  if (Platform.OS === 'web') {
+    console.log('Check-in reminder scheduled (web):', { time, days });
+    return [];
+  }
+  
   const [hours, minutes] = time.split(':').map(Number);
   const identifiers: string[] = [];
   
   const message = await getCachedMessage('checkin');
   
   for (const day of days) {
-    const jsDay = (day + 1) % 7;
+    const expoDay = day === 6 ? 1 : day + 2;
     
     const trigger: Notifications.WeeklyTriggerInput = {
-      weekday: jsDay + 1,
+      weekday: expoDay,
       hour: hours,
       minute: minutes,
       repeats: true,
@@ -196,65 +225,73 @@ export async function scheduleCheckinReminder(
 
 // Cancel all scheduled notifications
 export async function cancelAllNotifications(): Promise<void> {
+  if (Platform.OS === 'web') return;
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
 
 // Cancel specific notification
 export async function cancelNotification(identifier: string): Promise<void> {
+  if (Platform.OS === 'web') return;
   await Notifications.cancelScheduledNotificationAsync(identifier);
 }
 
-// Setup geofencing for a location
+// Setup geofencing for a location (simplified - stores in AsyncStorage)
 export async function setupGeofence(
   goalIndex: number,
   latitude: number,
   longitude: number,
   radius: number = 100
 ): Promise<void> {
-  if (Platform.OS === 'web') {
-    console.log('Geofencing not available on web');
-    return;
-  }
-  
-  const hasPermission = await requestLocationPermissions();
-  if (!hasPermission) {
-    throw new Error('Location permission required for geofencing');
-  }
-  
-  // Define the geofence region
-  const region = {
-    identifier: `goal_${goalIndex}`,
+  // Store geofence data in AsyncStorage
+  // On mobile devices with Expo Go, full geofencing requires a custom dev build
+  // This stores the configuration for later use
+  const geofences = JSON.parse(await AsyncStorage.getItem('geofences') || '{}');
+  geofences[`goal_${goalIndex}`] = {
     latitude,
     longitude,
     radius,
-    notifyOnEnter: true,
-    notifyOnExit: false,
+    enabled: true,
   };
-  
-  // Start geofencing
-  await Location.startGeofencingAsync(GEOFENCE_TASK_NAME, [region]);
+  await AsyncStorage.setItem('geofences', JSON.stringify(geofences));
+  console.log(`Geofence set for goal ${goalIndex}:`, { latitude, longitude, radius });
 }
 
 // Remove geofence for a goal
 export async function removeGeofence(goalIndex: number): Promise<void> {
-  if (Platform.OS === 'web') return;
-  
-  try {
-    const regions = await Location.getGeofencingAsync(GEOFENCE_TASK_NAME);
-    const updatedRegions = regions.filter(r => r.identifier !== `goal_${goalIndex}`);
-    
-    if (updatedRegions.length > 0) {
-      await Location.startGeofencingAsync(GEOFENCE_TASK_NAME, updatedRegions);
-    } else {
-      await Location.stopGeofencingAsync(GEOFENCE_TASK_NAME);
-    }
-  } catch (error) {
-    console.log('No active geofences to remove');
-  }
+  const geofences = JSON.parse(await AsyncStorage.getItem('geofences') || '{}');
+  delete geofences[`goal_${goalIndex}`];
+  await AsyncStorage.setItem('geofences', JSON.stringify(geofences));
 }
 
 // Get current location
 export async function getCurrentLocation(): Promise<Location.LocationObject | null> {
+  if (Platform.OS === 'web') {
+    // Use browser geolocation API
+    return new Promise((resolve) => {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            resolve({
+              coords: {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                altitude: position.coords.altitude,
+                accuracy: position.coords.accuracy,
+                altitudeAccuracy: position.coords.altitudeAccuracy,
+                heading: position.coords.heading,
+                speed: position.coords.speed,
+              },
+              timestamp: position.timestamp,
+            } as Location.LocationObject);
+          },
+          () => resolve(null)
+        );
+      } else {
+        resolve(null);
+      }
+    });
+  }
+  
   const hasPermission = await requestLocationPermissions();
   if (!hasPermission) return null;
   
@@ -268,6 +305,10 @@ export async function getAddressFromCoordinates(
   latitude: number,
   longitude: number
 ): Promise<string> {
+  if (Platform.OS === 'web') {
+    return `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+  }
+  
   try {
     const results = await Location.reverseGeocodeAsync({ latitude, longitude });
     if (results.length > 0) {
@@ -297,36 +338,4 @@ export async function initializeNotifications(): Promise<void> {
       lightColor: '#FF6B6B',
     });
   }
-}
-
-// Define the geofence task
-if (Platform.OS !== 'web') {
-  TaskManager.defineTask(GEOFENCE_TASK_NAME, async ({ data, error }) => {
-    if (error) {
-      console.error('Geofence task error:', error);
-      return;
-    }
-    
-    if (data) {
-      const { eventType, region } = data as { eventType: number; region: { identifier: string } };
-      
-      // eventType 1 = Enter, 2 = Exit
-      if (eventType === 1) {
-        const goalIndex = parseInt(region.identifier.replace('goal_', ''));
-        const message = await getCachedMessage(`habit_${goalIndex}` as const);
-        
-        // Add human-like delay (1-2 seconds)
-        await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
-        
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: `Du bist angekommen!`,
-            body: message,
-            sound: true,
-          },
-          trigger: null, // Immediate
-        });
-      }
-    }
-  });
 }
