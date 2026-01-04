@@ -61,12 +61,17 @@ export default function ProfileScreen() {
   const [partnerInfo, setPartnerInfo] = useState<any>(null);
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [inviteCode, setInviteCode] = useState('');
+  const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [settings, setSettings] = useState<any>(null);
   const [userName, setUserName] = useState<string>('');
 
   const colors = settings?.appearance?.color_palette 
     ? (COLOR_PALETTES[settings.appearance.color_palette] || COLOR_PALETTES.sonnenuntergang)
     : COLOR_PALETTES.sonnenuntergang;
+
+  // Einladungstext für alle Methoden
+  const getInviteMessage = (code: string) => 
+    `💜 Lass uns gemeinsam gute Gewohnheiten aufbauen! Werde meine Wegbegleiterin bei "Schritt fuer Schritt". Dein Code: ${code}`;
 
   const fetchData = useCallback(async () => {
     try {
