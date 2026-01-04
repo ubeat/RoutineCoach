@@ -421,7 +421,7 @@ async def get_weekly_summary(device_id: str):
         "success_rates": success_rates,
         "overall_success": overall_success,
         "average_mood": round(avg_mood, 1),
-        "checkins": checkins,
+        "checkins": serialize_doc(checkins),
         "is_week_complete": total_days >= 7
     }
 
