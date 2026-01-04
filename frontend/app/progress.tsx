@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
-import Svg, { Polygon, Circle, Line, Text as SvgText, G } from 'react-native-svg';
+import Svg, { Polygon, Circle, Line, Text as SvgText } from 'react-native-svg';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -35,13 +35,11 @@ const COLORS = {
 
 const WEEKDAYS_SHORT = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
-// Radar/Spider Chart Component
 const RadarChart = ({ data, labels, size = 250 }: { data: number[], labels: string[], size?: number }) => {
   const center = size / 2;
   const radius = size / 2 - 40;
   const angleStep = (2 * Math.PI) / labels.length;
   
-  // Calculate points for the data polygon
   const getPoint = (value: number, index: number) => {
     const angle = index * angleStep - Math.PI / 2;
     const r = (value / 100) * radius;
@@ -51,18 +49,15 @@ const RadarChart = ({ data, labels, size = 250 }: { data: number[], labels: stri
     };
   };
 
-  // Generate polygon points string
   const polygonPoints = data.map((value, index) => {
     const point = getPoint(value, index);
     return `${point.x},${point.y}`;
   }).join(' ');
 
-  // Generate grid lines (concentric hexagons)
   const gridLevels = [20, 40, 60, 80, 100];
   
   return (
     <Svg width={size} height={size}>
-      {/* Background grid */}
       {gridLevels.map((level, levelIndex) => {
         const gridPoints = labels.map((_, index) => {
           const angle = index * angleStep - Math.PI / 2;
@@ -81,7 +76,6 @@ const RadarChart = ({ data, labels, size = 250 }: { data: number[], labels: stri
         );
       })}
       
-      {/* Axis lines */}
       {labels.map((_, index) => {
         const angle = index * angleStep - Math.PI / 2;
         return (
@@ -97,7 +91,6 @@ const RadarChart = ({ data, labels, size = 250 }: { data: number[], labels: stri
         );
       })}
       
-      {/* Data polygon */}
       <Polygon
         points={polygonPoints}
         fill={`${COLORS.primary}40`}
@@ -105,7 +98,6 @@ const RadarChart = ({ data, labels, size = 250 }: { data: number[], labels: stri
         strokeWidth="2"
       />
       
-      {/* Data points */}
       {data.map((value, index) => {
         const point = getPoint(value, index);
         return (
@@ -119,7 +111,6 @@ const RadarChart = ({ data, labels, size = 250 }: { data: number[], labels: stri
         );
       })}
       
-      {/* Labels */}
       {labels.map((label, index) => {
         const angle = index * angleStep - Math.PI / 2;
         const labelRadius = radius + 25;
@@ -191,12 +182,10 @@ export default function ProgressScreen() {
   const isWeekComplete = summary?.is_week_complete || false;
   const checkins = summary?.checkins || [];
 
-  // Prepare radar chart data
   const radarLabels = goals.length > 0 
-    ? goals.map((g: string, i: number) => `Ziel ${i + 1}`)
+    ? goals.map((_g: string, i: number) => `Ziel ${i + 1}`)
     : ['Ziel 1', 'Ziel 2', 'Ziel 3'];
 
-  // Calculate mood over days for display
   const moodData = checkins.map((c: any) => c.mood_scale || 5);
 
   return (
@@ -208,7 +197,7 @@ export default function ProgressScreen() {
         }
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Wochenfortschritt \u{1F4CA}</Text>
+          <Text style={styles.title}>Wochenfortschritt</Text>
           <Text style={styles.subtitle}>{daysTracked} von 7 Tagen erfasst</Text>
         </View>
 
@@ -217,7 +206,7 @@ export default function ProgressScreen() {
             <Ionicons name="analytics-outline" size={80} color={COLORS.textLight} />
             <Text style={styles.emptyTitle}>Noch keine Daten</Text>
             <Text style={styles.emptyText}>
-              Starte mit dem t\u00e4glichen Check-In, um deinen Fortschritt zu sehen.
+              Starte mit dem taeglichen Check-In, um deinen Fortschritt zu sehen.
             </Text>
             <TouchableOpacity style={styles.startButton} onPress={() => router.push('/checkin')}>
               <Text style={styles.startButtonText}>Jetzt starten</Text>
@@ -225,7 +214,6 @@ export default function ProgressScreen() {
           </View>
         ) : (
           <>
-            {/* Radar Chart */}
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Erfolgsrate pro Gewohnheit</Text>
               <View style={styles.chartContainer}>
@@ -253,7 +241,6 @@ export default function ProgressScreen() {
               </View>
             </View>
 
-            {/* Overall Stats */}
             <View style={styles.statsRow}>
               <View style={[styles.statCard, { backgroundColor: '#E8F5E9' }]}>
                 <Ionicons name="trophy" size={32} color={COLORS.success} />
@@ -261,15 +248,14 @@ export default function ProgressScreen() {
                 <Text style={styles.statLabel}>Gesamterfolg</Text>
               </View>
               <View style={[styles.statCard, { backgroundColor: '#FFF3E0' }]}>
-                <Text style={styles.moodEmoji}>\u{1F60A}</Text>
+                <Text style={styles.moodEmoji}>😊</Text>
                 <Text style={styles.statValue}>{avgMood.toFixed(1)}</Text>
-                <Text style={styles.statLabel}>\u00d8 Stimmung</Text>
+                <Text style={styles.statLabel}>Durchschn. Stimmung</Text>
               </View>
             </View>
 
-            {/* Daily Overview */}
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>Tages\u00fcbersicht</Text>
+              <Text style={styles.cardTitle}>Tagesuebersicht</Text>
               <View style={styles.daysGrid}>
                 {WEEKDAYS_SHORT.map((day, index) => {
                   const checkin = checkins[index];
@@ -303,7 +289,6 @@ export default function ProgressScreen() {
               </View>
             </View>
 
-            {/* Week Complete Message */}
             {isWeekComplete && (
               <View style={[
                 styles.card,
@@ -315,12 +300,12 @@ export default function ProgressScreen() {
                   color={overallSuccess >= 70 ? COLORS.success : COLORS.warning} 
                 />
                 <Text style={styles.weekCompleteTitle}>
-                  {overallSuccess >= 70 ? 'Fantastische Woche! \u{1F389}' : 'Woche beendet'}
+                  {overallSuccess >= 70 ? 'Fantastische Woche!' : 'Woche beendet'}
                 </Text>
                 <Text style={styles.weekCompleteText}>
                   {overallSuccess >= 70 
-                    ? 'Du hast deine Ziele gro\u00dfartig erreicht! Weiter so!'
-                    : 'Kein Problem! Jede Woche ist ein neuer Anfang. Vielleicht w\u00e4hle n\u00e4chste Woche noch kleinere Gewohnheiten?'
+                    ? 'Du hast deine Ziele grossartig erreicht! Weiter so!'
+                    : 'Kein Problem! Jede Woche ist ein neuer Anfang. Vielleicht waehle naechste Woche noch kleinere Gewohnheiten?'
                   }
                 </Text>
                 <TouchableOpacity 
@@ -332,7 +317,6 @@ export default function ProgressScreen() {
               </View>
             )}
 
-            {/* Mood Trend */}
             {moodData.length > 0 && (
               <View style={styles.card}>
                 <Text style={styles.cardTitle}>Stimmungsverlauf</Text>
