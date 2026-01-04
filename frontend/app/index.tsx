@@ -235,6 +235,54 @@ export default function HomeScreen() {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
+
+      {/* Welcome Modal for first-time users */}
+      <Modal
+        transparent
+        animationType="fade"
+        visible={showWelcomeModal}
+        onRequestClose={() => {}}
+      >
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
+          <View style={styles.welcomeModalContent}>
+            <Text style={styles.welcomeEmoji}>💜</Text>
+            <Text style={styles.welcomeTitle}>Willkommen bei</Text>
+            <Text style={styles.welcomeAppName}>Schritt für Schritt</Text>
+            <Text style={styles.welcomeSubtitle}>Dein Gewohnheits-Tracker mit Herz</Text>
+            
+            <View style={styles.welcomeDivider} />
+            
+            <Text style={styles.welcomeQuestion}>Wie darf ich dich nennen?</Text>
+            <TextInput
+              style={styles.nameInput}
+              placeholder="Dein Name"
+              placeholderTextColor={COLORS.textLight}
+              value={nameInput}
+              onChangeText={setNameInput}
+              autoFocus
+              maxLength={20}
+            />
+            
+            <TouchableOpacity
+              style={[
+                styles.welcomeButton,
+                nameInput.trim().length < 1 && styles.welcomeButtonDisabled
+              ]}
+              onPress={saveUserName}
+              disabled={nameInput.trim().length < 1}
+            >
+              <Text style={styles.welcomeButtonText}>Los geht's! 🚀</Text>
+            </TouchableOpacity>
+            
+            <Text style={styles.welcomeNote}>
+              Du kannst deinen Namen jederzeit in den Einstellungen aendern.
+            </Text>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </SafeAreaView>
   );
 }
