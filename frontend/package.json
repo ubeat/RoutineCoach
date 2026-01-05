@@ -44,7 +44,6 @@
     "react-native-dotenv": "^3.4.11",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-gifted-charts": "^1.4.70",
-    "react-native-maps": "^1.26.20",
     "react-native-qrcode-svg": "^6.3.21",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
