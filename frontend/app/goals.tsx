@@ -160,13 +160,20 @@ export default function GoalsScreen() {
   };
 
   const saveGoals = async () => {
-    // Validate and format goals
-    const formattedGoals = goals.map((goal) => {
-      if (goal.wenn && goal.dann) {
-        return `Wenn ${goal.wenn}, dann ${goal.dann}`;
-      }
-      return goal.dann.trim();
-    });
+    let formattedGoals: string[];
+    
+    if (goalMode === 'wenn-dann') {
+      // Format wenn-dann goals
+      formattedGoals = wennDannGoals.map((goal) => {
+        if (goal.wenn && goal.dann) {
+          return `Wenn ${goal.wenn}, dann ${goal.dann}`;
+        }
+        return goal.dann.trim();
+      });
+    } else {
+      // Simple goals
+      formattedGoals = simpleGoals.map(g => g.trim());
+    }
 
     if (formattedGoals.some(g => g === '')) {
       Alert.alert(
