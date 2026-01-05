@@ -1721,4 +1721,165 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontStyle: 'italic',
   },
+  // Location styles
+  locationSetContainer: {
+    marginTop: 10,
+  },
+  locationSetInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  locationSetText: {
+    flex: 1,
+    fontSize: 13,
+  },
+  locationButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  locationEditButton: {
+    padding: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  locationRemoveButton: {
+    padding: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  // Location Modal
+  locationModalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  locationModalContent: {
+    flex: 1,
+    marginTop: 60,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: 'hidden',
+  },
+  locationModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+  },
+  locationModalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  locationModalConfirm: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginBottom: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+  },
+  searchResults: {
+    marginHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 10,
+    maxHeight: 150,
+  },
+  searchResultItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    gap: 10,
+    borderBottomWidth: 1,
+  },
+  searchResultText: {
+    flex: 1,
+    fontSize: 14,
+  },
+  mapContainer: {
+    flex: 1,
+    marginHorizontal: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 10,
+  },
+  map: {
+    width: '100%',
+    height: '100%',
+    minHeight: 250,
+  },
+  currentLocationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 12,
+    gap: 8,
+    marginBottom: 10,
+  },
+  currentLocationText: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  selectedLocationBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    padding: 14,
+    borderRadius: 12,
+    gap: 10,
+    marginBottom: 20,
+  },
+  selectedLocationText: {
+    flex: 1,
+    fontSize: 14,
+  },
+  // Sound Modal
+  soundModalContent: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+  },
+  soundModalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  soundOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 10,
+    gap: 12,
+  },
+  soundOptionText: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  soundModalClose: {
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  soundModalCloseText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
