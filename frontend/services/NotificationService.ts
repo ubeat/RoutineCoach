@@ -1,10 +1,14 @@
 import * as Notifications from 'expo-notifications';
 import * as Location from 'expo-location';
+import * as TaskManager from 'expo-task-manager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Platform } from 'react-native';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
+// Task name for geofencing
+const GEOFENCE_TASK = 'geofence-location-task';
 
 // Configure notification behavior
 Notifications.setNotificationHandler({
@@ -23,12 +27,30 @@ interface CachedMessages {
   checkin: string;
 }
 
+interface GeofenceData {
+  latitude: number;
+  longitude: number;
+  radius: number;
+  enabled: boolean;
+  locationName: string;
+  goalName: string;
+}
+
+// Available notification sounds
+export const NOTIFICATION_SOUNDS = [
+  { id: 'default', name: 'Standard', icon: 'notifications' },
+  { id: 'gentle', name: 'Sanft', icon: 'water' },
+  { id: 'cheerful', name: 'Froehlich', icon: 'happy' },
+  { id: 'energetic', name: 'Energisch', icon: 'flash' },
+  { id: 'calm', name: 'Ruhig', icon: 'leaf' },
+  { id: 'bell', name: 'Glocke', icon: 'notifications-circle' },
+];
+
 let cachedMessages: CachedMessages | null = null;
 
 // Request notification permissions
 export async function requestNotificationPermissions(): Promise<boolean> {
   if (Platform.OS === 'web') {
-    // Web notifications require different handling
     return true;
   }
   
@@ -43,30 +65,30 @@ export async function requestNotificationPermissions(): Promise<boolean> {
   return finalStatus === 'granted';
 }
 
-// Request location permissions
-export async function requestLocationPermissions(): Promise<boolean> {
+// Request location permissions (foreground + background for geofencing)
+export async function requestLocationPermissions(): Promise<{ foreground: boolean; background: boolean }> {
   if (Platform.OS === 'web') {
-    return false; // Geolocation works differently on web
+    return { foreground: true, background: false };
   }
   
+  // Request foreground first
   const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
+  const foregroundGranted = foregroundStatus === 'granted';
   
-  if (foregroundStatus !== 'granted') {
-    return false;
+  if (!foregroundGranted) {
+    return { foreground: false, background: false };
   }
   
-  // Request background location for geofencing on mobile
-  if (Platform.OS !== 'web') {
-    try {
-      const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
-      return backgroundStatus === 'granted';
-    } catch (e) {
-      console.log('Background location not available');
-      return true; // Still allow foreground
-    }
+  // Request background for geofencing
+  let backgroundGranted = false;
+  try {
+    const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+    backgroundGranted = backgroundStatus === 'granted';
+  } catch (e) {
+    console.log('Background location not available on this device');
   }
   
-  return true;
+  return { foreground: foregroundGranted, background: backgroundGranted };
 }
 
 // Pre-generate notification messages for the day
@@ -78,7 +100,6 @@ export async function pregenerateNotifications(): Promise<CachedMessages | null>
     const response = await axios.post(`${API_URL}/api/pregenerate-notifications/${deviceId}`);
     cachedMessages = response.data.messages;
     
-    // Store locally for offline access
     await AsyncStorage.setItem('cached_notifications', JSON.stringify(cachedMessages));
     await AsyncStorage.setItem('cached_notifications_date', new Date().toDateString());
     
@@ -86,7 +107,6 @@ export async function pregenerateNotifications(): Promise<CachedMessages | null>
   } catch (error) {
     console.error('Error pregenerating notifications:', error);
     
-    // Try to load from local cache
     const cached = await AsyncStorage.getItem('cached_notifications');
     if (cached) {
       cachedMessages = JSON.parse(cached);
@@ -98,7 +118,6 @@ export async function pregenerateNotifications(): Promise<CachedMessages | null>
 
 // Get cached message with fallback
 export async function getCachedMessage(type: 'habit_all' | 'habit_0' | 'habit_1' | 'habit_2' | 'checkin'): Promise<string> {
-  // Check if we need to regenerate (new day)
   const cachedDate = await AsyncStorage.getItem('cached_notifications_date');
   const today = new Date().toDateString();
   
@@ -110,36 +129,41 @@ export async function getCachedMessage(type: 'habit_all' | 'habit_0' | 'habit_1'
     return cachedMessages[type];
   }
   
-  // Fallback messages
   const fallbacks = {
-    habit_all: "Zeit fuer deine Tiny Habits! Du schaffst das!",
-    habit_0: "Denk an deine erste Gewohnheit!",
-    habit_1: "Zeit fuer Gewohnheit Nr. 2!",
-    habit_2: "Vergiss nicht deine dritte Gewohnheit!",
-    checkin: "Zeit fuer deinen Check-In!"
+    habit_all: "Zeit fuer deine Gewohnheiten! Du schaffst das! 💪",
+    habit_0: "Denk an deine erste Gewohnheit! 🌟",
+    habit_1: "Zeit fuer Gewohnheit Nr. 2! 💜",
+    habit_2: "Vergiss nicht deine dritte Gewohnheit! ✨",
+    checkin: "Zeit fuer deinen Check-In! Wie war dein Tag? 📊"
   };
   
   return fallbacks[type];
 }
 
-// Schedule a local notification
+// Schedule a local notification with sound
 export async function scheduleNotification(
   title: string,
   body: string,
   trigger: Notifications.NotificationTriggerInput,
-  identifier?: string
+  identifier?: string,
+  soundId?: string
 ): Promise<string> {
   if (Platform.OS === 'web') {
     console.log('Scheduled notification (web):', { title, body });
     return 'web-' + Date.now();
   }
   
+  // Note: Custom sounds require the sound file to be in the app bundle
+  // For now we use the default sound, but the soundId is stored for future use
+  const content: Notifications.NotificationContentInput = {
+    title,
+    body,
+    sound: true, // Uses default sound
+    data: { soundId: soundId || 'default' },
+  };
+  
   return await Notifications.scheduleNotificationAsync({
-    content: {
-      title,
-      body,
-      sound: true,
-    },
+    content,
     trigger,
     identifier,
   });
@@ -147,9 +171,10 @@ export async function scheduleNotification(
 
 // Schedule daily habit reminder
 export async function scheduleHabitReminder(
-  time: string, // "HH:MM" format
-  days: number[], // 0=Monday, 1=Tuesday, etc.
-  goalIndex?: number // undefined = all goals, 0-2 = specific goal
+  time: string,
+  days: number[],
+  goalIndex?: number,
+  soundId?: string
 ): Promise<string[]> {
   if (Platform.OS === 'web') {
     console.log('Habit reminder scheduled (web):', { time, days, goalIndex });
@@ -163,8 +188,7 @@ export async function scheduleHabitReminder(
   const message = await getCachedMessage(messageType);
   
   for (const day of days) {
-    // Convert our day format (0=Monday) to JS format (1=Sunday, 2=Monday, etc.)
-    const expoDay = day === 6 ? 1 : day + 2; // Convert: 0(Mon)->2, 6(Sun)->1
+    const expoDay = day === 6 ? 1 : day + 2;
     
     const trigger: Notifications.WeeklyTriggerInput = {
       weekday: expoDay,
@@ -175,10 +199,11 @@ export async function scheduleHabitReminder(
     
     const goalText = goalIndex !== undefined ? ` (Ziel ${goalIndex + 1})` : '';
     const id = await scheduleNotification(
-      `Tiny Habits Erinnerung${goalText}`,
+      `Schritt für Schritt${goalText}`,
       message,
       trigger,
-      `habit_${goalIndex ?? 'all'}_day_${day}`
+      `habit_${goalIndex ?? 'all'}_day_${day}`,
+      soundId
     );
     identifiers.push(id);
   }
@@ -189,7 +214,8 @@ export async function scheduleHabitReminder(
 // Schedule daily check-in reminder
 export async function scheduleCheckinReminder(
   time: string,
-  days: number[]
+  days: number[],
+  soundId?: string
 ): Promise<string[]> {
   if (Platform.OS === 'web') {
     console.log('Check-in reminder scheduled (web):', { time, days });
@@ -212,10 +238,11 @@ export async function scheduleCheckinReminder(
     };
     
     const id = await scheduleNotification(
-      "Check-In Erinnerung",
+      "Check-In Erinnerung 📊",
       message,
       trigger,
-      `checkin_day_${day}`
+      `checkin_day_${day}`,
+      soundId
     );
     identifiers.push(id);
   }
@@ -235,38 +262,144 @@ export async function cancelNotification(identifier: string): Promise<void> {
   await Notifications.cancelScheduledNotificationAsync(identifier);
 }
 
-// Setup geofencing for a location (simplified - stores in AsyncStorage)
+// ==================== GEOFENCING ====================
+
+// Define the background task for geofencing
+TaskManager.defineTask(GEOFENCE_TASK, async ({ data, error }) => {
+  if (error) {
+    console.error('Geofence task error:', error);
+    return;
+  }
+  
+  if (data) {
+    const { eventType, region } = data as { 
+      eventType: Location.GeofencingEventType; 
+      region: Location.LocationRegion;
+    };
+    
+    // Only trigger on ENTER
+    if (eventType === Location.GeofencingEventType.Enter) {
+      // Get stored geofence info
+      const geofences = await getStoredGeofences();
+      const geofenceData = Object.values(geofences).find(
+        (g: any) => g.identifier === region.identifier
+      ) as GeofenceData | undefined;
+      
+      if (geofenceData) {
+        // Send notification
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: `Du bist bei: ${geofenceData.locationName}`,
+            body: `Zeit für: ${geofenceData.goalName}! 💪`,
+            sound: true,
+          },
+          trigger: null, // Immediate
+        });
+      }
+    }
+  }
+});
+
+// Get stored geofences
+export async function getStoredGeofences(): Promise<Record<string, GeofenceData>> {
+  const stored = await AsyncStorage.getItem('geofences');
+  return stored ? JSON.parse(stored) : {};
+}
+
+// Setup geofencing for a location
 export async function setupGeofence(
   goalIndex: number,
   latitude: number,
   longitude: number,
+  locationName: string,
+  goalName: string,
   radius: number = 100
-): Promise<void> {
-  // Store geofence data in AsyncStorage
-  // On mobile devices with Expo Go, full geofencing requires a custom dev build
-  // This stores the configuration for later use
-  const geofences = JSON.parse(await AsyncStorage.getItem('geofences') || '{}');
-  geofences[`goal_${goalIndex}`] = {
+): Promise<boolean> {
+  const identifier = `goal_${goalIndex}`;
+  
+  // Store geofence data
+  const geofences = await getStoredGeofences();
+  geofences[identifier] = {
     latitude,
     longitude,
     radius,
     enabled: true,
+    locationName,
+    goalName,
   };
   await AsyncStorage.setItem('geofences', JSON.stringify(geofences));
-  console.log(`Geofence set for goal ${goalIndex}:`, { latitude, longitude, radius });
+  
+  // On web, just store the data (no actual geofencing)
+  if (Platform.OS === 'web') {
+    console.log(`Geofence stored for goal ${goalIndex}:`, { latitude, longitude, locationName });
+    return true;
+  }
+  
+  // Check for background permission
+  const permissions = await requestLocationPermissions();
+  if (!permissions.background) {
+    console.log('Background location not granted - geofencing will not work in background');
+    // Still store the data, but warn user
+    return false;
+  }
+  
+  try {
+    // Start geofencing
+    const regions: Location.LocationRegion[] = Object.entries(geofences)
+      .filter(([_, data]) => (data as GeofenceData).enabled)
+      .map(([id, data]) => ({
+        identifier: id,
+        latitude: (data as GeofenceData).latitude,
+        longitude: (data as GeofenceData).longitude,
+        radius: (data as GeofenceData).radius,
+        notifyOnEnter: true,
+        notifyOnExit: false,
+      }));
+    
+    await Location.startGeofencingAsync(GEOFENCE_TASK, regions);
+    console.log('Geofencing started with regions:', regions);
+    return true;
+  } catch (error) {
+    console.error('Error starting geofencing:', error);
+    return false;
+  }
 }
 
 // Remove geofence for a goal
 export async function removeGeofence(goalIndex: number): Promise<void> {
-  const geofences = JSON.parse(await AsyncStorage.getItem('geofences') || '{}');
-  delete geofences[`goal_${goalIndex}`];
+  const identifier = `goal_${goalIndex}`;
+  const geofences = await getStoredGeofences();
+  delete geofences[identifier];
   await AsyncStorage.setItem('geofences', JSON.stringify(geofences));
+  
+  if (Platform.OS === 'web') return;
+  
+  try {
+    // Restart geofencing with remaining regions
+    const remainingRegions: Location.LocationRegion[] = Object.entries(geofences)
+      .filter(([_, data]) => (data as GeofenceData).enabled)
+      .map(([id, data]) => ({
+        identifier: id,
+        latitude: (data as GeofenceData).latitude,
+        longitude: (data as GeofenceData).longitude,
+        radius: (data as GeofenceData).radius,
+        notifyOnEnter: true,
+        notifyOnExit: false,
+      }));
+    
+    if (remainingRegions.length > 0) {
+      await Location.startGeofencingAsync(GEOFENCE_TASK, remainingRegions);
+    } else {
+      await Location.stopGeofencingAsync(GEOFENCE_TASK);
+    }
+  } catch (error) {
+    console.error('Error updating geofencing:', error);
+  }
 }
 
 // Get current location
 export async function getCurrentLocation(): Promise<Location.LocationObject | null> {
   if (Platform.OS === 'web') {
-    // Use browser geolocation API
     return new Promise((resolve) => {
       if ('geolocation' in navigator) {
         navigator.geolocation.getCurrentPosition(
@@ -284,7 +417,8 @@ export async function getCurrentLocation(): Promise<Location.LocationObject | nu
               timestamp: position.timestamp,
             } as Location.LocationObject);
           },
-          () => resolve(null)
+          () => resolve(null),
+          { enableHighAccuracy: true, timeout: 10000 }
         );
       } else {
         resolve(null);
@@ -292,11 +426,11 @@ export async function getCurrentLocation(): Promise<Location.LocationObject | nu
     });
   }
   
-  const hasPermission = await requestLocationPermissions();
-  if (!hasPermission) return null;
+  const permissions = await requestLocationPermissions();
+  if (!permissions.foreground) return null;
   
   return await Location.getCurrentPositionAsync({
-    accuracy: Location.Accuracy.Balanced,
+    accuracy: Location.Accuracy.High,
   });
 }
 
@@ -306,6 +440,21 @@ export async function getAddressFromCoordinates(
   longitude: number
 ): Promise<string> {
   if (Platform.OS === 'web') {
+    // Use a free geocoding API for web
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`,
+        { headers: { 'Accept-Language': 'de' } }
+      );
+      const data = await response.json();
+      if (data.display_name) {
+        // Shorten the address
+        const parts = data.display_name.split(',').slice(0, 3);
+        return parts.join(', ');
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+    }
     return `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
   }
   
@@ -313,7 +462,9 @@ export async function getAddressFromCoordinates(
     const results = await Location.reverseGeocodeAsync({ latitude, longitude });
     if (results.length > 0) {
       const addr = results[0];
-      return `${addr.street || ''} ${addr.streetNumber || ''}, ${addr.city || addr.region || ''}`.trim();
+      const street = addr.street ? `${addr.street} ${addr.streetNumber || ''}`.trim() : '';
+      const city = addr.city || addr.region || '';
+      return street ? `${street}, ${city}` : city || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
     }
   } catch (error) {
     console.error('Reverse geocode error:', error);
@@ -321,21 +472,68 @@ export async function getAddressFromCoordinates(
   return `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
 }
 
+// Search for location by address (for map search)
+export async function searchLocation(query: string): Promise<Array<{
+  latitude: number;
+  longitude: number;
+  name: string;
+}>> {
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`,
+      { headers: { 'Accept-Language': 'de' } }
+    );
+    const data = await response.json();
+    return data.map((item: any) => ({
+      latitude: parseFloat(item.lat),
+      longitude: parseFloat(item.lon),
+      name: item.display_name.split(',').slice(0, 3).join(', '),
+    }));
+  } catch (error) {
+    console.error('Location search error:', error);
+    return [];
+  }
+}
+
 // Initialize notification system
 export async function initializeNotifications(): Promise<void> {
-  // Request permissions
   await requestNotificationPermissions();
-  
-  // Pre-generate messages for the day
   await pregenerateNotifications();
   
-  // Setup notification channel for Android
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
+      name: 'Schritt für Schritt',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF6B6B',
+      sound: 'default',
     });
+  }
+  
+  // Restore geofences on app start (mobile only)
+  if (Platform.OS !== 'web') {
+    const geofences = await getStoredGeofences();
+    const regions: Location.LocationRegion[] = Object.entries(geofences)
+      .filter(([_, data]) => (data as GeofenceData).enabled)
+      .map(([id, data]) => ({
+        identifier: id,
+        latitude: (data as GeofenceData).latitude,
+        longitude: (data as GeofenceData).longitude,
+        radius: (data as GeofenceData).radius,
+        notifyOnEnter: true,
+        notifyOnExit: false,
+      }));
+    
+    if (regions.length > 0) {
+      try {
+        const permissions = await requestLocationPermissions();
+        if (permissions.background) {
+          await Location.startGeofencingAsync(GEOFENCE_TASK, regions);
+          console.log('Geofences restored on app start');
+        }
+      } catch (error) {
+        console.log('Could not restore geofences:', error);
+      }
+    }
   }
 }
