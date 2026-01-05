@@ -882,56 +882,61 @@ export default function SettingsScreen() {
                   </Text>
                 </View>
                 <Text style={[styles.geoHint, { color: colors.textLight }]}>
-                  Hinweis: Standort-Tracking verbraucht etwas mehr Akku.
+                  Werde erinnert, wenn du an einem bestimmten Ort ankommst.
                 </Text>
 
-                {goals.map((goal, index) => (
-                  <View key={index} style={[styles.geoItem, { backgroundColor: colors.background }]}>
-                    <View style={styles.geoItemHeader}>
-                      <View style={[styles.goalBadge, { backgroundColor: [colors.primary, colors.secondary, colors.accent][index % 3] }]}>
-                        <Text style={styles.goalBadgeText}>{index + 1}</Text>
+                {goals.map((goal, index) => {
+                  const locationData = settings.habit_reminders.locations[index];
+                  const hasLocation = locationData?.latitude && locationData?.longitude;
+                  
+                  return (
+                    <View key={index} style={[styles.geoItem, { backgroundColor: colors.background }]}>
+                      <View style={styles.geoItemHeader}>
+                        <View style={[styles.goalBadge, { backgroundColor: [colors.primary, colors.secondary, colors.accent][index % 3] }]}>
+                          <Text style={styles.goalBadgeText}>{index + 1}</Text>
+                        </View>
+                        <Text style={[styles.geoGoalText, { color: colors.text }]} numberOfLines={1}>
+                          {goal || `Ziel ${index + 1}`}
+                        </Text>
                       </View>
-                      <Text style={[styles.geoGoalText, { color: colors.text }]} numberOfLines={1}>
-                        {goal || `Ziel ${index + 1}`}
-                      </Text>
-                      <Switch
-                        value={settings.habit_reminders.locations[index]?.enabled || false}
-                        onValueChange={(value) => {
-                          const newLocations = [...settings.habit_reminders.locations];
-                          newLocations[index] = {
-                            ...newLocations[index],
-                            enabled: value,
-                          };
-                          setSettings({
-                            ...settings,
-                            habit_reminders: { ...settings.habit_reminders, locations: newLocations },
-                          });
-                        }}
-                        trackColor={{ false: '#E0E0E0', true: colors.secondary }}
-                      />
-                    </View>
 
-                    {settings.habit_reminders.locations[index]?.enabled && (
-                      <TouchableOpacity
-                        style={[styles.setLocationButton, { borderColor: colors.secondary }]}
-                        onPress={() => setCurrentLocation(index)}
-                        disabled={settingLocation === index}
-                      >
-                        {settingLocation === index ? (
-                          <ActivityIndicator size="small" color={colors.secondary} />
-                        ) : (
-                          <>
-                            <Ionicons name="navigate" size={16} color={colors.secondary} />
-                            <Text style={[styles.setLocationText, { color: colors.secondary }]}>
-                              {settings.habit_reminders.locations[index]?.address ||
-                                'Aktuellen Standort setzen'}
+                      {hasLocation && locationData?.enabled ? (
+                        <View style={styles.locationSetContainer}>
+                          <View style={styles.locationSetInfo}>
+                            <Ionicons name="checkmark-circle" size={16} color={colors.secondary} />
+                            <Text style={[styles.locationSetText, { color: colors.text }]} numberOfLines={2}>
+                              {locationData.address || locationData.locationName || 'Ort gesetzt'}
                             </Text>
-                          </>
-                        )}
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                ))}
+                          </View>
+                          <View style={styles.locationButtons}>
+                            <TouchableOpacity
+                              style={[styles.locationEditButton, { borderColor: colors.secondary }]}
+                              onPress={() => openLocationPicker(index)}
+                            >
+                              <Ionicons name="create-outline" size={16} color={colors.secondary} />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={[styles.locationRemoveButton, { borderColor: colors.primary }]}
+                              onPress={() => disableLocationReminder(index)}
+                            >
+                              <Ionicons name="trash-outline" size={16} color={colors.primary} />
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      ) : (
+                        <TouchableOpacity
+                          style={[styles.setLocationButton, { borderColor: colors.secondary }]}
+                          onPress={() => openLocationPicker(index)}
+                        >
+                          <Ionicons name="add-circle-outline" size={18} color={colors.secondary} />
+                          <Text style={[styles.setLocationText, { color: colors.secondary }]}>
+                            Ort auf Karte waehlen
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  );
+                })}
               </View>
             </>
           )}
