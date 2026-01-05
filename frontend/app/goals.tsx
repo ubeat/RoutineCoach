@@ -779,10 +779,37 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 8,
   },
+  modeSelector: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 12,
+  },
+  modeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+  },
+  modeButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
   sectionHint: {
     fontSize: 14,
     marginBottom: 20,
     lineHeight: 20,
+  },
+  simpleGoalBlock: {
+    marginBottom: 16,
+  },
+  simpleInput: {
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 15,
   },
   goalBlock: {
     marginBottom: 20,
