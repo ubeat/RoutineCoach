@@ -64,8 +64,40 @@ export default function ProfileScreen() {
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [settings, setSettings] = useState<any>(null);
   const [userName, setUserName] = useState<string>('');
+  
+  // Badge Modal State
+  const [showBadgeModal, setShowBadgeModal] = useState(false);
+  const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
+  const [badgeEarned, setBadgeEarned] = useState(false);
+  
+  // XP Info Modal State
+  const [showXPInfoModal, setShowXPInfoModal] = useState(false);
 
-  const colors = settings?.appearance?.color_palette 
+  // XP-Übersicht: Was gibt wie viele XP
+  const XP_REWARDS = [
+    { action: 'Tägliches Check-in', xp: 10, icon: 'checkbox-outline', color: '#4CAF50' },
+    { action: 'Alle 3 Gewohnheiten geschafft', xp: 25, icon: 'star', color: '#FFD700' },
+    { action: '2 von 3 Gewohnheiten', xp: 15, icon: 'star-half', color: '#FFA500' },
+    { action: '1 von 3 Gewohnheiten', xp: 5, icon: 'star-outline', color: '#9E9E9E' },
+    { action: '7-Tage Streak erreicht', xp: 50, icon: 'flame', color: '#FF4500' },
+    { action: '30-Tage Streak erreicht', xp: 200, icon: 'trophy', color: '#9C27B0' },
+    { action: 'Abzeichen verdient', xp: 30, icon: 'ribbon', color: '#2196F3' },
+    { action: 'Challenge abgeschlossen', xp: '50-100', icon: 'flag', color: '#E91E63' },
+  ];
+
+  // Badge Icons und Bilder
+  const BADGE_IMAGES: Record<string, { emoji: string; description: string }> = {
+    'first_checkin': { emoji: '🌟', description: 'Du hast deinen allerersten Check-in gemacht! Der erste Schritt ist immer der wichtigste.' },
+    'streak_3': { emoji: '🔥', description: '3 Tage am Stueck! Du baust eine echte Routine auf.' },
+    'streak_7': { emoji: '💪', description: 'Eine ganze Woche! Deine Gewohnheit wird staerker.' },
+    'streak_14': { emoji: '⚡', description: '2 Wochen durchgehalten! Du bist auf dem besten Weg.' },
+    'streak_30': { emoji: '👑', description: 'Ein ganzer Monat! Du bist ein echter Streak-Meister!' },
+    'perfect_week': { emoji: '🏆', description: 'Alle Gewohnheiten eine Woche lang perfekt erfuellt!' },
+    'habit_hero': { emoji: '🦸', description: 'Du hast 100 Gewohnheiten insgesamt abgeschlossen!' },
+    'early_bird': { emoji: '🐦', description: 'Check-in vor 8 Uhr morgens - Fruehaufsteher!' },
+    'night_owl': { emoji: '🦉', description: 'Check-in nach 22 Uhr - Nachtmensch!' },
+    'comeback': { emoji: '🔄', description: 'Nach einer Pause wieder zurueckgekommen - Respekt!' },
+  }; 
     ? (COLOR_PALETTES[settings.appearance.color_palette] || COLOR_PALETTES.sonnenuntergang)
     : COLOR_PALETTES.sonnenuntergang;
 
