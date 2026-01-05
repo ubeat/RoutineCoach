@@ -1849,11 +1849,56 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 12,
     gap: 10,
-    marginBottom: 20,
+    marginBottom: 10,
+    borderWidth: 1,
+  },
+  selectedLocationInfo: {
+    flex: 1,
+  },
+  selectedLocationLabel: {
+    fontSize: 12,
+    marginBottom: 2,
   },
   selectedLocationText: {
     flex: 1,
     fontSize: 14,
+    fontWeight: '500',
+  },
+  locationModalHint: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginHorizontal: 20,
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  locationDivider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginVertical: 15,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    opacity: 0.3,
+  },
+  dividerText: {
+    marginHorizontal: 15,
+    fontSize: 14,
+  },
+  locationInfoBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginHorizontal: 16,
+    marginBottom: 20,
+    padding: 12,
+    borderRadius: 12,
+    gap: 10,
+  },
+  locationInfoText: {
+    flex: 1,
+    fontSize: 12,
+    lineHeight: 18,
   },
   // Sound Modal
   soundModalContent: {
