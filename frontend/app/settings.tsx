@@ -523,14 +523,21 @@ export default function SettingsScreen() {
   };
 
   const setCurrentLocation = async (goalIndex: number) => {
-    setSettingLocation(goalIndex);
+    setLocationGoalIndex(goalIndex);
+    setLoadingLocation(true);
+    setShowLocationModal(true);
+    setSelectedLocation(null);
+    setLocationSearchQuery('');
+    setLocationSearchResults([]);
+    
     try {
-      const hasPermission = await requestLocationPermissions();
-      if (!hasPermission) {
+      const permissions = await requestLocationPermissions();
+      if (!permissions.foreground) {
         Alert.alert(
           'Standort-Berechtigung',
           'Bitte erlaube den Standortzugriff in den Einstellungen.'
         );
+        setShowLocationModal(false);
         return;
       }
 
@@ -541,25 +548,176 @@ export default function SettingsScreen() {
           location.coords.longitude
         );
 
-        const newLocations = [...settings.habit_reminders.locations];
-        newLocations[goalIndex] = {
-          enabled: true,
+        setMapRegion({
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-          address,
-          radius: 100,
-        };
-        setSettings({
-          ...settings,
-          habit_reminders: { ...settings.habit_reminders, locations: newLocations },
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        });
+        
+        setSelectedLocation({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          address: address,
         });
       }
     } catch (error) {
       console.error('Error getting location:', error);
-      Alert.alert('Fehler', 'Standort konnte nicht ermittelt werden.');
     } finally {
-      setSettingLocation(null);
+      setLoadingLocation(false);
     }
+  };
+
+  const openLocationPicker = (goalIndex: number) => {
+    setLocationGoalIndex(goalIndex);
+    setShowLocationModal(true);
+    setSelectedLocation(null);
+    setLocationSearchQuery('');
+    setLocationSearchResults([]);
+    
+    // Check if there's already a saved location for this goal
+    const existingLoc = settings.habit_reminders.locations[goalIndex];
+    if (existingLoc?.latitude && existingLoc?.longitude) {
+      setMapRegion({
+        latitude: existingLoc.latitude,
+        longitude: existingLoc.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+      setSelectedLocation({
+        latitude: existingLoc.latitude,
+        longitude: existingLoc.longitude,
+        address: existingLoc.address || '',
+      });
+    }
+  };
+
+  const handleLocationSearch = async () => {
+    if (!locationSearchQuery.trim()) return;
+    
+    setLoadingLocation(true);
+    try {
+      const results = await searchLocation(locationSearchQuery);
+      setLocationSearchResults(results);
+      
+      // If results found, zoom to first one
+      if (results.length > 0) {
+        setMapRegion({
+          latitude: results[0].latitude,
+          longitude: results[0].longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        });
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setLoadingLocation(false);
+    }
+  };
+
+  const selectSearchResult = (result: { latitude: number; longitude: number; name: string }) => {
+    setSelectedLocation({
+      latitude: result.latitude,
+      longitude: result.longitude,
+      address: result.name,
+    });
+    setMapRegion({
+      latitude: result.latitude,
+      longitude: result.longitude,
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    });
+    setLocationSearchResults([]);
+  };
+
+  const handleMapPress = async (event: any) => {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+    setLoadingLocation(true);
+    
+    try {
+      const address = await getAddressFromCoordinates(latitude, longitude);
+      setSelectedLocation({
+        latitude,
+        longitude,
+        address,
+      });
+    } catch (error) {
+      setSelectedLocation({
+        latitude,
+        longitude,
+        address: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+      });
+    } finally {
+      setLoadingLocation(false);
+    }
+  };
+
+  const confirmLocationSelection = async () => {
+    if (!selectedLocation) return;
+    
+    const goalName = goals[locationGoalIndex] || `Ziel ${locationGoalIndex + 1}`;
+    
+    // Save to settings state
+    const newLocations = [...settings.habit_reminders.locations];
+    newLocations[locationGoalIndex] = {
+      enabled: true,
+      latitude: selectedLocation.latitude,
+      longitude: selectedLocation.longitude,
+      address: selectedLocation.address,
+      locationName: selectedLocation.address,
+      radius: 100,
+    };
+    setSettings({
+      ...settings,
+      habit_reminders: { ...settings.habit_reminders, locations: newLocations },
+    });
+    
+    // Setup geofence
+    const success = await setupGeofence(
+      locationGoalIndex,
+      selectedLocation.latitude,
+      selectedLocation.longitude,
+      selectedLocation.address,
+      goalName,
+      100
+    );
+    
+    if (!success && Platform.OS !== 'web') {
+      Alert.alert(
+        'Hinweis',
+        'Orts-Erinnerungen funktionieren nur mit Hintergrund-Standort-Berechtigung. Bitte erlaube diese in den System-Einstellungen.'
+      );
+    }
+    
+    setShowLocationModal(false);
+    setSelectedLocation(null);
+  };
+
+  const disableLocationReminder = async (goalIndex: number) => {
+    const newLocations = [...settings.habit_reminders.locations];
+    newLocations[goalIndex] = {
+      enabled: false,
+      latitude: null,
+      longitude: null,
+      address: null,
+      locationName: null,
+      radius: 100,
+    };
+    setSettings({
+      ...settings,
+      habit_reminders: { ...settings.habit_reminders, locations: newLocations },
+    });
+    
+    await removeGeofence(goalIndex);
+  };
+
+  const selectNotificationSound = (soundId: string) => {
+    setSettings({
+      ...settings,
+      appearance: { ...settings.appearance, notification_sound: soundId },
+    });
+    setShowSoundPicker(false);
   };
 
   if (loading) {
