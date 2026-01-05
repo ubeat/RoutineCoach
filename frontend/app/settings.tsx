@@ -1190,24 +1190,53 @@ export default function SettingsScreen() {
               </TouchableOpacity>
             </View>
 
+            <Text style={[styles.locationModalHint, { color: colors.textLight }]}>
+              Waehle deinen aktuellen Standort oder suche nach einer Adresse.
+              Du wirst erinnert, wenn du dort ankommst.
+            </Text>
+
+            {/* Current Location Button */}
+            <TouchableOpacity
+              style={[styles.currentLocationButton, { backgroundColor: colors.secondary }]}
+              onPress={() => setCurrentLocation(locationGoalIndex)}
+              disabled={loadingLocation}
+            >
+              {loadingLocation ? (
+                <ActivityIndicator color="#FFF" />
+              ) : (
+                <>
+                  <Ionicons name="navigate" size={20} color="#FFF" />
+                  <Text style={styles.currentLocationText}>Meinen aktuellen Standort verwenden</Text>
+                </>
+              )}
+            </TouchableOpacity>
+
+            <View style={styles.locationDivider}>
+              <View style={[styles.dividerLine, { backgroundColor: colors.textLight }]} />
+              <Text style={[styles.dividerText, { color: colors.textLight }]}>oder</Text>
+              <View style={[styles.dividerLine, { backgroundColor: colors.textLight }]} />
+            </View>
+
             {/* Search Bar */}
             <View style={[styles.searchContainer, { backgroundColor: colors.background }]}>
               <Ionicons name="search" size={20} color={colors.textLight} />
               <TextInput
                 style={[styles.searchInput, { color: colors.text }]}
-                placeholder="Adresse suchen..."
+                placeholder="Adresse suchen (z.B. Bahnhofstr. 1, Zuerich)"
                 placeholderTextColor={colors.textLight}
                 value={locationSearchQuery}
                 onChangeText={setLocationSearchQuery}
                 onSubmitEditing={handleLocationSearch}
                 returnKeyType="search"
               />
-              {loadingLocation && <ActivityIndicator size="small" color={colors.primary} />}
+              <TouchableOpacity onPress={handleLocationSearch}>
+                <Ionicons name="arrow-forward-circle" size={28} color={colors.primary} />
+              </TouchableOpacity>
             </View>
 
             {/* Search Results */}
             {locationSearchResults.length > 0 && (
-              <View style={[styles.searchResults, { backgroundColor: colors.background }]}>
+              <ScrollView style={[styles.searchResults, { backgroundColor: colors.background }]}>
                 {locationSearchResults.map((result, index) => (
                   <TouchableOpacity
                     key={index}
@@ -1218,53 +1247,35 @@ export default function SettingsScreen() {
                     <Text style={[styles.searchResultText, { color: colors.text }]} numberOfLines={2}>
                       {result.name}
                     </Text>
+                    <Ionicons name="add-circle" size={22} color={colors.primary} />
                   </TouchableOpacity>
                 ))}
-              </View>
+              </ScrollView>
             )}
-
-            {/* Map */}
-            <View style={styles.mapContainer}>
-              <MapView
-                ref={mapRef}
-                style={styles.map}
-                provider={PROVIDER_DEFAULT}
-                region={mapRegion}
-                onRegionChangeComplete={setMapRegion}
-                onPress={handleMapPress}
-                showsUserLocation
-                showsMyLocationButton
-              >
-                {selectedLocation && (
-                  <Marker
-                    coordinate={{
-                      latitude: selectedLocation.latitude,
-                      longitude: selectedLocation.longitude,
-                    }}
-                    pinColor={colors.primary}
-                  />
-                )}
-              </MapView>
-            </View>
-
-            {/* Current Location Button */}
-            <TouchableOpacity
-              style={[styles.currentLocationButton, { backgroundColor: colors.secondary }]}
-              onPress={() => setCurrentLocation(locationGoalIndex)}
-            >
-              <Ionicons name="navigate" size={20} color="#FFF" />
-              <Text style={styles.currentLocationText}>Meinen Standort verwenden</Text>
-            </TouchableOpacity>
 
             {/* Selected Location Info */}
             {selectedLocation && (
-              <View style={[styles.selectedLocationBox, { backgroundColor: colors.background }]}>
-                <Ionicons name="checkmark-circle" size={20} color={colors.secondary} />
-                <Text style={[styles.selectedLocationText, { color: colors.text }]} numberOfLines={2}>
-                  {selectedLocation.address}
-                </Text>
+              <View style={[styles.selectedLocationBox, { backgroundColor: colors.secondary + '20', borderColor: colors.secondary }]}>
+                <Ionicons name="checkmark-circle" size={24} color={colors.secondary} />
+                <View style={styles.selectedLocationInfo}>
+                  <Text style={[styles.selectedLocationLabel, { color: colors.textLight }]}>Ausgewaehlter Ort:</Text>
+                  <Text style={[styles.selectedLocationText, { color: colors.text }]} numberOfLines={2}>
+                    {selectedLocation.address}
+                  </Text>
+                </View>
               </View>
             )}
+
+            {/* Info Text */}
+            <View style={[styles.locationInfoBox, { backgroundColor: colors.background }]}>
+              <Ionicons name="information-circle" size={20} color={colors.textLight} />
+              <Text style={[styles.locationInfoText, { color: colors.textLight }]}>
+                {Platform.OS === 'web' 
+                  ? 'Hinweis: Orts-Erinnerungen funktionieren nur in der mobilen App.'
+                  : 'Du wirst eine Erinnerung erhalten, wenn du in der Naehe dieses Ortes bist.'
+                }
+              </Text>
+            </View>
           </View>
         </KeyboardAvoidingView>
       </Modal>
