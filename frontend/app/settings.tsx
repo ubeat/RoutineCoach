@@ -711,11 +711,98 @@ export default function SettingsScreen() {
     await removeGeofence(goalIndex);
   };
 
-  const selectNotificationSound = (soundId: string) => {
+  const selectNotificationSound = async (soundId: string) => {
+    // Play preview sound
+    await playPreviewSound(soundId);
+    
     setSettings({
       ...settings,
       appearance: { ...settings.appearance, notification_sound: soundId },
     });
+  };
+
+  const playPreviewSound = async (soundId: string) => {
+    try {
+      // Generate different tones based on soundId using Web Audio API or Expo Audio
+      if (Platform.OS === 'web') {
+        // Use Web Audio API for web
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // Different frequencies for different sounds
+        const soundConfigs: Record<string, { freq: number; type: OscillatorType; duration: number }> = {
+          'default': { freq: 800, type: 'sine', duration: 0.15 },
+          'gentle': { freq: 400, type: 'sine', duration: 0.3 },
+          'cheerful': { freq: 1000, type: 'triangle', duration: 0.1 },
+          'energetic': { freq: 1200, type: 'square', duration: 0.08 },
+          'calm': { freq: 300, type: 'sine', duration: 0.4 },
+          'bell': { freq: 600, type: 'triangle', duration: 0.2 },
+        };
+        
+        const config = soundConfigs[soundId] || soundConfigs['default'];
+        
+        oscillator.type = config.type;
+        oscillator.frequency.setValueAtTime(config.freq, audioContext.currentTime);
+        
+        // Fade in and out for smoother sound
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+        gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + config.duration);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + config.duration);
+        
+        // For bell, add a second harmonic
+        if (soundId === 'bell') {
+          const osc2 = audioContext.createOscillator();
+          const gain2 = audioContext.createGain();
+          osc2.connect(gain2);
+          gain2.connect(audioContext.destination);
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(1200, audioContext.currentTime);
+          gain2.gain.setValueAtTime(0, audioContext.currentTime);
+          gain2.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.01);
+          gain2.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.3);
+          osc2.start(audioContext.currentTime);
+          osc2.stop(audioContext.currentTime + 0.3);
+        }
+        
+        // For cheerful, play a quick melody
+        if (soundId === 'cheerful') {
+          setTimeout(() => {
+            const osc2 = audioContext.createOscillator();
+            const gain2 = audioContext.createGain();
+            osc2.connect(gain2);
+            gain2.connect(audioContext.destination);
+            osc2.type = 'triangle';
+            osc2.frequency.setValueAtTime(1200, audioContext.currentTime);
+            gain2.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gain2.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.1);
+            osc2.start(audioContext.currentTime);
+            osc2.stop(audioContext.currentTime + 0.1);
+          }, 100);
+        }
+      } else {
+        // For native, use Expo Notifications to play a preview
+        // This triggers a local notification sound
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+        });
+        
+        // Since we don't have actual sound files, we'll just show feedback
+        // In production, you'd load actual sound files here
+        console.log(`Playing preview for sound: ${soundId}`);
+      }
+    } catch (error) {
+      console.log('Could not play preview sound:', error);
+    }
+  };
+
+  const closeSoundPicker = () => {
     setShowSoundPicker(false);
   };
 
