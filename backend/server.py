@@ -257,7 +257,8 @@ async def create_weekly_goals(input: WeeklyGoalsCreate):
     if len(input.goals) != 3:
         raise HTTPException(status_code=400, detail="Bitte genau 3 Ziele angeben")
     
-    week_start = get_week_start()
+    # Use goal_week_start - if Sunday, goals are for next week
+    week_start = get_goal_week_start()
     
     # Check if goals already exist for this week
     existing = await db.weekly_goals.find_one({
@@ -285,18 +286,28 @@ async def create_weekly_goals(input: WeeklyGoalsCreate):
 
 @api_router.get("/goals/{device_id}")
 async def get_current_goals(device_id: str):
+    # Get goals for current week (Mon-Sun)
     week_start = get_week_start()
     goals = await db.weekly_goals.find_one({
         "device_id": device_id,
         "week_start": week_start
     })
     
+    # If no goals for current week, check if there are goals set on Sunday for this week
+    if not goals:
+        # Maybe goals were set on Sunday (stored with next week's start date)
+        # Try to find goals that match
+        goals = await db.weekly_goals.find_one({
+            "device_id": device_id,
+            "week_start": {"$lte": week_start + timedelta(days=6), "$gte": week_start}
+        })
+    
     if not goals:
         return {"goals": None, "message": "Keine Ziele für diese Woche gesetzt"}
     
     return {
         "goals": goals["goals"],
-        "id": goals["id"],
+        "id": goals.get("id", str(goals.get("_id", ""))),
         "week_start": goals["week_start"]
     }
 
