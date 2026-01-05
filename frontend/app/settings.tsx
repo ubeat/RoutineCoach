@@ -1159,6 +1159,170 @@ export default function SettingsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Location Picker Modal */}
+      <Modal
+        transparent
+        animationType="slide"
+        visible={showLocationModal}
+        onRequestClose={() => setShowLocationModal(false)}
+      >
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.locationModalContainer}
+        >
+          <View style={[styles.locationModalContent, { backgroundColor: colors.card }]}>
+            <View style={styles.locationModalHeader}>
+              <TouchableOpacity onPress={() => setShowLocationModal(false)}>
+                <Ionicons name="close" size={28} color={colors.textLight} />
+              </TouchableOpacity>
+              <Text style={[styles.locationModalTitle, { color: colors.text }]}>
+                Ort waehlen
+              </Text>
+              <TouchableOpacity 
+                onPress={confirmLocationSelection}
+                disabled={!selectedLocation}
+              >
+                <Text style={[
+                  styles.locationModalConfirm, 
+                  { color: selectedLocation ? colors.primary : colors.textLight }
+                ]}>
+                  Fertig
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Search Bar */}
+            <View style={[styles.searchContainer, { backgroundColor: colors.background }]}>
+              <Ionicons name="search" size={20} color={colors.textLight} />
+              <TextInput
+                style={[styles.searchInput, { color: colors.text }]}
+                placeholder="Adresse suchen..."
+                placeholderTextColor={colors.textLight}
+                value={locationSearchQuery}
+                onChangeText={setLocationSearchQuery}
+                onSubmitEditing={handleLocationSearch}
+                returnKeyType="search"
+              />
+              {loadingLocation && <ActivityIndicator size="small" color={colors.primary} />}
+            </View>
+
+            {/* Search Results */}
+            {locationSearchResults.length > 0 && (
+              <View style={[styles.searchResults, { backgroundColor: colors.background }]}>
+                {locationSearchResults.map((result, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[styles.searchResultItem, { borderBottomColor: colors.card }]}
+                    onPress={() => selectSearchResult(result)}
+                  >
+                    <Ionicons name="location" size={18} color={colors.secondary} />
+                    <Text style={[styles.searchResultText, { color: colors.text }]} numberOfLines={2}>
+                      {result.name}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {/* Map */}
+            <View style={styles.mapContainer}>
+              <MapView
+                ref={mapRef}
+                style={styles.map}
+                provider={PROVIDER_DEFAULT}
+                region={mapRegion}
+                onRegionChangeComplete={setMapRegion}
+                onPress={handleMapPress}
+                showsUserLocation
+                showsMyLocationButton
+              >
+                {selectedLocation && (
+                  <Marker
+                    coordinate={{
+                      latitude: selectedLocation.latitude,
+                      longitude: selectedLocation.longitude,
+                    }}
+                    pinColor={colors.primary}
+                  />
+                )}
+              </MapView>
+            </View>
+
+            {/* Current Location Button */}
+            <TouchableOpacity
+              style={[styles.currentLocationButton, { backgroundColor: colors.secondary }]}
+              onPress={() => setCurrentLocation(locationGoalIndex)}
+            >
+              <Ionicons name="navigate" size={20} color="#FFF" />
+              <Text style={styles.currentLocationText}>Meinen Standort verwenden</Text>
+            </TouchableOpacity>
+
+            {/* Selected Location Info */}
+            {selectedLocation && (
+              <View style={[styles.selectedLocationBox, { backgroundColor: colors.background }]}>
+                <Ionicons name="checkmark-circle" size={20} color={colors.secondary} />
+                <Text style={[styles.selectedLocationText, { color: colors.text }]} numberOfLines={2}>
+                  {selectedLocation.address}
+                </Text>
+              </View>
+            )}
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Sound Picker Modal */}
+      <Modal
+        transparent
+        animationType="slide"
+        visible={showSoundPicker}
+        onRequestClose={() => setShowSoundPicker(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.soundModalContent, { backgroundColor: colors.card }]}>
+            <Text style={[styles.soundModalTitle, { color: colors.text }]}>
+              Benachrichtigungston waehlen
+            </Text>
+            
+            {NOTIFICATION_SOUNDS.map((sound) => (
+              <TouchableOpacity
+                key={sound.id}
+                style={[
+                  styles.soundOption,
+                  { backgroundColor: colors.background },
+                  settings.appearance.notification_sound === sound.id && {
+                    borderColor: colors.primary,
+                    borderWidth: 2,
+                  }
+                ]}
+                onPress={() => selectNotificationSound(sound.id)}
+              >
+                <Ionicons 
+                  name={sound.icon as any} 
+                  size={24} 
+                  color={settings.appearance.notification_sound === sound.id ? colors.primary : colors.textLight} 
+                />
+                <Text style={[
+                  styles.soundOptionText,
+                  { color: settings.appearance.notification_sound === sound.id ? colors.primary : colors.text }
+                ]}>
+                  {sound.name}
+                </Text>
+                {settings.appearance.notification_sound === sound.id && (
+                  <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
+                )}
+              </TouchableOpacity>
+            ))}
+            
+            <TouchableOpacity
+              style={[styles.soundModalClose, { backgroundColor: colors.primary }]}
+              onPress={() => setShowSoundPicker(false)}
+            >
+              <Text style={styles.soundModalCloseText}>Fertig</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
