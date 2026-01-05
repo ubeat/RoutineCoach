@@ -318,64 +318,152 @@ export default function GoalsScreen() {
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               Deine 3 winzigen Gewohnheiten
             </Text>
+            
+            {/* Mode Selector */}
+            <View style={styles.modeSelector}>
+              <TouchableOpacity
+                style={[
+                  styles.modeButton,
+                  goalMode === 'simple' && { backgroundColor: colors.primary },
+                  goalMode !== 'simple' && { backgroundColor: colors.background }
+                ]}
+                onPress={() => setGoalMode('simple')}
+              >
+                <Ionicons 
+                  name="checkmark-circle-outline" 
+                  size={18} 
+                  color={goalMode === 'simple' ? '#FFF' : colors.textLight} 
+                />
+                <Text style={[
+                  styles.modeButtonText,
+                  { color: goalMode === 'simple' ? '#FFF' : colors.textLight }
+                ]}>
+                  Einfach
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[
+                  styles.modeButton,
+                  goalMode === 'wenn-dann' && { backgroundColor: colors.secondary },
+                  goalMode !== 'wenn-dann' && { backgroundColor: colors.background }
+                ]}
+                onPress={() => setGoalMode('wenn-dann')}
+              >
+                <Ionicons 
+                  name="git-branch-outline" 
+                  size={18} 
+                  color={goalMode === 'wenn-dann' ? '#FFF' : colors.textLight} 
+                />
+                <Text style={[
+                  styles.modeButtonText,
+                  { color: goalMode === 'wenn-dann' ? '#FFF' : colors.textLight }
+                ]}>
+                  Wenn-Dann
+                </Text>
+              </TouchableOpacity>
+            </View>
+            
             <Text style={[styles.sectionHint, { color: colors.textLight }]}>
-              Formuliere sie als "Wenn... dann..." Saetze - das verdreifacht deinen Erfolg! 🎯
+              {goalMode === 'wenn-dann' 
+                ? 'Verknuepfe deine Gewohnheit mit einem Ausloeser - das verdreifacht den Erfolg! 🎯'
+                : 'Beschreibe einfach, was du tun moechtest - kurz und knapp! 🎯'
+              }
             </Text>
 
-            {[0, 1, 2].map((index) => (
-              <View key={index} style={styles.goalBlock}>
-                <View style={styles.goalHeader}>
-                  <View style={[
-                    styles.goalNumber,
-                    { backgroundColor: [colors.primary, colors.secondary, colors.accent][index] }
-                  ]}>
-                    <Text style={styles.goalNumberText}>{index + 1}</Text>
-                  </View>
-                  <TouchableOpacity 
-                    style={[styles.suggestionButton, { backgroundColor: colors.background }]}
-                    onPress={() => openSuggestions(index)}
-                  >
-                    <Ionicons name="bulb-outline" size={16} color={colors.primary} />
-                    <Text style={[styles.suggestionButtonText, { color: colors.primary }]}>
-                      Vorschlaege
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={styles.wennDannContainer}>
-                  <View style={styles.wennRow}>
-                    <Text style={[styles.wennLabel, { color: colors.primary }]}>WENN</Text>
+            {goalMode === 'simple' ? (
+              // Simple Goals Mode
+              <>
+                {[0, 1, 2].map((index) => (
+                  <View key={index} style={styles.simpleGoalBlock}>
+                    <View style={styles.goalHeader}>
+                      <View style={[
+                        styles.goalNumber,
+                        { backgroundColor: [colors.primary, colors.secondary, colors.accent][index] }
+                      ]}>
+                        <Text style={styles.goalNumberText}>{index + 1}</Text>
+                      </View>
+                      <TouchableOpacity 
+                        style={[styles.suggestionButton, { backgroundColor: colors.background }]}
+                        onPress={() => openSuggestions(index)}
+                      >
+                        <Ionicons name="bulb-outline" size={16} color={colors.primary} />
+                        <Text style={[styles.suggestionButtonText, { color: colors.primary }]}>
+                          Ideen
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                    
                     <TextInput
-                      style={[styles.wennInput, { backgroundColor: colors.background, color: colors.text }]}
-                      placeholder="z.B. ich morgens aufgestanden bin"
+                      style={[styles.simpleInput, { backgroundColor: colors.background, color: colors.text }]}
+                      placeholder="z.B. Ein Glas Wasser trinken"
                       placeholderTextColor={colors.textLight}
-                      value={goals[index].wenn}
-                      onChangeText={(text) => updateGoal(index, 'wenn', text)}
-                      maxLength={80}
+                      value={simpleGoals[index]}
+                      onChangeText={(text) => updateSimpleGoal(index, text)}
+                      maxLength={100}
                     />
                   </View>
-                  <View style={styles.dannRow}>
-                    <Text style={[styles.dannLabel, { color: colors.secondary }]}>DANN</Text>
-                    <TextInput
-                      style={[styles.dannInput, { backgroundColor: colors.background, color: colors.text }]}
-                      placeholder="z.B. trinke ich ein Glas Wasser"
-                      placeholderTextColor={colors.textLight}
-                      value={goals[index].dann}
-                      onChangeText={(text) => updateGoal(index, 'dann', text)}
-                      maxLength={80}
-                    />
-                  </View>
-                </View>
+                ))}
+              </>
+            ) : (
+              // Wenn-Dann Mode
+              <>
+                {[0, 1, 2].map((index) => (
+                  <View key={index} style={styles.goalBlock}>
+                    <View style={styles.goalHeader}>
+                      <View style={[
+                        styles.goalNumber,
+                        { backgroundColor: [colors.primary, colors.secondary, colors.accent][index] }
+                      ]}>
+                        <Text style={styles.goalNumberText}>{index + 1}</Text>
+                      </View>
+                      <TouchableOpacity 
+                        style={[styles.suggestionButton, { backgroundColor: colors.background }]}
+                        onPress={() => openSuggestions(index)}
+                      >
+                        <Ionicons name="bulb-outline" size={16} color={colors.primary} />
+                        <Text style={[styles.suggestionButtonText, { color: colors.primary }]}>
+                          Vorschlaege
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
 
-                {goals[index].wenn && goals[index].dann && (
-                  <View style={[styles.previewBox, { backgroundColor: colors.primary + '15' }]}>
-                    <Text style={[styles.previewText, { color: colors.text }]}>
-                      ✨ Wenn {goals[index].wenn}, dann {goals[index].dann}
-                    </Text>
+                    <View style={styles.wennDannContainer}>
+                      <View style={styles.wennRow}>
+                        <Text style={[styles.wennLabel, { color: colors.primary }]}>WENN</Text>
+                        <TextInput
+                          style={[styles.wennInput, { backgroundColor: colors.background, color: colors.text }]}
+                          placeholder="z.B. ich morgens aufgestanden bin"
+                          placeholderTextColor={colors.textLight}
+                          value={wennDannGoals[index].wenn}
+                          onChangeText={(text) => updateWennDannGoal(index, 'wenn', text)}
+                          maxLength={80}
+                        />
+                      </View>
+                      <View style={styles.dannRow}>
+                        <Text style={[styles.dannLabel, { color: colors.secondary }]}>DANN</Text>
+                        <TextInput
+                          style={[styles.dannInput, { backgroundColor: colors.background, color: colors.text }]}
+                          placeholder="z.B. trinke ich ein Glas Wasser"
+                          placeholderTextColor={colors.textLight}
+                          value={wennDannGoals[index].dann}
+                          onChangeText={(text) => updateWennDannGoal(index, 'dann', text)}
+                          maxLength={80}
+                        />
+                      </View>
+                    </View>
+
+                    {wennDannGoals[index].wenn && wennDannGoals[index].dann && (
+                      <View style={[styles.previewBox, { backgroundColor: colors.primary + '15' }]}>
+                        <Text style={[styles.previewText, { color: colors.text }]}>
+                          ✨ Wenn {wennDannGoals[index].wenn}, dann {wennDannGoals[index].dann}
+                        </Text>
+                      </View>
+                    )}
                   </View>
-                )}
-              </View>
-            ))}
+                ))}
+              </>
+            )}
           </View>
 
           {/* Encouraging Tips */}
