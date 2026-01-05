@@ -346,7 +346,6 @@ export default function SettingsScreen() {
       console.log('Error loading geofences:', error);
     }
   };
-  }, []);
 
   const loadUserName = async () => {
     const storedName = await AsyncStorage.getItem('userName');
