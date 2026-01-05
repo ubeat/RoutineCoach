@@ -97,9 +97,17 @@ export default function ProfileScreen() {
     'early_bird': { emoji: '🐦', description: 'Check-in vor 8 Uhr morgens - Fruehaufsteher!' },
     'night_owl': { emoji: '🦉', description: 'Check-in nach 22 Uhr - Nachtmensch!' },
     'comeback': { emoji: '🔄', description: 'Nach einer Pause wieder zurueckgekommen - Respekt!' },
-  }; 
+  };
+
+  const colors = settings?.appearance?.color_palette 
     ? (COLOR_PALETTES[settings.appearance.color_palette] || COLOR_PALETTES.sonnenuntergang)
     : COLOR_PALETTES.sonnenuntergang;
+
+  const openBadgeDetail = (badge: Badge, earned: boolean) => {
+    setSelectedBadge(badge);
+    setBadgeEarned(earned);
+    setShowBadgeModal(true);
+  };
 
   // Einladungstext für alle Methoden
   const getInviteMessage = (code: string) => 
