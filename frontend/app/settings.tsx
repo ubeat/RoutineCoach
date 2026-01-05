@@ -13,12 +13,14 @@ import {
   FlatList,
   Dimensions,
   TextInput,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
+import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps';
 import {
   initializeNotifications,
   scheduleHabitReminder,
@@ -29,11 +31,14 @@ import {
   getAddressFromCoordinates,
   setupGeofence,
   removeGeofence,
+  searchLocation,
+  getStoredGeofences,
+  NOTIFICATION_SOUNDS,
 } from '../services/NotificationService';
 import { COLOR_PALETTES } from '../contexts/SettingsContext';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const WEEKDAYS = [
   { short: 'Mo', full: 'Montag', index: 0 },
@@ -55,6 +60,7 @@ interface LocationSetting {
   latitude: number | null;
   longitude: number | null;
   address: string | null;
+  locationName: string | null;
   radius: number;
 }
 
