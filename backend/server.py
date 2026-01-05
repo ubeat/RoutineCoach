@@ -106,6 +106,17 @@ def get_week_start(dt: datetime = None) -> datetime:
     week_start = dt - timedelta(days=days_since_monday)
     return week_start.replace(hour=0, minute=0, second=0, microsecond=0)
 
+# Helper function to get the "goal week" - if Sunday, goals are for NEXT week
+def get_goal_week_start(dt: datetime = None) -> datetime:
+    if dt is None:
+        dt = datetime.utcnow()
+    # If it's Sunday (weekday 6), goals are for the upcoming week (starting tomorrow)
+    if dt.weekday() == 6:
+        # Next Monday
+        return (dt + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    # Otherwise, goals are for the current week
+    return get_week_start(dt)
+
 # AI Coach function
 async def get_ai_coach_response(request: AICoachRequest) -> str:
     try:
