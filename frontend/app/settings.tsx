@@ -92,9 +92,9 @@ const defaultSettings: Settings = {
     individual_times: ["08:00", "12:00", "18:00"],
     days: [0, 1, 2, 3, 4, 5, 6],
     locations: [
-      { enabled: false, latitude: null, longitude: null, address: null, radius: 100 },
-      { enabled: false, latitude: null, longitude: null, address: null, radius: 100 },
-      { enabled: false, latitude: null, longitude: null, address: null, radius: 100 },
+      { enabled: false, latitude: null, longitude: null, address: null, locationName: null, radius: 100 },
+      { enabled: false, latitude: null, longitude: null, address: null, locationName: null, radius: 100 },
+      { enabled: false, latitude: null, longitude: null, address: null, locationName: null, radius: 100 },
     ],
   },
   checkin_reminder: {
