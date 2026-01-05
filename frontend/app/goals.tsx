@@ -203,10 +203,16 @@ export default function GoalsScreen() {
     }
   };
 
-  const updateGoal = (index: number, field: 'wenn' | 'dann', text: string) => {
-    const newGoals = [...goals];
+  const updateWennDannGoal = (index: number, field: 'wenn' | 'dann', text: string) => {
+    const newGoals = [...wennDannGoals];
     newGoals[index] = { ...newGoals[index], [field]: text };
-    setGoals(newGoals);
+    setWennDannGoals(newGoals);
+  };
+
+  const updateSimpleGoal = (index: number, text: string) => {
+    const newGoals = [...simpleGoals];
+    newGoals[index] = text;
+    setSimpleGoals(newGoals);
   };
 
   const openSuggestions = (index: number) => {
@@ -215,8 +221,13 @@ export default function GoalsScreen() {
   };
 
   const applySuggestion = (wenn: string, dann: string) => {
-    updateGoal(currentGoalIndex, 'wenn', wenn);
-    updateGoal(currentGoalIndex, 'dann', dann);
+    if (goalMode === 'wenn-dann') {
+      updateWennDannGoal(currentGoalIndex, 'wenn', wenn);
+      updateWennDannGoal(currentGoalIndex, 'dann', dann);
+    } else {
+      // For simple mode, just use the dann part
+      updateSimpleGoal(currentGoalIndex, dann);
+    }
     setShowSuggestions(false);
   };
 
