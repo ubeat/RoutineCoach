@@ -67,11 +67,20 @@ export default function GoalsScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [loadingAdvice, setLoadingAdvice] = useState(false);
-  const [goals, setGoals] = useState<Goal[]>([
+  
+  // Goal mode: 'simple' or 'wenn-dann'
+  const [goalMode, setGoalMode] = useState<'simple' | 'wenn-dann'>('simple');
+  
+  // For Wenn-Dann goals
+  const [wennDannGoals, setWennDannGoals] = useState<Goal[]>([
     { wenn: '', dann: '' },
     { wenn: '', dann: '' },
     { wenn: '', dann: '' },
   ]);
+  
+  // For simple goals
+  const [simpleGoals, setSimpleGoals] = useState<string[]>(['', '', '']);
+  
   const [existingGoals, setExistingGoals] = useState<string[] | null>(null);
   const [advice, setAdvice] = useState('');
   const [showAdvice, setShowAdvice] = useState(false);
@@ -105,15 +114,26 @@ export default function GoalsScreen() {
 
       if (goalsRes.data.goals) {
         setExistingGoals(goalsRes.data.goals);
-        // Parse existing goals back into wenn-dann format
-        const parsedGoals = goalsRes.data.goals.map((goal: string) => {
-          const match = goal.match(/Wenn (.+), dann (.+)/i);
-          if (match) {
-            return { wenn: match[1], dann: match[2] };
-          }
-          return { wenn: '', dann: goal };
-        });
-        setGoals(parsedGoals);
+        
+        // Detect if existing goals are wenn-dann or simple
+        const hasWennDann = goalsRes.data.goals.some((goal: string) => 
+          goal.toLowerCase().includes('wenn ') && goal.toLowerCase().includes(', dann ')
+        );
+        
+        if (hasWennDann) {
+          setGoalMode('wenn-dann');
+          const parsedGoals = goalsRes.data.goals.map((goal: string) => {
+            const match = goal.match(/Wenn (.+), dann (.+)/i);
+            if (match) {
+              return { wenn: match[1], dann: match[2] };
+            }
+            return { wenn: '', dann: goal };
+          });
+          setWennDannGoals(parsedGoals);
+        } else {
+          setGoalMode('simple');
+          setSimpleGoals(goalsRes.data.goals);
+        }
       }
     } catch (error) {
       console.error('Error fetching data:', error);
