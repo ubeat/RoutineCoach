@@ -277,12 +277,75 @@ export default function SettingsScreen() {
   const [tempTime, setTempTime] = useState({ hour: '08', minute: '00' });
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [settingLocation, setSettingLocation] = useState<number | null>(null);
+  
+  // Location Modal State
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [locationGoalIndex, setLocationGoalIndex] = useState<number>(0);
+  const [mapRegion, setMapRegion] = useState({
+    latitude: 47.3769, // Zürich default
+    longitude: 8.5417,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  });
+  const [selectedLocation, setSelectedLocation] = useState<{
+    latitude: number;
+    longitude: number;
+    address: string;
+  } | null>(null);
+  const [locationSearchQuery, setLocationSearchQuery] = useState('');
+  const [locationSearchResults, setLocationSearchResults] = useState<Array<{
+    latitude: number;
+    longitude: number;
+    name: string;
+  }>>([]);
+  const [loadingLocation, setLoadingLocation] = useState(false);
+  const mapRef = useRef<MapView>(null);
+  
+  // Sound Modal State
+  const [showSoundPicker, setShowSoundPicker] = useState(false);
 
   const colors = COLOR_PALETTES[settings.appearance.color_palette] || COLOR_PALETTES.sonnenuntergang;
 
   useEffect(() => {
     loadSettings();
     loadUserName();
+  }, []);
+
+  // Load stored geofences on mount
+  useEffect(() => {
+    loadStoredGeofences();
+  }, []);
+
+  const loadStoredGeofences = async () => {
+    try {
+      const geofences = await getStoredGeofences();
+      // Update settings with stored geofence data
+      const updatedLocations = [...(settings.location_reminders || [])];
+      
+      for (let i = 0; i < 3; i++) {
+        const geofence = geofences[`goal_${i}`];
+        if (geofence) {
+          updatedLocations[i] = {
+            enabled: geofence.enabled,
+            latitude: geofence.latitude,
+            longitude: geofence.longitude,
+            address: null,
+            locationName: geofence.locationName,
+            radius: geofence.radius,
+          };
+        }
+      }
+      
+      if (JSON.stringify(updatedLocations) !== JSON.stringify(settings.location_reminders)) {
+        setSettings(prev => ({
+          ...prev,
+          location_reminders: updatedLocations,
+        }));
+      }
+    } catch (error) {
+      console.log('Error loading geofences:', error);
+    }
+  };
   }, []);
 
   const loadUserName = async () => {
