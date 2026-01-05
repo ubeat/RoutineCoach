@@ -1036,11 +1036,11 @@ export default function SettingsScreen() {
           </Text>
           <TouchableOpacity
             style={[styles.soundButton, { backgroundColor: colors.background }]}
-            onPress={() => Alert.alert('Info', 'Ton-Auswahl oeffnet die Systemeinstellungen.')}
+            onPress={() => setShowSoundPicker(true)}
           >
             <Ionicons name="musical-notes" size={20} color={colors.primary} />
             <Text style={[styles.soundText, { color: colors.text }]}>
-              {settings.appearance.notification_sound === 'default' ? 'Standard' : 'Benutzerdefiniert'}
+              {NOTIFICATION_SOUNDS.find(s => s.id === settings.appearance.notification_sound)?.name || 'Standard'}
             </Text>
             <Ionicons name="chevron-forward" size={20} color={colors.textLight} />
           </TouchableOpacity>
