@@ -1,4 +1,5 @@
 {
+  "_lang": "de",
   "common": {
     "save": "Speichern",
     "cancel": "Abbrechen",
@@ -16,16 +17,19 @@
     "close": "Schließen",
     "retry": "Erneut versuchen",
     "understood": "Verstanden",
-    "later": "Später"
+    "later": "Später",
+    "you": "du",
+    "apply": "Übernehmen",
+    "letsgo": "Los geht's!"
   },
   "tabs": {
-    "home": "Home",
+    "home": "Heute",
     "goals": "Ziele",
     "checkin": "Check-In",
     "progress": "Fortschritt",
     "profile": "Profil",
-    "settings": "Einstellungen",
-    "journal": "Journal"
+    "settings": "Mehr",
+    "journal": "Tagebuch"
   },
   "home": {
     "greeting_morning": "Guten Morgen",
@@ -33,11 +37,18 @@
     "greeting_evening": "Guten Abend",
     "welcome_back": "Schön, dass du da bist!",
     "todays_habits": "Deine heutigen Gewohnheiten",
-    "no_habits": "Noch keine Gewohnheiten eingetragen",
-    "set_habits": "Gewohnheiten festlegen",
+    "no_habits": "Deine Reise beginnt hier",
+    "set_habits": "Setze deine ersten Wenn-Dann Ziele",
     "checkin_reminder": "Vergiss nicht deinen Check-In!",
     "streak_message": "Du bist seit {{days}} Tagen dabei!",
-    "motivational_quote": "Kleine Schritte führen zu großen Veränderungen"
+    "motivational_quote": "Dein Tag voller Möglichkeiten",
+    "checkin_done": "Check-In erledigt!",
+    "mood_label": "Stimmung",
+    "checkin_now": "Jetzt einchecken!",
+    "set_goals_first": "Setze erst deine Wochenziele",
+    "days_tracked": "Tage erfasst",
+    "view_results": "Wochenergebnis ansehen",
+    "coach_says": "Dein Coach sagt"
   },
   "goals": {
     "title": "Deine Wochenziele",
@@ -47,6 +58,7 @@
     "habit_placeholder": "z.B. 10 Minuten spazieren",
     "save_goals": "Ziele speichern",
     "saving": "Speichern...",
+    "saved_success": "Deine Ziele wurden gespeichert!",
     "theory_title": "Die Wenn-Dann Methode",
     "theory_subtitle": "Wissenschaftlich bewährt • Tippe zum Lernen",
     "why_three_title": "Warum nur 3 Gewohnheiten?",
@@ -57,7 +69,6 @@
     "then_placeholder": "dann werde ich...",
     "get_tip": "KI-Tipp holen",
     "suggestions": "Vorschläge",
-    "apply": "Übernehmen",
     "theory_modal": {
       "title": "Die Wenn-Dann Methode",
       "intro": "Wissenschaftler nennen es 'Implementation Intentions' - eine der wirksamsten Techniken zur Verhaltensänderung.",
@@ -70,6 +81,16 @@
       "reason_3": "Du musst nicht mehr über das 'Wann' nachdenken",
       "tip_title": "Tipp",
       "tip_text": "Wähle Situationen, die jeden Tag vorkommen (Zähneputzen, Kaffee trinken, nach Hause kommen)."
+    },
+    "suggestions_data": {
+      "s1": { "wenn": "Nachdem ich morgens aufgestanden bin", "dann": ["ein Glas Wasser trinken", "mein Bett machen", "3 tiefe Atemzüge nehmen", "mich kurz strecken"] },
+      "s2": { "wenn": "Nachdem ich mir die Zähne geputzt habe", "dann": ["2 Kniebeugen machen", "mein Gesicht eincremen", "im Spiegel lächeln", "eine Affirmation sagen"] },
+      "s3": { "wenn": "Bevor ich frühstücke", "dann": ["ein Glas Wasser trinken", "kurz meditieren", "meine Tagesziele anschauen"] },
+      "s4": { "wenn": "Wenn ich mich an den Schreibtisch setze", "dann": ["3 tiefe Atemzüge nehmen", "meine wichtigste Aufgabe notieren", "Wasser bereitstellen"] },
+      "s5": { "wenn": "Nach dem Mittagessen", "dann": ["5 Minuten spazieren gehen", "ein Glas Wasser trinken", "kurz aus dem Fenster schauen"] },
+      "s6": { "wenn": "Wenn ich nach Hause komme", "dann": ["meine Schuhe ordentlich abstellen", "die Jacke aufhängen", "5 Minuten aufräumen"] },
+      "s7": { "wenn": "Bevor ich ins Bett gehe", "dann": ["mein Handy weglegen", "3 Dinge aufschreiben für die ich dankbar bin", "meine Kleidung für morgen bereitlegen"] },
+      "s8": { "wenn": "Wenn ich Stress spüre", "dann": ["5 tiefe Atemzüge nehmen", "kurz die Augen schließen", "meine Schultern entspannen"] }
     }
   },
   "checkin": {
@@ -86,7 +107,10 @@
     "success_title": "Super gemacht!",
     "success_message": "Dein Check-In wurde gespeichert.",
     "already_done": "Du hast heute bereits eingecheckt!",
-    "no_goals": "Bitte lege zuerst deine Wochenziele fest."
+    "no_goals": "Bitte lege zuerst deine Wochenziele fest.",
+    "well_done": "Toll gemacht!",
+    "keep_going": "Weiter so!",
+    "no_worries": "Kein Problem, morgen ist ein neuer Tag!"
   },
   "progress": {
     "title": "Dein Fortschritt",
@@ -105,7 +129,9 @@
     "coaching_intro": "Lass uns gemeinsam auf deine Woche schauen",
     "no_data": "Noch keine Daten für diese Woche",
     "chart_habits": "Gewohnheiten",
-    "premium_required": "Diese Funktion ist nur für Premium-Nutzer verfügbar."
+    "premium_required": "Diese Funktion ist nur für Premium-Nutzer verfügbar.",
+    "habits_completed": "Gewohnheiten geschafft",
+    "your_week": "Deine Woche auf einen Blick"
   },
   "profile": {
     "title": "Profil",
@@ -165,7 +191,9 @@
     "save_settings": "Einstellungen speichern",
     "saving": "Speichern...",
     "saved_success": "Gespeichert!",
-    "saved_message": "Deine Einstellungen wurden gespeichert."
+    "saved_message": "Deine Einstellungen wurden gespeichert.",
+    "all_days": "Alle Tage",
+    "select_time": "Zeit wählen"
   },
   "premium": {
     "title": "Premium",
@@ -342,5 +370,19 @@
     "name_placeholder": "Dein Name",
     "continue": "Los geht's!",
     "skip": "Überspringen"
+  },
+  "badges": {
+    "first_step": { "name": "Erster Schritt", "desc": "Dein erster Check-In!" },
+    "week_warrior": { "name": "Wochen-Krieger", "desc": "7 Tage in Folge" },
+    "habit_hero": { "name": "Gewohnheits-Held", "desc": "Alle Habits an einem Tag" },
+    "mood_master": { "name": "Stimmungs-Meister", "desc": "10 Tage Stimmung geloggt" },
+    "early_bird": { "name": "Frühaufsteher", "desc": "Check-In vor 8 Uhr" },
+    "night_owl": { "name": "Nachteule", "desc": "Check-In nach 22 Uhr" },
+    "perfectionist": { "name": "Perfektionist", "desc": "100% eine Woche" },
+    "comeback": { "name": "Comeback", "desc": "Nach Pause zurück" },
+    "month_master": { "name": "Monats-Meister", "desc": "30 Tage dabei" },
+    "social_butterfly": { "name": "Sozialer Schmetterling", "desc": "Wegbegleiter eingeladen" },
+    "explorer": { "name": "Entdecker", "desc": "Alle Features genutzt" },
+    "immortal": { "name": "Unsterblich", "desc": "365 Tage Serie" }
   }
 }

@@ -1,4 +1,5 @@
 {
+  "_lang": "en",
   "common": {
     "save": "Save",
     "cancel": "Cancel",
@@ -16,15 +17,18 @@
     "close": "Close",
     "retry": "Try again",
     "understood": "Got it",
-    "later": "Later"
+    "later": "Later",
+    "you": "you",
+    "apply": "Apply",
+    "letsgo": "Let's go!"
   },
   "tabs": {
-    "home": "Home",
+    "home": "Today",
     "goals": "Goals",
     "checkin": "Check-In",
     "progress": "Progress",
     "profile": "Profile",
-    "settings": "Settings",
+    "settings": "More",
     "journal": "Journal"
   },
   "home": {
@@ -33,11 +37,18 @@
     "greeting_evening": "Good evening",
     "welcome_back": "Great to see you!",
     "todays_habits": "Your habits for today",
-    "no_habits": "No habits set yet",
-    "set_habits": "Set your habits",
+    "no_habits": "Your journey starts here",
+    "set_habits": "Set your first If-Then goals",
     "checkin_reminder": "Don't forget your check-in!",
     "streak_message": "You've been going for {{days}} days!",
-    "motivational_quote": "Small steps lead to big changes"
+    "motivational_quote": "Your day full of possibilities",
+    "checkin_done": "Check-In completed!",
+    "mood_label": "Mood",
+    "checkin_now": "Check in now!",
+    "set_goals_first": "Set your weekly goals first",
+    "days_tracked": "days tracked",
+    "view_results": "View weekly results",
+    "coach_says": "Your coach says"
   },
   "goals": {
     "title": "Your Weekly Goals",
@@ -47,6 +58,7 @@
     "habit_placeholder": "e.g. Walk for 10 minutes",
     "save_goals": "Save goals",
     "saving": "Saving...",
+    "saved_success": "Your goals have been saved!",
     "theory_title": "The If-Then Method",
     "theory_subtitle": "Scientifically proven • Tap to learn",
     "why_three_title": "Why only 3 habits?",
@@ -57,7 +69,6 @@
     "then_placeholder": "then I will...",
     "get_tip": "Get AI tip",
     "suggestions": "Suggestions",
-    "apply": "Apply",
     "theory_modal": {
       "title": "The If-Then Method",
       "intro": "Scientists call it 'Implementation Intentions' - one of the most effective techniques for behavior change.",
@@ -70,6 +81,16 @@
       "reason_3": "You don't have to think about 'when' anymore",
       "tip_title": "Tip",
       "tip_text": "Choose situations that happen every day (brushing teeth, drinking coffee, coming home)."
+    },
+    "suggestions_data": {
+      "s1": { "wenn": "After waking up in the morning", "dann": ["drink a glass of water", "make my bed", "take 3 deep breaths", "stretch briefly"] },
+      "s2": { "wenn": "After brushing my teeth", "dann": ["do 2 squats", "moisturize my face", "smile in the mirror", "say an affirmation"] },
+      "s3": { "wenn": "Before having breakfast", "dann": ["drink a glass of water", "meditate briefly", "review my daily goals"] },
+      "s4": { "wenn": "When I sit down at my desk", "dann": ["take 3 deep breaths", "write down my most important task", "prepare water"] },
+      "s5": { "wenn": "After lunch", "dann": ["go for a 5-minute walk", "drink a glass of water", "look out the window briefly"] },
+      "s6": { "wenn": "When I come home", "dann": ["put my shoes away neatly", "hang up my jacket", "tidy up for 5 minutes"] },
+      "s7": { "wenn": "Before going to bed", "dann": ["put my phone away", "write down 3 things I'm grateful for", "prepare clothes for tomorrow"] },
+      "s8": { "wenn": "When I feel stressed", "dann": ["take 5 deep breaths", "close my eyes briefly", "relax my shoulders"] }
     }
   },
   "checkin": {
@@ -86,26 +107,31 @@
     "success_title": "Great job!",
     "success_message": "Your check-in has been saved.",
     "already_done": "You've already checked in today!",
-    "no_goals": "Please set your weekly goals first."
+    "no_goals": "Please set your weekly goals first.",
+    "well_done": "Well done!",
+    "keep_going": "Keep going!",
+    "no_worries": "No worries, tomorrow is a new day!"
   },
   "progress": {
     "title": "Your Progress",
-    "this_week": "This week",
-    "weekly_overview": "Weekly overview",
-    "completion_rate": "Completion rate",
-    "average_mood": "Average mood",
-    "streak": "Current streak",
+    "this_week": "This Week",
+    "weekly_overview": "Weekly Overview",
+    "completion_rate": "Completion Rate",
+    "average_mood": "Average Mood",
+    "streak": "Current Streak",
     "days": "days",
     "ai_analysis": "AI Weekly Analysis",
-    "ai_analysis_locked": "Premium feature",
-    "generate_analysis": "Generate analysis",
+    "ai_analysis_locked": "Premium Feature",
+    "generate_analysis": "Generate Analysis",
     "generating": "Analyzing...",
     "coaching": "AI Coaching",
-    "start_coaching": "Start coaching",
+    "start_coaching": "Start Coaching",
     "coaching_intro": "Let's reflect on your week together",
     "no_data": "No data for this week yet",
     "chart_habits": "Habits",
-    "premium_required": "This feature is only available for Premium users."
+    "premium_required": "This feature is only available for Premium users.",
+    "habits_completed": "Habits completed",
+    "your_week": "Your week at a glance"
   },
   "profile": {
     "title": "Profile",
@@ -115,8 +141,8 @@
     "badges": "Badges",
     "badges_count": "{{earned}}/{{total}}",
     "streaks": "Streaks",
-    "current_streak": "Current streak",
-    "longest_streak": "Longest streak",
+    "current_streak": "Current Streak",
+    "longest_streak": "Longest Streak",
     "companion": "Companion",
     "companion_description": "A companion motivates you and you support each other. Together you're more likely to stick with it!",
     "invite_companion": "Invite a companion",
@@ -165,7 +191,9 @@
     "save_settings": "Save Settings",
     "saving": "Saving...",
     "saved_success": "Saved!",
-    "saved_message": "Your settings have been saved."
+    "saved_message": "Your settings have been saved.",
+    "all_days": "All days",
+    "select_time": "Select time"
   },
   "premium": {
     "title": "Premium",
@@ -342,5 +370,19 @@
     "name_placeholder": "Your name",
     "continue": "Let's go!",
     "skip": "Skip"
+  },
+  "badges": {
+    "first_step": { "name": "First Step", "desc": "Your first check-in!" },
+    "week_warrior": { "name": "Week Warrior", "desc": "7 days in a row" },
+    "habit_hero": { "name": "Habit Hero", "desc": "All habits in one day" },
+    "mood_master": { "name": "Mood Master", "desc": "10 days mood logged" },
+    "early_bird": { "name": "Early Bird", "desc": "Check-in before 8 AM" },
+    "night_owl": { "name": "Night Owl", "desc": "Check-in after 10 PM" },
+    "perfectionist": { "name": "Perfectionist", "desc": "100% for a week" },
+    "comeback": { "name": "Comeback", "desc": "Back after a break" },
+    "month_master": { "name": "Month Master", "desc": "30 days going" },
+    "social_butterfly": { "name": "Social Butterfly", "desc": "Invited a companion" },
+    "explorer": { "name": "Explorer", "desc": "Used all features" },
+    "immortal": { "name": "Immortal", "desc": "365-day streak" }
   }
 }
