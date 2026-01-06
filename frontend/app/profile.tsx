@@ -718,6 +718,123 @@ export default function ProfileScreen() {
           </ScrollView>
         </View>
       </Modal>
+
+      {/* Badge Detail Modal */}
+      <Modal
+        transparent
+        animationType="fade"
+        visible={showBadgeModal}
+        onRequestClose={() => setShowBadgeModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.badgeModalContent, { backgroundColor: colors.card }]}>
+            {selectedBadge && (
+              <>
+                <View style={[
+                  styles.badgeModalIcon, 
+                  { backgroundColor: badgeEarned ? selectedBadge.color : '#E0E0E0' }
+                ]}>
+                  <Text style={styles.badgeModalEmoji}>
+                    {BADGE_IMAGES[selectedBadge.id]?.emoji || '🏅'}
+                  </Text>
+                </View>
+                
+                <Text style={[styles.badgeModalTitle, { color: colors.text }]}>
+                  {selectedBadge.name}
+                </Text>
+                
+                <View style={[
+                  styles.badgeStatusPill, 
+                  { backgroundColor: badgeEarned ? '#E8F5E9' : '#FFF3E0' }
+                ]}>
+                  <Ionicons 
+                    name={badgeEarned ? "checkmark-circle" : "lock-closed"} 
+                    size={16} 
+                    color={badgeEarned ? '#4CAF50' : '#FF9800'} 
+                  />
+                  <Text style={[
+                    styles.badgeStatusText, 
+                    { color: badgeEarned ? '#4CAF50' : '#FF9800' }
+                  ]}>
+                    {badgeEarned ? 'Freigeschaltet! 🎉' : 'Noch nicht freigeschaltet'}
+                  </Text>
+                </View>
+                
+                <Text style={[styles.badgeModalDescription, { color: colors.textLight }]}>
+                  {BADGE_IMAGES[selectedBadge.id]?.description || selectedBadge.description}
+                </Text>
+                
+                {!badgeEarned && (
+                  <View style={[styles.badgeHintBox, { backgroundColor: colors.background }]}>
+                    <Ionicons name="bulb-outline" size={20} color={colors.accent} />
+                    <Text style={[styles.badgeHintText, { color: colors.text }]}>
+                      Tipp: {selectedBadge.description}
+                    </Text>
+                  </View>
+                )}
+                
+                <TouchableOpacity
+                  style={[styles.badgeModalCloseButton, { backgroundColor: colors.primary }]}
+                  onPress={() => setShowBadgeModal(false)}
+                >
+                  <Text style={styles.badgeModalCloseText}>Verstanden</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* XP Info Modal */}
+      <Modal
+        transparent
+        animationType="slide"
+        visible={showXPInfoModal}
+        onRequestClose={() => setShowXPInfoModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.xpModalContent, { backgroundColor: colors.card }]}>
+            <View style={styles.xpModalHeader}>
+              <Ionicons name="star" size={32} color="#FFD700" />
+              <Text style={[styles.xpModalTitle, { color: colors.text }]}>So verdienst du XP!</Text>
+            </View>
+            
+            <Text style={[styles.xpModalSubtitle, { color: colors.textLight }]}>
+              XP (Erfahrungspunkte) helfen dir, Level aufzusteigen und neue Abzeichen freizuschalten.
+            </Text>
+            
+            <ScrollView style={styles.xpRewardsList}>
+              {XP_REWARDS.map((reward, index) => (
+                <View key={index} style={[styles.xpRewardItem, { backgroundColor: colors.background }]}>
+                  <View style={[styles.xpRewardIconContainer, { backgroundColor: reward.color + '20' }]}>
+                    <Ionicons name={reward.icon as any} size={24} color={reward.color} />
+                  </View>
+                  <View style={styles.xpRewardInfo}>
+                    <Text style={[styles.xpRewardAction, { color: colors.text }]}>{reward.action}</Text>
+                  </View>
+                  <View style={[styles.xpRewardBadge, { backgroundColor: reward.color }]}>
+                    <Text style={styles.xpRewardAmount}>+{reward.xp}</Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+            
+            <View style={[styles.xpTipBox, { backgroundColor: colors.accent + '30' }]}>
+              <Ionicons name="heart" size={20} color={colors.primary} />
+              <Text style={[styles.xpTipText, { color: colors.text }]}>
+                Bleib dran - jeder kleine Schritt zaehlt und bringt dich naeher ans Ziel! 💪
+              </Text>
+            </View>
+            
+            <TouchableOpacity
+              style={[styles.xpModalCloseButton, { backgroundColor: colors.primary }]}
+              onPress={() => setShowXPInfoModal(false)}
+            >
+              <Text style={styles.xpModalCloseText}>Los geht's!</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
