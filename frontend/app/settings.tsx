@@ -1391,7 +1391,7 @@ export default function SettingsScreen() {
               style={[styles.modalButton, { backgroundColor: colors.primary }]}
               onPress={() => setShowColorPicker(false)}
             >
-              <Text style={styles.modalButtonText}>Fertig</Text>
+              <Text style={styles.modalButtonText}>{t('common.done')}</Text>
             </TouchableOpacity>
           </View>
         </View>
