@@ -1664,16 +1664,16 @@ async def update_streak(device_id: str, all_habits_completed: bool):
     }
 
 @api_router.post("/gamification/{device_id}/award-badge")
-async def award_badge(device_id: str, badge_id: str):
+async def award_badge(device_id: str, badge_id: str, language: str = "de"):
     if badge_id not in BADGES:
-        raise HTTPException(status_code=400, detail="Badge nicht gefunden")
+        raise HTTPException(status_code=400, detail="Badge not found" if language == "en" else "Badge nicht gefunden")
     
     await db.gamification.update_one(
         {"device_id": device_id},
         {"$addToSet": {"badges": badge_id}}
     )
     
-    return {"badge": BADGES[badge_id], "awarded": True}
+    return {"badge": get_localized_badge(BADGES[badge_id], language), "awarded": True}
 
 @api_router.get("/challenges")
 async def get_available_challenges(language: str = "de"):
