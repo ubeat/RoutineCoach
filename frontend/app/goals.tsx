@@ -237,7 +237,7 @@ export default function GoalsScreen() {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={[styles.loadingText, { color: colors.textLight }]}>Einen Moment...</Text>
+        <Text style={[styles.loadingText, { color: colors.textLight }]}>{t('common.loading')}</Text>
       </View>
     );
   }
@@ -252,13 +252,13 @@ export default function GoalsScreen() {
           {/* Header with heart */}
           <View style={styles.header}>
             <View style={styles.headerRow}>
-              <Text style={[styles.title, { color: colors.text }]}>Deine Wochenziele</Text>
+              <Text style={[styles.title, { color: colors.text }]}>{t('goals.title')}</Text>
               <Text style={styles.heartEmoji}>💜</Text>
             </View>
             <Text style={[styles.subtitle, { color: colors.textLight }]}>
               {isSunday 
-                ? 'Perfekter Tag fuer einen Neuanfang!' 
-                : 'Kleine Schritte fuehren zu grossen Veraenderungen'}
+                ? t('goals.subtitle_sunday')
+                : t('goals.subtitle_default')}
             </Text>
           </View>
 
