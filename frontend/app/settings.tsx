@@ -266,6 +266,7 @@ const TimePresets = ({ onSelect, colors }: { onSelect: (time: string) => void; c
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const searchParams = useLocalSearchParams<{ scrollTo?: string }>();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
