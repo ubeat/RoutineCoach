@@ -1,0 +1,43 @@
+{
+  "_note": "French translation - TODO: Translate from German",
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "next": "Suivant",
+    "done": "Terminé",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "yes": "Oui",
+    "no": "Non",
+    "ok": "OK",
+    "close": "Fermer",
+    "retry": "Réessayer",
+    "understood": "Compris",
+    "later": "Plus tard"
+  },
+  "tabs": {
+    "home": "Accueil",
+    "goals": "Objectifs",
+    "checkin": "Check-In",
+    "progress": "Progrès",
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "journal": "Journal"
+  },
+  "home": {
+    "greeting_morning": "Bonjour",
+    "greeting_afternoon": "Bon après-midi",
+    "greeting_evening": "Bonsoir",
+    "welcome_back": "Content de te voir!",
+    "todays_habits": "Tes habitudes du jour",
+    "no_habits": "Pas encore d'habitudes",
+    "set_habits": "Définir des habitudes",
+    "checkin_reminder": "N'oublie pas ton check-in!",
+    "streak_message": "Tu es actif depuis {{days}} jours!",
+    "motivational_quote": "Les petits pas mènent aux grands changements"
+  }
+}
