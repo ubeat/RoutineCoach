@@ -735,7 +735,16 @@ Meine Empfehlung: Lass uns nächste Woche mit winzigen Schritten starten. Was w�
 
 @api_router.post("/coaching/message")
 async def coaching_message(request: CoachingMessageRequest):
-    """Führt einen lösungsorientierten Coaching-Dialog"""
+    """Führt einen lösungsorientierten Coaching-Dialog (Premium Feature)"""
+    
+    # Check premium status
+    premium_status = await check_premium_status(request.device_id)
+    if not premium_status.get("is_premium"):
+        raise HTTPException(
+            status_code=403, 
+            detail="Diese Funktion ist nur für Premium-Nutzer verfügbar. Schließe ein Abo ab oder nutze einen Promo-Code."
+        )
+    
     try:
         api_key = os.environ.get('EMERGENT_LLM_KEY')
         
@@ -788,6 +797,8 @@ KONTEXT DER WOCHE:
             "suggested_questions": []  # The AI asks its own questions
         }
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Coaching error: {e}")
         return {
@@ -801,7 +812,16 @@ KONTEXT DER WOCHE:
 
 @api_router.post("/coaching/start")
 async def start_coaching_session(request: WeeklyReviewRequest):
-    """Startet eine neue Coaching-Reflexionssitzung mit einer ersten Frage"""
+    """Startet eine neue Coaching-Reflexionssitzung mit einer ersten Frage (Premium Feature)"""
+    
+    # Check premium status
+    premium_status = await check_premium_status(request.device_id)
+    if not premium_status.get("is_premium"):
+        raise HTTPException(
+            status_code=403, 
+            detail="Diese Funktion ist nur für Premium-Nutzer verfügbar. Schließe ein Abo ab oder nutze einen Promo-Code."
+        )
+    
     try:
         device_id = request.device_id
         
