@@ -28,9 +28,16 @@ const resources = {
 
 // Get initial language
 const getInitialLanguage = (): string => {
-  const deviceLang = Localization.locale.split('-')[0];
-  if (deviceLang in languages) {
-    return deviceLang;
+  try {
+    const locale = Localization.locale;
+    if (locale) {
+      const deviceLang = locale.split('-')[0];
+      if (deviceLang in languages) {
+        return deviceLang;
+      }
+    }
+  } catch (error) {
+    console.log('Could not get device language, defaulting to German');
   }
   return 'de'; // Default to German
 };
