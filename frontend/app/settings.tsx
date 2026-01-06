@@ -2056,4 +2056,51 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  // Premium & Admin Buttons
+  premiumButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+  },
+  premiumIconBg: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  premiumButtonContent: {
+    flex: 1,
+    marginLeft: 14,
+  },
+  premiumButtonTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  premiumButtonSubtitle: {
+    fontSize: 13,
+    marginTop: 2,
+  },
+  settingDivider: {
+    height: 1,
+    marginHorizontal: 16,
+  },
+  adminButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    paddingLeft: 16,
+  },
+  adminIconBg: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  adminButtonText: {
+    flex: 1,
+    fontSize: 14,
+    marginLeft: 12,
+  },
 });
