@@ -1462,7 +1462,9 @@ export default function SettingsScreen() {
               <View style={[styles.selectedLocationBox, { backgroundColor: colors.secondary + '20', borderColor: colors.secondary }]}>
                 <Ionicons name="checkmark-circle" size={24} color={colors.secondary} />
                 <View style={styles.selectedLocationInfo}>
-                  <Text style={[styles.selectedLocationLabel, { color: colors.textLight }]}>Ausgewaehlter Ort:</Text>
+                  <Text style={[styles.selectedLocationLabel, { color: colors.textLight }]}>
+                    {i18n.language === 'en' ? 'Selected location:' : 'Ausgewaehlter Ort:'}
+                  </Text>
                   <Text style={[styles.selectedLocationText, { color: colors.text }]} numberOfLines={2}>
                     {selectedLocation.address}
                   </Text>
