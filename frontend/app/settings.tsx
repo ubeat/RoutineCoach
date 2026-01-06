@@ -43,9 +43,6 @@ const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 // WEEKDAYS will be dynamically translated in the component
-  { short: 'Sa', full: 'Samstag', index: 5 },
-  { short: 'So', full: 'Sonntag', index: 6 },
-];
 
 // Generate hours and minutes arrays
 const HOURS = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
