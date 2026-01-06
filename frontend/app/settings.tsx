@@ -1110,7 +1110,7 @@ export default function SettingsScreen() {
               >
                 <Ionicons name="alarm" size={24} color={colors.secondary} />
                 <View style={styles.timeButtonContent}>
-                  <Text style={[styles.timeLabel, { color: colors.textLight }]}>Erinnerungszeit</Text>
+                  <Text style={[styles.timeLabel, { color: colors.textLight }]}>{t('settings.reminder_time')}</Text>
                   <Text style={[styles.timeText, { color: colors.text }]}>
                     {settings.checkin_reminder.time} {i18n.language === 'en' ? "o'clock" : 'Uhr'}
                   </Text>
