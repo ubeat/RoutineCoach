@@ -1441,40 +1441,50 @@ LEVELS = [
 WEEKLY_CHALLENGES = [
     {
         "id": "early_bird",
-        "name": "Fruehaufsteher-Challenge",
-        "description": "Check 5x vor 7:00 Uhr ein",
+        "name_de": "Frühaufsteher-Challenge",
+        "name_en": "Early Bird Challenge",
+        "description_de": "Check 5x vor 7:00 Uhr ein",
+        "description_en": "Check in 5 times before 7:00 AM",
         "target": 5,
         "xp_reward": 50,
         "type": "early_checkin"
     },
     {
         "id": "perfect_3",
-        "name": "Perfekte 3 Tage",
-        "description": "Erledige alle Habits an 3 aufeinanderfolgenden Tagen",
+        "name_de": "Perfekte 3 Tage",
+        "name_en": "Perfect 3 Days",
+        "description_de": "Erledige alle Habits an 3 aufeinanderfolgenden Tagen",
+        "description_en": "Complete all habits on 3 consecutive days",
         "target": 3,
         "xp_reward": 75,
         "type": "perfect_days"
     },
     {
         "id": "mood_tracker",
-        "name": "Stimmungs-Tracker",
-        "description": "Tracke deine Stimmung 7 Tage lang",
+        "name_de": "Stimmungs-Tracker",
+        "name_en": "Mood Tracker",
+        "description_de": "Tracke deine Stimmung 7 Tage lang",
+        "description_en": "Track your mood for 7 days",
         "target": 7,
         "xp_reward": 40,
         "type": "mood_tracking"
     },
     {
         "id": "journal_week",
-        "name": "Reflexions-Woche",
-        "description": "Schreibe 5 Journal-Eintraege",
+        "name_de": "Reflexions-Woche",
+        "name_en": "Reflection Week",
+        "description_de": "Schreibe 5 Journal-Einträge",
+        "description_en": "Write 5 journal entries",
         "target": 5,
         "xp_reward": 60,
         "type": "journal_entries"
     },
     {
         "id": "gratitude_master",
-        "name": "Dankbarkeits-Meister",
-        "description": "Schreibe 10 Dankbarkeiten auf",
+        "name_de": "Dankbarkeits-Meister",
+        "name_en": "Gratitude Master",
+        "description_de": "Schreibe 10 Dankbarkeiten auf",
+        "description_en": "Write down 10 gratitudes",
         "target": 10,
         "xp_reward": 50,
         "type": "gratitudes"
