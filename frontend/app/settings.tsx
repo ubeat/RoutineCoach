@@ -1414,7 +1414,7 @@ export default function SettingsScreen() {
                 <Ionicons name="close" size={28} color={colors.textLight} />
               </TouchableOpacity>
               <Text style={[styles.locationModalTitle, { color: colors.text }]}>
-                {i18n.language === 'en' ? 'Choose location' : 'Ort waehlen'}
+                {t('settings.choose_location')}
               </Text>
               <TouchableOpacity 
                 onPress={confirmLocationSelection}
