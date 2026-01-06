@@ -98,6 +98,83 @@ class AICoachRequest(BaseModel):
 class GoalAdviceRequest(BaseModel):
     device_id: str
 
+# ============================================
+# SUBSCRIPTION & PREMIUM SYSTEM
+# ============================================
+
+# Subscription Models
+class SubscriptionStatus(BaseModel):
+    device_id: str
+    is_premium: bool = False
+    subscription_type: Optional[str] = None  # 'stripe', 'paypal', 'revenuecat', 'promo'
+    subscription_id: Optional[str] = None
+    expires_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class PromoCode(BaseModel):
+    code: str
+    duration_days: int  # 7, 30, 90, 180, 365
+    description: Optional[str] = None
+    max_uses: Optional[int] = None  # None = unlimited
+    current_uses: int = 0
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_by: str = "admin"
+
+class PromoCodeCreate(BaseModel):
+    code: str
+    duration_days: int  # 7=1 week, 30=1 month, 90=3 months, 180=6 months, 365=1 year
+    description: Optional[str] = None
+    max_uses: Optional[int] = None
+
+class PromoCodeRedeem(BaseModel):
+    device_id: str
+    code: str
+
+class StripeCheckoutRequest(BaseModel):
+    device_id: str
+    success_url: str
+    cancel_url: str
+
+class PayPalCheckoutRequest(BaseModel):
+    device_id: str
+    return_url: str
+    cancel_url: str
+
+class RevenueCatWebhook(BaseModel):
+    event: dict
+    api_version: str
+
+# Admin authentication (simple password-based)
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'habits_admin_2025')
+
+def verify_admin(password: str) -> bool:
+    return password == ADMIN_PASSWORD
+
+# Check if user has premium subscription
+async def check_premium_status(device_id: str) -> dict:
+    """Check if a device has an active premium subscription"""
+    subscription = await db.subscriptions.find_one({"device_id": device_id})
+    
+    if not subscription:
+        return {"is_premium": False, "reason": "no_subscription"}
+    
+    # Check if subscription has expired
+    if subscription.get("expires_at"):
+        expires_at = subscription["expires_at"]
+        if isinstance(expires_at, str):
+            expires_at = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+        
+        if expires_at < datetime.utcnow():
+            return {"is_premium": False, "reason": "expired", "expired_at": expires_at.isoformat()}
+    
+    return {
+        "is_premium": True,
+        "subscription_type": subscription.get("subscription_type"),
+        "expires_at": subscription.get("expires_at").isoformat() if subscription.get("expires_at") else None
+    }
+
 # Helper function to get week start (Monday)
 def get_week_start(dt: datetime = None) -> datetime:
     if dt is None:
