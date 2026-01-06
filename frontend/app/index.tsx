@@ -125,13 +125,21 @@ export default function HomeScreen() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Wird geladen...</Text>
+        <Text style={styles.loadingText}>{t('common.loading')}</Text>
       </View>
     );
   }
 
   const completedToday = todayCheckin?.completed_today;
   const daysTracked = weekSummary?.total_days_tracked || 0;
+  
+  // Get greeting based on time
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return t('home.greeting_morning');
+    if (hour < 18) return t('home.greeting_afternoon');
+    return t('home.greeting_evening');
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -143,8 +151,8 @@ export default function HomeScreen() {
       >
         <View style={styles.header}>
           <Text style={styles.appName}>Schritt für Schritt</Text>
-          <Text style={styles.greeting}>Hallo, {userName || 'du'}! 💜</Text>
-          <Text style={styles.dayText}>{dayName} - Dein Tag voller Moeglichkeiten</Text>
+          <Text style={styles.greeting}>{getGreeting()}, {userName || 'du'}! 💜</Text>
+          <Text style={styles.dayText}>{getLocalizedWeekday()} - {t('home.motivational_quote')}</Text>
         </View>
 
         {isSunday && (
@@ -152,8 +160,8 @@ export default function HomeScreen() {
             <View style={styles.sundayContent}>
               <Ionicons name="sparkles" size={28} color="#FFF" />
               <View style={styles.sundayTextContainer}>
-                <Text style={styles.sundayTitle}>Neuer Wochenstart! 🌟</Text>
-                <Text style={styles.sundaySubtitle}>Zeit fuer deine Wenn-Dann Plaene</Text>
+                <Text style={styles.sundayTitle}>{t('goals.subtitle_sunday')} 🌟</Text>
+                <Text style={styles.sundaySubtitle}>{t('goals.theory_title')}</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -162,7 +170,7 @@ export default function HomeScreen() {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Ionicons name="flag" size={24} color={COLORS.primary} />
-            <Text style={styles.cardTitle}>Deine Wochenziele</Text>
+            <Text style={styles.cardTitle}>{t('goals.title')}</Text>
           </View>
           {goals ? (
             <View style={styles.goalsContainer}>
@@ -176,7 +184,7 @@ export default function HomeScreen() {
               ))}
               <TouchableOpacity style={styles.editGoalsLink} onPress={() => router.push('/goals')}>
                 <Ionicons name="pencil" size={14} color={COLORS.primary} />
-                <Text style={styles.editGoalsText}>Ziele bearbeiten</Text>
+                <Text style={styles.editGoalsText}>{t('common.edit')}</Text>
               </TouchableOpacity>
             </View>
           ) : (
