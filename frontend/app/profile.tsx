@@ -1310,4 +1310,171 @@ const styles = StyleSheet.create({
   newCodeText: {
     fontSize: 14,
   },
+  // XP Info Link on Level Card
+  xpInfoLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+    gap: 6,
+  },
+  xpInfoLinkText: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 13,
+    textDecorationLine: 'underline',
+  },
+  // Badge Detail Modal Styles
+  badgeModalContent: {
+    marginHorizontal: 30,
+    marginTop: 'auto',
+    marginBottom: 'auto',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+  },
+  badgeModalIcon: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  badgeModalEmoji: {
+    fontSize: 48,
+  },
+  badgeModalTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  badgeStatusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginBottom: 16,
+    gap: 6,
+  },
+  badgeStatusText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  badgeModalDescription: {
+    fontSize: 15,
+    lineHeight: 22,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  badgeHintBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 16,
+    gap: 10,
+  },
+  badgeHintText: {
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  badgeModalCloseButton: {
+    width: '100%',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  badgeModalCloseText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  // XP Info Modal Styles
+  xpModalContent: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    paddingBottom: 40,
+    marginTop: 60,
+    maxHeight: '85%',
+  },
+  xpModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginBottom: 8,
+  },
+  xpModalTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+  },
+  xpModalSubtitle: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  xpRewardsList: {
+    maxHeight: 320,
+    marginBottom: 16,
+  },
+  xpRewardItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  xpRewardIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  xpRewardInfo: {
+    flex: 1,
+  },
+  xpRewardAction: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  xpRewardBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  xpRewardAmount: {
+    color: '#FFF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  xpTipBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    borderRadius: 12,
+    gap: 10,
+    marginBottom: 16,
+  },
+  xpTipText: {
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  xpModalCloseButton: {
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  xpModalCloseText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
 });
