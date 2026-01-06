@@ -343,12 +343,29 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 10,
   },
+  headerTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  languageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.card,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 4,
+  },
+  languageFlag: {
+    fontSize: 18,
+  },
   appName: {
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.textLight,
     letterSpacing: 1,
-    marginBottom: 4,
   },
   greeting: {
     fontSize: 28,
