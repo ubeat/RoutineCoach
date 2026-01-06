@@ -72,6 +72,50 @@ export default function ProfileScreen() {
   const [badgeEarned, setBadgeEarned] = useState(false);
   const [showXPInfoModal, setShowXPInfoModal] = useState(false);
 
+  // Helper function to translate level names
+  const getLevelName = (level: number | undefined): string => {
+    const levelNames: Record<number, { de: string; en: string }> = {
+      1: { de: 'Anfänger', en: 'Beginner' },
+      2: { de: 'Lehrling', en: 'Apprentice' },
+      3: { de: 'Fortgeschritten', en: 'Advanced' },
+      4: { de: 'Experte', en: 'Expert' },
+      5: { de: 'Meister', en: 'Master' },
+      6: { de: 'Großmeister', en: 'Grand Master' },
+      7: { de: 'Legende', en: 'Legend' },
+      8: { de: 'Champion', en: 'Champion' },
+      9: { de: 'Held', en: 'Hero' },
+      10: { de: 'Unsterblich', en: 'Immortal' },
+    };
+    const lvl = level || 1;
+    return levelNames[lvl]?.[i18n.language === 'en' ? 'en' : 'de'] || t('profile.beginner');
+  };
+
+  // Helper function to translate challenge names
+  const getChallengeName = (challenge: Challenge): string => {
+    const key = `challenges.${challenge.id}.name`;
+    const translated = t(key);
+    return translated !== key ? translated : challenge.name;
+  };
+
+  const getChallengeDesc = (challenge: Challenge): string => {
+    const key = `challenges.${challenge.id}.desc`;
+    const translated = t(key);
+    return translated !== key ? translated : challenge.description;
+  };
+
+  // Helper function to translate badge names
+  const getBadgeName = (badge: Badge): string => {
+    const key = `badges.${badge.id}.name`;
+    const translated = t(key);
+    return translated !== key ? translated : badge.name;
+  };
+
+  const getBadgeDesc = (badge: Badge): string => {
+    const key = `badges.${badge.id}.desc`;
+    const translated = t(key);
+    return translated !== key ? translated : badge.description;
+  };
+
   const XP_REWARDS = [
     { action: t('profile.xp_daily_checkin'), xp: 10, icon: 'checkbox-outline', color: '#4CAF50' },
     { action: t('profile.xp_all_habits'), xp: 25, icon: 'star', color: '#FFD700' },
