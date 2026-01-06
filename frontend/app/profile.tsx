@@ -717,7 +717,7 @@ export default function ProfileScreen() {
                   { backgroundColor: badgeEarned ? selectedBadge.color : '#E0E0E0' }
                 ]}>
                   <Text style={styles.badgeModalEmoji}>
-                    {BADGE_IMAGES[selectedBadge.id]?.emoji || '🏅'}
+                    {BADGE_EMOJIS[selectedBadge.id] || '🏅'}
                   </Text>
                 </View>
                 
@@ -739,20 +739,20 @@ export default function ProfileScreen() {
                     { color: badgeEarned ? '#4CAF50' : '#FF9800' }
                   ]}>
                     {badgeEarned 
-                      ? (isEn ? 'Unlocked! 🎉' : 'Freigeschaltet! 🎉') 
-                      : (isEn ? 'Not yet unlocked' : 'Noch nicht freigeschaltet')}
+                      ? (t('profile.badge_unlocked') + ' 🎉')
+                      : t('profile.badge_locked')}
                   </Text>
                 </View>
                 
                 <Text style={[styles.badgeModalDescription, { color: colors.textLight }]}>
-                  {BADGE_IMAGES[selectedBadge.id]?.description || selectedBadge.description}
+                  {t(`badges.${selectedBadge.id}.desc`, { defaultValue: selectedBadge.description })}
                 </Text>
                 
                 {!badgeEarned && (
                   <View style={[styles.badgeHintBox, { backgroundColor: colors.background }]}>
                     <Ionicons name="bulb-outline" size={20} color={colors.accent} />
                     <Text style={[styles.badgeHintText, { color: colors.text }]}>
-                      {isEn ? 'Tip:' : 'Tipp:'} {selectedBadge.description}
+                      {t('profile.badge_tip')} {selectedBadge.description}
                     </Text>
                   </View>
                 )}
@@ -780,13 +780,11 @@ export default function ProfileScreen() {
           <View style={[styles.xpModalContent, { backgroundColor: colors.card }]}>
             <View style={styles.xpModalHeader}>
               <Ionicons name="star" size={32} color="#FFD700" />
-              <Text style={[styles.xpModalTitle, { color: colors.text }]}>{isEn ? 'How to earn XP!' : 'So verdienst du XP!'}</Text>
+              <Text style={[styles.xpModalTitle, { color: colors.text }]}>{t('profile.xp_modal_title')}</Text>
             </View>
             
             <Text style={[styles.xpModalSubtitle, { color: colors.textLight }]}>
-              {isEn 
-                ? 'XP (experience points) help you level up and unlock new badges.'
-                : 'XP (Erfahrungspunkte) helfen dir, Level aufzusteigen und neue Abzeichen freizuschalten.'}
+              {t('profile.xp_modal_subtitle')}
             </Text>
             
             <ScrollView style={styles.xpRewardsList}>
