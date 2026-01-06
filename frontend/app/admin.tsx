@@ -143,7 +143,8 @@ export default function AdminScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await axios.delete(`${API_URL}/api/admin/promo-codes/${code}?admin_password=${password}`);
+              const encodedPassword = encodeURIComponent(password);
+              await axios.delete(`${API_URL}/api/admin/promo-codes/${code}?admin_password=${encodedPassword}`);
               fetchData();
             } catch (error) {
               Alert.alert(t('common.error'), isEn ? 'Code could not be deleted.' : 'Code konnte nicht gelöscht werden.');
