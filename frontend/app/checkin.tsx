@@ -98,7 +98,7 @@ export default function CheckinScreen() {
 
   const submitCheckin = async () => {
     if (!selectedMoodEmoji) {
-      Alert.alert('Hinweis', 'Bitte waehle deine Stimmung aus');
+      Alert.alert(t('common.error'), t('checkin.select_mood', 'Bitte wähle deine Stimmung aus'));
       return;
     }
 
@@ -118,7 +118,7 @@ export default function CheckinScreen() {
       setAiResponse(response.data.ai_response);
       setAlreadyCheckedIn(true);
     } catch (error: any) {
-      Alert.alert('Fehler', error.response?.data?.detail || 'Check-In fehlgeschlagen');
+      Alert.alert(t('common.error'), error.response?.data?.detail || t('errors.save_failed'));
     } finally {
       setSubmitting(false);
     }
@@ -137,10 +137,10 @@ export default function CheckinScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.emptyContainer}>
           <Ionicons name="flag-outline" size={80} color={COLORS.textLight} />
-          <Text style={styles.emptyTitle}>Keine Ziele gesetzt</Text>
-          <Text style={styles.emptyText}>Setze erst deine Wochenziele, bevor du einchecken kannst.</Text>
+          <Text style={styles.emptyTitle}>{t('checkin.no_goals')}</Text>
+          <Text style={styles.emptyText}>{t('home.set_goals_first')}</Text>
           <TouchableOpacity style={styles.goToGoalsButton} onPress={() => router.push('/goals')}>
-            <Text style={styles.goToGoalsText}>Ziele setzen</Text>
+            <Text style={styles.goToGoalsText}>{t('home.set_habits')}</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -152,22 +152,22 @@ export default function CheckinScreen() {
       <SafeAreaView style={styles.container}>
         <ScrollView style={styles.scrollView}>
           <View style={styles.header}>
-            <Text style={styles.title}>Erledigt!</Text>
-            <Text style={styles.subtitle}>Du hast heute schon eingecheckt</Text>
+            <Text style={styles.title}>{t('common.done')}!</Text>
+            <Text style={styles.subtitle}>{t('checkin.already_done')}</Text>
           </View>
 
           <View style={styles.card}>
             <View style={styles.successIcon}>
               <Ionicons name="checkmark-circle" size={80} color={COLORS.success} />
             </View>
-            <Text style={styles.successText}>Toll gemacht!</Text>
+            <Text style={styles.successText}>{t('checkin.well_done')}</Text>
           </View>
 
           {aiResponse && (
             <View style={[styles.card, styles.coachCard]}>
               <View style={styles.cardHeader}>
                 <Ionicons name="chatbubble-ellipses" size={24} color={COLORS.pink} />
-                <Text style={styles.cardTitle}>Dein Coach sagt</Text>
+                <Text style={styles.cardTitle}>{t('home.coach_says')}</Text>
               </View>
               <Text style={styles.coachMessage}>{aiResponse}</Text>
             </View>
