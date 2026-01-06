@@ -1292,7 +1292,7 @@ export default function SettingsScreen() {
           ) : (
             <>
               <Ionicons name="save" size={20} color="#FFF" />
-              <Text style={styles.saveButtonText}>Einstellungen speichern</Text>
+              <Text style={styles.saveButtonText}>{t('settings.save_settings')}</Text>
             </>
           )}
         </TouchableOpacity>
