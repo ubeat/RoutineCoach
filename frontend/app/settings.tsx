@@ -821,6 +821,38 @@ export default function SettingsScreen() {
           <Text style={[styles.title, { color: colors.text }]}>Einstellungen</Text>
         </View>
 
+        {/* Premium & Admin Section */}
+        <View style={[styles.section, { backgroundColor: colors.card }]}>
+          <TouchableOpacity 
+            style={styles.premiumButton}
+            onPress={() => router.push('/premium')}
+          >
+            <View style={[styles.premiumIconBg, { backgroundColor: '#FFD700' }]}>
+              <Ionicons name="diamond" size={24} color="#FFF" />
+            </View>
+            <View style={styles.premiumButtonContent}>
+              <Text style={[styles.premiumButtonTitle, { color: colors.text }]}>Premium</Text>
+              <Text style={[styles.premiumButtonSubtitle, { color: colors.textLight }]}>
+                KI-Coach & Wochenanalysen
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={colors.textLight} />
+          </TouchableOpacity>
+          
+          <View style={[styles.settingDivider, { backgroundColor: colors.background }]} />
+          
+          <TouchableOpacity 
+            style={styles.adminButton}
+            onPress={() => router.push('/admin')}
+          >
+            <View style={[styles.adminIconBg, { backgroundColor: colors.primary + '20' }]}>
+              <Ionicons name="shield-checkmark" size={20} color={colors.primary} />
+            </View>
+            <Text style={[styles.adminButtonText, { color: colors.textLight }]}>Admin-Bereich</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
+          </TouchableOpacity>
+        </View>
+
         {/* Profile Section - Name */}
         <View style={[styles.section, { backgroundColor: colors.card }]}>
           <View style={styles.sectionHeader}>
