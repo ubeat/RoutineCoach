@@ -199,19 +199,19 @@ export default function PremiumScreen() {
               <Ionicons name="star" size={40} color="#FFF" />
             </View>
             <Text style={[styles.premiumTitle, { color: colors.text }]}>
-              {isEn ? 'You are Premium! 🎉' : 'Du bist Premium! 🎉'}
+              {t('premium.you_are_premium')} 🎉
             </Text>
             <Text style={[styles.premiumSubtitle, { color: colors.textLight }]}>
-              {isEn ? 'Thank you for your support!' : 'Vielen Dank für deine Unterstützung!'}
+              {t('premium.thank_you')}
             </Text>
 
             <View style={[styles.subscriptionCard, { backgroundColor: colors.card }]}>
               <View style={styles.subscriptionRow}>
-                <Text style={[styles.subscriptionLabel, { color: colors.textLight }]}>Status</Text>
-                <Text style={[styles.subscriptionValue, { color: colors.secondary }]}>{isEn ? 'Active ✓' : 'Aktiv ✓'}</Text>
+                <Text style={[styles.subscriptionLabel, { color: colors.textLight }]}>{t('premium.status')}</Text>
+                <Text style={[styles.subscriptionValue, { color: colors.secondary }]}>{t('premium.active')} ✓</Text>
               </View>
               <View style={styles.subscriptionRow}>
-                <Text style={[styles.subscriptionLabel, { color: colors.textLight }]}>{isEn ? 'Type' : 'Typ'}</Text>
+                <Text style={[styles.subscriptionLabel, { color: colors.textLight }]}>{t('premium.type')}</Text>
                 <Text style={[styles.subscriptionValue, { color: colors.text }]}>
                   {subscriptionInfo?.subscription_type === 'promo' ? 'Promo-Code' :
                    subscriptionInfo?.subscription_type === 'stripe' ? 'Stripe' :
@@ -222,7 +222,7 @@ export default function PremiumScreen() {
               </View>
               {subscriptionInfo?.expires_at && (
                 <View style={styles.subscriptionRow}>
-                  <Text style={[styles.subscriptionLabel, { color: colors.textLight }]}>{isEn ? 'Valid until' : 'Gültig bis'}</Text>
+                  <Text style={[styles.subscriptionLabel, { color: colors.textLight }]}>{t('premium.valid_until')}</Text>
                   <Text style={[styles.subscriptionValue, { color: colors.text }]}>
                     {formatDate(subscriptionInfo.expires_at)}
                   </Text>
@@ -230,7 +230,7 @@ export default function PremiumScreen() {
               )}
             </View>
 
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>{isEn ? 'Your Features' : 'Deine Features'}</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('premium.your_features')}</Text>
             {PREMIUM_FEATURES.map((feature, index) => (
               <View key={index} style={[styles.featureItem, { backgroundColor: colors.card }]}>
                 <View style={[styles.featureIcon, { backgroundColor: colors.secondary + '20' }]}>
