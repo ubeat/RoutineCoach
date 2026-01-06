@@ -1315,7 +1315,7 @@ export default function SettingsScreen() {
               </TouchableOpacity>
               <Text style={[styles.modalTitle, { color: colors.text }]}>Zeit waehlen</Text>
               <TouchableOpacity onPress={confirmTime}>
-                <Text style={[styles.modalConfirmText, { color: colors.primary }]}>Fertig</Text>
+                <Text style={[styles.modalConfirmText, { color: colors.primary }]}>{t('common.done')}</Text>
               </TouchableOpacity>
             </View>
 
