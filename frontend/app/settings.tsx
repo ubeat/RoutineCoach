@@ -712,7 +712,7 @@ export default function SettingsScreen() {
   const confirmLocationSelection = async () => {
     if (!selectedLocation) return;
     
-    const goalLabel = i18n.language === 'en' ? 'Goal' : 'Ziel';
+    const goalLabel = t('goals.goal');
     const goalName = goals[locationGoalIndex] || `${goalLabel} ${locationGoalIndex + 1}`;
     
     // Save to settings state
