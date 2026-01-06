@@ -1164,6 +1164,56 @@ export default function SettingsScreen() {
             </Text>
             <Ionicons name="chevron-forward" size={20} color={colors.textLight} />
           </TouchableOpacity>
+
+          {/* Language Selection */}
+          <Text style={[styles.subLabel, { color: colors.textLight, marginTop: 15 }]}>
+            Sprache / Language:
+          </Text>
+          <View style={styles.languageGrid}>
+            {(Object.keys(languages) as LanguageCode[]).map((langCode) => {
+              const lang = languages[langCode];
+              const isSelected = getCurrentLanguage() === langCode;
+              const isAvailable = langCode === 'de' || langCode === 'en';
+              
+              return (
+                <TouchableOpacity
+                  key={langCode}
+                  style={[
+                    styles.languageOption,
+                    { 
+                      backgroundColor: isSelected ? colors.primary : colors.background,
+                      borderColor: isSelected ? colors.primary : colors.card,
+                      opacity: isAvailable ? 1 : 0.5,
+                    }
+                  ]}
+                  onPress={() => {
+                    if (isAvailable) {
+                      setLanguage(langCode);
+                      // Force re-render
+                      setSettings({...settings});
+                    } else {
+                      Alert.alert('Bald verfügbar', `${lang.nativeName} wird bald hinzugefügt!`);
+                    }
+                  }}
+                  disabled={!isAvailable}
+                >
+                  <Text style={styles.languageFlag}>{lang.flag}</Text>
+                  <Text style={[
+                    styles.languageName, 
+                    { color: isSelected ? '#FFF' : colors.text }
+                  ]}>
+                    {lang.nativeName}
+                  </Text>
+                  {isSelected && (
+                    <Ionicons name="checkmark-circle" size={16} color="#FFF" />
+                  )}
+                  {!isAvailable && (
+                    <Text style={[styles.comingSoon, { color: colors.textLight }]}>Soon</Text>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         </View>
 
         {/* Save Button */}
