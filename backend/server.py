@@ -152,13 +152,35 @@ ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'habits_admin_2025')
 def verify_admin(password: str) -> bool:
     return password == ADMIN_PASSWORD
 
+# Premium Features Definition
+PREMIUM_FEATURES = {
+    "ai_weekly_review": True,      # KI-Wochenanalyse
+    "ai_coaching": True,            # KI-Coaching-Chat
+    "location_reminders": True,     # Standort-basierte Erinnerungen
+    "detailed_stats": True,         # Monats-/Jahres-Statistiken
+    "export": True,                 # PDF/CSV Export
+    "mood_correlation": True,       # Stimmungs-Korrelation
+    "all_badges": True,             # Alle 20+ Badges (statt nur 5)
+    "cloud_backup": True,           # Cloud-Backup & Sync
+}
+
+# Free features (always available)
+FREE_FEATURES = {
+    "max_habits": 3,                # Immer 3 Habits
+    "basic_badges_count": 5,        # 5 Basis-Badges
+    "themes": "all",                # Alle Themes kostenlos
+    "time_reminders": True,         # Zeit-basierte Erinnerungen
+    "weekly_chart": True,           # Basis-Wochenchart
+    "companion": True,              # Wegbegleiter/in
+}
+
 # Check if user has premium subscription
 async def check_premium_status(device_id: str) -> dict:
     """Check if a device has an active premium subscription"""
     subscription = await db.subscriptions.find_one({"device_id": device_id})
     
     if not subscription:
-        return {"is_premium": False, "reason": "no_subscription"}
+        return {"is_premium": False, "reason": "no_subscription", "features": FREE_FEATURES}
     
     # Check if subscription has expired
     if subscription.get("expires_at"):
@@ -167,13 +189,22 @@ async def check_premium_status(device_id: str) -> dict:
             expires_at = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
         
         if expires_at < datetime.utcnow():
-            return {"is_premium": False, "reason": "expired", "expired_at": expires_at.isoformat()}
+            return {"is_premium": False, "reason": "expired", "expired_at": expires_at.isoformat(), "features": FREE_FEATURES}
     
     return {
         "is_premium": True,
         "subscription_type": subscription.get("subscription_type"),
-        "expires_at": subscription.get("expires_at").isoformat() if subscription.get("expires_at") else None
+        "expires_at": subscription.get("expires_at").isoformat() if subscription.get("expires_at") else None,
+        "features": {**FREE_FEATURES, **PREMIUM_FEATURES}
     }
+
+# Check specific premium feature
+async def check_premium_feature(device_id: str, feature: str) -> bool:
+    """Check if a specific premium feature is available for this device"""
+    status = await check_premium_status(device_id)
+    if status.get("is_premium"):
+        return True
+    return feature not in PREMIUM_FEATURES
 
 # Helper function to get week start (Monday)
 def get_week_start(dt: datetime = None) -> datetime:
