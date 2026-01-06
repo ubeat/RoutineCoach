@@ -675,7 +675,8 @@ export default function SettingsScreen() {
   const confirmLocationSelection = async () => {
     if (!selectedLocation) return;
     
-    const goalName = goals[locationGoalIndex] || `Ziel ${locationGoalIndex + 1}`;
+    const goalLabel = i18n.language === 'en' ? 'Goal' : 'Ziel';
+    const goalName = goals[locationGoalIndex] || `${goalLabel} ${locationGoalIndex + 1}`;
     
     // Save to settings state
     const newLocations = [...settings.habit_reminders.locations];
