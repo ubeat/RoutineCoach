@@ -1240,6 +1240,7 @@ export default function SettingsScreen() {
               );
             })}
           </View>
+          </View>
         </View>
 
         {/* Save Button */}
