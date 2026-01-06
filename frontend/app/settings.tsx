@@ -467,7 +467,10 @@ export default function SettingsScreen() {
         }
       }
 
-      Alert.alert('Gespeichert!', 'Deine Einstellungen wurden gespeichert.');
+      Alert.alert(
+        i18n.language === 'en' ? 'Saved!' : 'Gespeichert!', 
+        i18n.language === 'en' ? 'Your settings have been saved.' : 'Deine Einstellungen wurden gespeichert.'
+      );
     } catch (error) {
       console.error('Error saving settings:', error);
       Alert.alert('Fehler', 'Einstellungen konnten nicht gespeichert werden.');
