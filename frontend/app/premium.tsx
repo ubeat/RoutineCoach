@@ -252,15 +252,15 @@ export default function PremiumScreen() {
             <View style={[styles.premiumBanner, { backgroundColor: colors.primary }]}>
               <Ionicons name="sparkles" size={48} color="#FFF" />
               <Text style={styles.premiumBannerTitle}>Premium</Text>
-              <Text style={styles.premiumBannerPrice}>€4,99/{isEn ? 'month' : 'Monat'}</Text>
+              <Text style={styles.premiumBannerPrice}>€4,99/{t('premium.per_month')}</Text>
               <Text style={styles.premiumBannerSubtitle}>
-                {isEn ? 'Unlock all features' : 'Schalte alle Features frei'}
+                {t('premium.unlock_features')}
               </Text>
             </View>
 
             {/* Premium Features */}
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {isEn ? 'Premium Features' : 'Premium-Features'}
+              {t('premium.premium_features')}
             </Text>
             {PREMIUM_FEATURES.map((feature, index) => (
               <View key={index} style={[styles.featureItem, { backgroundColor: colors.card }]}>
