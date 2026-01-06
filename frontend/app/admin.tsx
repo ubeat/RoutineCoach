@@ -88,7 +88,8 @@ export default function AdminScreen() {
     
     setLoading(true);
     try {
-      await axios.get(`${API_URL}/api/admin/promo-codes?admin_password=${password}`);
+      const encodedPassword = encodeURIComponent(password);
+      await axios.get(`${API_URL}/api/admin/promo-codes?admin_password=${encodedPassword}`);
       setAuthenticated(true);
     } catch (error: any) {
       if (error.response?.status === 403) {
