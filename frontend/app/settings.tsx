@@ -706,7 +706,9 @@ export default function SettingsScreen() {
     if (!success && Platform.OS !== 'web') {
       Alert.alert(
         'Hinweis',
-        'Orts-Erinnerungen funktionieren nur mit Hintergrund-Standort-Berechtigung. Bitte erlaube diese in den System-Einstellungen.'
+        i18n.language === 'en' 
+          ? 'Location reminders only work with background location permission. Please allow this in system settings.'
+          : 'Orts-Erinnerungen funktionieren nur mit Hintergrund-Standort-Berechtigung. Bitte erlaube diese in den System-Einstellungen.'
       );
     }
     
