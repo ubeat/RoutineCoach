@@ -24,8 +24,20 @@ const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const PREMIUM_FEATURES = [
   { icon: 'sparkles', title: 'KI-Wochenanalyse', description: 'Personalisierte Auswertung deiner Fortschritte' },
   { icon: 'chatbubbles', title: 'KI-Coach', description: 'Lösungsorientierter Coaching-Dialog' },
-  { icon: 'trending-up', title: 'Tiefere Einblicke', description: 'Erkenne Muster in deinen Gewohnheiten' },
-  { icon: 'heart', title: 'Motivations-Boost', description: 'Personalisierte Ermutigung und Tipps' },
+  { icon: 'location', title: 'Orts-Erinnerungen', description: 'Erinnerungen wenn du an bestimmten Orten bist' },
+  { icon: 'stats-chart', title: 'Erweiterte Statistiken', description: 'Monats- und Jahresübersichten' },
+  { icon: 'analytics', title: 'Stimmungs-Analyse', description: 'Erkenne wann du dich am besten fühlst' },
+  { icon: 'cloud-upload', title: 'Cloud-Backup', description: 'Sichere deine Daten in der Cloud' },
+  { icon: 'download', title: 'Daten-Export', description: 'Exportiere als PDF oder CSV' },
+  { icon: 'medal', title: 'Alle 20+ Badges', description: 'Schalte alle Abzeichen frei' },
+];
+
+const FREE_FEATURES = [
+  { icon: 'checkmark-circle', title: '3 Gewohnheiten', description: 'Optimal für nachhaltigen Erfolg' },
+  { icon: 'color-palette', title: 'Alle Themes', description: 'Personalisiere deine App' },
+  { icon: 'time', title: 'Zeit-Erinnerungen', description: 'Tägliche Benachrichtigungen' },
+  { icon: 'bar-chart', title: 'Wochen-Statistik', description: 'Dein Fortschritt auf einen Blick' },
+  { icon: 'people', title: 'Wegbegleiter/in', description: 'Gemeinsam stark bleiben' },
 ];
 
 export default function PremiumScreen() {
