@@ -22,34 +22,6 @@ import { COLOR_PALETTES } from '../contexts/SettingsContext';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-// Get localized suggestions based on current language
-const getLocalizedSuggestions = (isEn: boolean) => {
-  if (isEn) {
-    return [
-      { wenn: 'After waking up in the morning', dann: ['drink a glass of water', 'make my bed', 'take 3 deep breaths', 'stretch briefly'] },
-      { wenn: 'After brushing my teeth', dann: ['do 2 squats', 'moisturize my face', 'smile in the mirror', 'say an affirmation'] },
-      { wenn: 'Before having breakfast', dann: ['drink a glass of water', 'meditate briefly', 'review my daily goals'] },
-      { wenn: 'When I sit down at my desk', dann: ['take 3 deep breaths', 'write down my most important task', 'prepare water'] },
-      { wenn: 'After lunch', dann: ['go for a 5-minute walk', 'take 10 steps', 'stretch briefly'] },
-      { wenn: 'When I come home', dann: ['put my shoes away neatly', 'take a deep breath', 'sit down briefly'] },
-      { wenn: 'Before going to bed', dann: ['write down 3 things I am grateful for', 'put my phone away', 'pause for a moment'] },
-      { wenn: 'When I feel stressed', dann: ['take 3 deep breaths', 'look out the window briefly', 'drink water'] },
-    ];
-  }
-  
-  // German (default)
-  return [
-    { wenn: 'Nachdem ich morgens aufgestanden bin', dann: ['ein Glas Wasser trinken', 'mein Bett machen', '3 tiefe Atemzuege nehmen', 'mich kurz strecken'] },
-    { wenn: 'Nachdem ich mir die Zaehne geputzt habe', dann: ['2 Kniebeugen machen', 'mein Gesicht eincremen', 'im Spiegel laecheln', 'eine Affirmation sagen'] },
-    { wenn: 'Bevor ich fruehstuecke', dann: ['ein Glas Wasser trinken', 'kurz meditieren', 'meine Tagesziele anschauen'] },
-    { wenn: 'Wenn ich mich an den Schreibtisch setze', dann: ['3 tiefe Atemzuege nehmen', 'meine wichtigste Aufgabe notieren', 'Wasser bereitstellen'] },
-    { wenn: 'Nachdem ich Mittag gegessen habe', dann: ['5 Minuten spazieren gehen', '10 Schritte gehen', 'mich kurz strecken'] },
-    { wenn: 'Wenn ich nach Hause komme', dann: ['Schuhe ordentlich wegstellen', 'tief durchatmen', 'mich kurz hinsetzen'] },
-    { wenn: 'Bevor ich ins Bett gehe', dann: ['3 Dinge aufschreiben, fuer die ich dankbar bin', 'Handy weglegen', 'einen Moment innehalten'] },
-    { wenn: 'Wenn ich gestresst bin', dann: ['3 tiefe Atemzuege nehmen', 'kurz aus dem Fenster schauen', 'Wasser trinken'] },
-  ];
-};
-
 interface Goal {
   wenn: string;
   dann: string;
@@ -57,36 +29,38 @@ interface Goal {
 
 export default function GoalsScreen() {
   const router = useRouter();
-  const { t, i18n } = useTranslation();
-  const isEn = i18n.language === 'en';
+  const { t } = useTranslation();
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [loadingAdvice, setLoadingAdvice] = useState(false);
-  
-  // Goal mode: 'simple' or 'wenn-dann'
   const [goalMode, setGoalMode] = useState<'simple' | 'wenn-dann'>('simple');
-  
-  // For Wenn-Dann goals
   const [wennDannGoals, setWennDannGoals] = useState<Goal[]>([
     { wenn: '', dann: '' },
     { wenn: '', dann: '' },
     { wenn: '', dann: '' },
   ]);
-  
-  // For simple goals
   const [simpleGoals, setSimpleGoals] = useState<string[]>(['', '', '']);
-  
   const [existingGoals, setExistingGoals] = useState<string[] | null>(null);
   const [showTheory, setShowTheory] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [currentGoalIndex, setCurrentGoalIndex] = useState(0);
   const [settings, setSettings] = useState<any>(null);
-  const [aiAdvice, setAiAdvice] = useState<string | null>(null);
 
   const colors = settings?.appearance?.color_palette 
     ? (COLOR_PALETTES[settings.appearance.color_palette] || COLOR_PALETTES.sonnenuntergang)
     : COLOR_PALETTES.sonnenuntergang;
+
+  // Localized suggestions using t()
+  const getSuggestions = () => [
+    { wenn: t('suggestions.after_waking'), dann: [t('suggestions.drink_water'), t('suggestions.make_bed'), t('suggestions.deep_breaths'), t('suggestions.stretch')] },
+    { wenn: t('suggestions.after_brushing'), dann: [t('suggestions.squats'), t('suggestions.moisturize'), t('suggestions.smile_mirror'), t('suggestions.affirmation')] },
+    { wenn: t('suggestions.before_breakfast'), dann: [t('suggestions.drink_water'), t('suggestions.meditate'), t('suggestions.review_goals')] },
+    { wenn: t('suggestions.at_desk'), dann: [t('suggestions.deep_breaths'), t('suggestions.write_task'), t('suggestions.prepare_water')] },
+    { wenn: t('suggestions.after_lunch'), dann: [t('suggestions.walk_5min'), t('suggestions.take_steps'), t('suggestions.stretch')] },
+    { wenn: t('suggestions.coming_home'), dann: [t('suggestions.put_shoes'), t('suggestions.deep_breaths'), t('suggestions.sit_down')] },
+    { wenn: t('suggestions.before_bed'), dann: [t('suggestions.gratitude'), t('suggestions.phone_away'), t('suggestions.pause')] },
+    { wenn: t('suggestions.when_stressed'), dann: [t('suggestions.deep_breaths'), t('suggestions.look_window'), t('suggestions.drink_water')] },
+  ];
 
   useEffect(() => {
     loadGoals();
@@ -107,18 +81,19 @@ export default function GoalsScreen() {
       
       if (goalsRes.data.goals) {
         setExistingGoals(goalsRes.data.goals);
-        
-        // Check if goals are in wenn-dann format
         const goals = goalsRes.data.goals;
-        const hasWennDann = goals.some((g: string) => g.toLowerCase().includes('wenn') && g.toLowerCase().includes('dann'));
+        const hasWennDann = goals.some((g: string) => 
+          (g.toLowerCase().includes('wenn') && g.toLowerCase().includes('dann')) ||
+          (g.toLowerCase().includes('when') && g.toLowerCase().includes('then'))
+        );
         
         if (hasWennDann) {
           setGoalMode('wenn-dann');
           const parsedGoals = goals.map((g: string) => {
-            const match = g.match(/^Wenn (.+), dann (.+)$/i);
-            if (match) {
-              return { wenn: match[1], dann: match[2] };
-            }
+            const matchDe = g.match(/^Wenn (.+), dann (.+)$/i);
+            const matchEn = g.match(/^When (.+), then (.+)$/i);
+            if (matchDe) return { wenn: matchDe[1], dann: matchDe[2] };
+            if (matchEn) return { wenn: matchEn[1], dann: matchEn[2] };
             return { wenn: '', dann: g };
           });
           setWennDannGoals(parsedGoals);
@@ -142,7 +117,7 @@ export default function GoalsScreen() {
     if (goalMode === 'wenn-dann') {
       formattedGoals = wennDannGoals.map((goal) => {
         if (goal.wenn && goal.dann) {
-          return isEn ? `When ${goal.wenn}, then ${goal.dann}` : `Wenn ${goal.wenn}, dann ${goal.dann}`;
+          return `${t('goals.when')} ${goal.wenn}, ${t('goals.then').toLowerCase()} ${goal.dann}`;
         }
         return goal.dann.trim();
       });
@@ -151,10 +126,7 @@ export default function GoalsScreen() {
     }
 
     if (formattedGoals.some(g => g === '')) {
-      Alert.alert(
-        isEn ? 'Not finished yet 💭' : 'Noch nicht fertig 💭',
-        isEn ? 'Please fill in all 3 habits. Remember: They can be tiny!' : 'Bitte fuelle alle 3 Gewohnheiten aus. Denk dran: Sie duerfen winzig klein sein!'
-      );
+      Alert.alert(t('goals.not_finished_title'), t('goals.not_finished_message'));
       return;
     }
 
@@ -167,15 +139,12 @@ export default function GoalsScreen() {
       });
 
       Alert.alert(
-        isEn ? 'Wonderful! 🌟' : 'Wunderbar! 🌟',
-        isEn ? 'Your weekly goals are saved. You took the first step - that is great!' : 'Deine Wochenziele sind gespeichert. Du hast den ersten Schritt getan - das ist grossartig!',
-        [{ text: isEn ? "Let's go!" : "Los geht's!", onPress: () => router.push('/') }]
+        t('goals.saved_title'),
+        t('goals.saved_message'),
+        [{ text: t('common.letsgo'), onPress: () => router.push('/') }]
       );
     } catch (error: any) {
-      Alert.alert(
-        isEn ? 'Oops!' : 'Ohje!', 
-        error.response?.data?.detail || (isEn ? 'Saving failed. Try again!' : 'Speichern hat nicht geklappt. Versuch es nochmal!')
-      );
+      Alert.alert(t('common.error'), error.response?.data?.detail || t('errors.save_failed'));
     } finally {
       setSaving(false);
     }
@@ -218,22 +187,15 @@ export default function GoalsScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView style={styles.scrollView}>
           <View style={styles.header}>
             <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
               <Ionicons name="arrow-back" size={24} color={colors.text} />
             </TouchableOpacity>
             <View>
-              <Text style={[styles.title, { color: colors.text }]}>
-                {isEn ? 'Your Weekly Goals' : 'Deine Wochenziele'} 🎯
-              </Text>
-              <Text style={[styles.subtitle, { color: colors.textLight }]}>
-                {isEn ? 'Focus on 3 tiny habits' : 'Konzentriere dich auf 3 winzige Gewohnheiten'}
-              </Text>
+              <Text style={[styles.title, { color: colors.text }]}>{t('goals.title')} 🎯</Text>
+              <Text style={[styles.subtitle, { color: colors.textLight }]}>{t('goals.subtitle')}</Text>
             </View>
           </View>
 
@@ -245,88 +207,47 @@ export default function GoalsScreen() {
             <View style={styles.theoryBannerContent}>
               <Ionicons name="school" size={24} color={colors.text} />
               <View style={styles.theoryBannerText}>
-                <Text style={[styles.theoryBannerTitle, { color: colors.text }]}>
-                  {isEn ? 'The If-Then Method' : 'Die Wenn-Dann Methode'}
-                </Text>
-                <Text style={[styles.theoryBannerSubtitle, { color: colors.textLight }]}>
-                  {isEn ? 'Scientifically proven • Tap to learn' : 'Wissenschaftlich bewaehrt • Tippe zum Lernen'}
-                </Text>
+                <Text style={[styles.theoryBannerTitle, { color: colors.text }]}>{t('goals.theory_title')}</Text>
+                <Text style={[styles.theoryBannerSubtitle, { color: colors.textLight }]}>{t('goals.theory_subtitle')}</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={colors.textLight} />
             </View>
           </TouchableOpacity>
 
-          {/* Why only 3 habits */}
+          {/* Why 3 habits */}
           <View style={[styles.whyThreeBox, { backgroundColor: colors.card }]}>
             <View style={styles.whyThreeHeader}>
               <Text style={styles.brainEmoji}>🧠</Text>
-              <Text style={[styles.whyThreeTitle, { color: colors.text }]}>
-                {isEn ? 'Why only 3 habits?' : 'Warum nur 3 Gewohnheiten?'}
-              </Text>
+              <Text style={[styles.whyThreeTitle, { color: colors.text }]}>{t('goals.why_three_title')}</Text>
             </View>
-            <Text style={[styles.whyThreeText, { color: colors.textLight }]}>
-              {isEn 
-                ? 'Research shows: Less is more! Our brain can only process a limited number of new behaviors at once. With 1-3 habits you have the best chance of real, lasting success. Quality over quantity! 💪'
-                : 'Forschung zeigt: Weniger ist mehr! Unser Gehirn kann nur begrenzt neue Verhaltensweisen gleichzeitig verarbeiten. Mit 1-3 Gewohnheiten hast du die beste Chance auf echten, nachhaltigen Erfolg. Qualitaet vor Quantitaet! 💪'}
-            </Text>
+            <Text style={[styles.whyThreeText, { color: colors.textLight }]}>{t('goals.why_three_text')} 💪</Text>
           </View>
 
-          {/* Goals Input Card */}
+          {/* Goals Card */}
           <View style={[styles.card, { backgroundColor: colors.card }]}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {isEn ? 'Your 3 tiny habits' : 'Deine 3 winzigen Gewohnheiten'}
-            </Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('goals.your_three_habits')}</Text>
             
             {/* Mode Selector */}
             <View style={styles.modeSelector}>
               <TouchableOpacity
-                style={[
-                  styles.modeButton,
-                  goalMode === 'simple' && { backgroundColor: colors.primary },
-                  goalMode !== 'simple' && { backgroundColor: colors.background }
-                ]}
+                style={[styles.modeButton, goalMode === 'simple' && { backgroundColor: colors.primary }, goalMode !== 'simple' && { backgroundColor: colors.background }]}
                 onPress={() => setGoalMode('simple')}
               >
-                <Ionicons 
-                  name="checkmark-circle-outline" 
-                  size={18} 
-                  color={goalMode === 'simple' ? '#FFF' : colors.textLight} 
-                />
-                <Text style={[
-                  styles.modeButtonText,
-                  { color: goalMode === 'simple' ? '#FFF' : colors.textLight }
-                ]}>
-                  {isEn ? 'Simple' : 'Einfach'}
-                </Text>
+                <Ionicons name="checkmark-circle-outline" size={18} color={goalMode === 'simple' ? '#FFF' : colors.textLight} />
+                <Text style={[styles.modeButtonText, { color: goalMode === 'simple' ? '#FFF' : colors.textLight }]}>{t('goals.mode_simple')}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity
-                style={[
-                  styles.modeButton,
-                  goalMode === 'wenn-dann' && { backgroundColor: colors.secondary },
-                  goalMode !== 'wenn-dann' && { backgroundColor: colors.background }
-                ]}
+                style={[styles.modeButton, goalMode === 'wenn-dann' && { backgroundColor: colors.secondary }, goalMode !== 'wenn-dann' && { backgroundColor: colors.background }]}
                 onPress={() => setGoalMode('wenn-dann')}
               >
-                <Ionicons 
-                  name="git-branch-outline" 
-                  size={18} 
-                  color={goalMode === 'wenn-dann' ? '#FFF' : colors.textLight} 
-                />
-                <Text style={[
-                  styles.modeButtonText,
-                  { color: goalMode === 'wenn-dann' ? '#FFF' : colors.textLight }
-                ]}>
-                  {isEn ? 'If-Then' : 'Wenn-Dann'}
-                </Text>
+                <Ionicons name="git-branch-outline" size={18} color={goalMode === 'wenn-dann' ? '#FFF' : colors.textLight} />
+                <Text style={[styles.modeButtonText, { color: goalMode === 'wenn-dann' ? '#FFF' : colors.textLight }]}>{t('goals.mode_wenn_dann')}</Text>
               </TouchableOpacity>
             </View>
             
             <Text style={[styles.sectionHint, { color: colors.textLight }]}>
-              {goalMode === 'wenn-dann' 
-                ? (isEn ? 'Link your habit to a trigger - this triples success! 🎯' : 'Verknuepfe deine Gewohnheit mit einem Ausloeser - das verdreifacht den Erfolg! 🎯')
-                : (isEn ? 'Simply describe what you want to do - short and sweet! 🎯' : 'Beschreibe einfach, was du tun moechtest - kurz und knapp! 🎯')
-              }
+              {goalMode === 'wenn-dann' ? t('goals.hint_wenn_dann') : t('goals.hint_simple')} 🎯
             </Text>
 
             {/* Goal Inputs */}
@@ -339,37 +260,28 @@ export default function GoalsScreen() {
                 {goalMode === 'wenn-dann' ? (
                   <View style={styles.wennDannContainer}>
                     <View style={styles.wennRow}>
-                      <Text style={[styles.wennLabel, { color: colors.textLight }]}>
-                        {isEn ? 'When' : 'Wenn'}
-                      </Text>
+                      <Text style={[styles.wennLabel, { color: colors.textLight }]}>{t('goals.when')}</Text>
                       <TextInput
                         style={[styles.wennInput, { backgroundColor: colors.background, color: colors.text }]}
                         value={wennDannGoals[index].wenn}
                         onChangeText={(text) => updateWennDannGoal(index, 'wenn', text)}
-                        placeholder={isEn ? 'e.g. I wake up in the morning' : 'z.B. ich morgens aufgestanden bin'}
+                        placeholder={t('goals.when_placeholder')}
                         placeholderTextColor={colors.textLight}
                       />
                     </View>
                     <View style={styles.dannRow}>
-                      <Text style={[styles.dannLabel, { color: colors.textLight }]}>
-                        {isEn ? 'Then' : 'Dann'}
-                      </Text>
+                      <Text style={[styles.dannLabel, { color: colors.textLight }]}>{t('goals.then')}</Text>
                       <TextInput
                         style={[styles.dannInput, { backgroundColor: colors.background, color: colors.text }]}
                         value={wennDannGoals[index].dann}
                         onChangeText={(text) => updateWennDannGoal(index, 'dann', text)}
-                        placeholder={isEn ? 'e.g. drink a glass of water' : 'z.B. trinke ich ein Glas Wasser'}
+                        placeholder={t('goals.then_placeholder')}
                         placeholderTextColor={colors.textLight}
                       />
                     </View>
-                    <TouchableOpacity 
-                      style={[styles.ideasButton, { backgroundColor: colors.primary + '15' }]}
-                      onPress={() => openSuggestions(index)}
-                    >
+                    <TouchableOpacity style={[styles.ideasButton, { backgroundColor: colors.primary + '15' }]} onPress={() => openSuggestions(index)}>
                       <Ionicons name="bulb-outline" size={16} color={colors.primary} />
-                      <Text style={[styles.ideasButtonText, { color: colors.primary }]}>
-                        {isEn ? 'Ideas' : 'Ideen'}
-                      </Text>
+                      <Text style={[styles.ideasButtonText, { color: colors.primary }]}>{t('goals.ideas')}</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (
@@ -378,13 +290,10 @@ export default function GoalsScreen() {
                       style={[styles.simpleInput, { backgroundColor: colors.background, color: colors.text }]}
                       value={simpleGoals[index]}
                       onChangeText={(text) => updateSimpleGoal(index, text)}
-                      placeholder={isEn ? `Habit ${index + 1}...` : `Gewohnheit ${index + 1}...`}
+                      placeholder={`${t('goals.habit_placeholder')} ${index + 1}...`}
                       placeholderTextColor={colors.textLight}
                     />
-                    <TouchableOpacity 
-                      style={[styles.ideasButtonSmall, { backgroundColor: colors.primary + '15' }]}
-                      onPress={() => openSuggestions(index)}
-                    >
+                    <TouchableOpacity style={[styles.ideasButtonSmall, { backgroundColor: colors.primary + '15' }]} onPress={() => openSuggestions(index)}>
                       <Ionicons name="bulb-outline" size={18} color={colors.primary} />
                     </TouchableOpacity>
                   </View>
@@ -393,34 +302,20 @@ export default function GoalsScreen() {
             ))}
           </View>
 
-          {/* Reminder with Heart */}
-          <View style={[styles.tipsBox, { backgroundColor: colors.pink + '20', borderColor: colors.pink }]}>
-            <Text style={[styles.tipsTitle, { color: colors.text }]}>
-              {isEn ? '💡 Reminder with Heart' : '💡 Erinnerung mit Herz'}
-            </Text>
-            <Text style={[styles.tipsText, { color: colors.textLight }]}>
-              {isEn 
-                ? '• Make your habits SO tiny that you cannot fail\n• 1 pushup is better than 0\n• Be kind to yourself! 💜'
-                : '• Mach deine Gewohnheiten SO winzig, dass du nicht scheitern kannst\n• 1 Liegestuetze ist besser als 0\n• Sei liebevoll zu dir selbst! 💜'}
-            </Text>
+          {/* Reminder Box */}
+          <View style={[styles.tipsBox, { backgroundColor: '#F472B620', borderColor: '#F472B6' }]}>
+            <Text style={[styles.tipsTitle, { color: colors.text }]}>💡 {t('goals.reminder_title')}</Text>
+            <Text style={[styles.tipsText, { color: colors.textLight }]}>{t('goals.reminder_text')} 💜</Text>
           </View>
 
           {/* Save Button */}
-          <TouchableOpacity
-            style={[styles.saveButton, { backgroundColor: colors.primary }]}
-            onPress={saveGoals}
-            disabled={saving}
-          >
+          <TouchableOpacity style={[styles.saveButton, { backgroundColor: colors.primary }]} onPress={saveGoals} disabled={saving}>
             {saving ? (
               <ActivityIndicator color="#FFF" />
             ) : (
               <>
                 <Ionicons name="heart" size={24} color="#FFF" />
-                <Text style={styles.saveButtonText}>
-                  {existingGoals 
-                    ? (isEn ? 'Update Goals' : 'Ziele aktualisieren') 
-                    : (isEn ? 'Start My Journey' : 'Meine Reise beginnen')}
-                </Text>
+                <Text style={styles.saveButtonText}>{existingGoals ? t('goals.update_goals') : t('goals.start_journey')}</Text>
               </>
             )}
           </TouchableOpacity>
@@ -430,116 +325,60 @@ export default function GoalsScreen() {
       </KeyboardAvoidingView>
 
       {/* Theory Modal */}
-      <Modal
-        transparent
-        animationType="slide"
-        visible={showTheory}
-        onRequestClose={() => setShowTheory(false)}
-      >
+      <Modal transparent animationType="slide" visible={showTheory} onRequestClose={() => setShowTheory(false)}>
         <View style={styles.modalOverlay}>
           <View style={[styles.theoryModalContent, { backgroundColor: colors.card }]}>
             <ScrollView showsVerticalScrollIndicator={false}>
-              <Text style={[styles.theoryModalTitle, { color: colors.text }]}>
-                {isEn ? '📚 The If-Then Method' : '📚 Die Wenn-Dann Methode'}
-              </Text>
-              
-              <Text style={[styles.theoryParagraph, { color: colors.text }]}>
-                {isEn 
-                  ? '"If-Then Plans" (Implementation Intentions) are a scientifically researched method by Prof. Peter Gollwitzer. They help us turn resolutions into automatic behaviors.'
-                  : '"Wenn-Dann Plaene" (Implementation Intentions) sind eine wissenschaftlich erforschte Methode von Prof. Peter Gollwitzer. Sie helfen uns, Vorsaetze in automatische Verhaltensweisen zu verwandeln.'}
-              </Text>
+              <Text style={[styles.theoryModalTitle, { color: colors.text }]}>📚 {t('goals.theory_title')}</Text>
+              <Text style={[styles.theoryParagraph, { color: colors.text }]}>{t('goals.theory_intro')}</Text>
               
               <View style={[styles.exampleBox, { backgroundColor: colors.primary + '15' }]}>
-                <Text style={[styles.exampleLabel, { color: colors.primary }]}>
-                  {isEn ? 'Example:' : 'Beispiel:'}
-                </Text>
-                <Text style={[styles.exampleText, { color: colors.text }]}>
-                  {isEn 
-                    ? '"When I wake up in the morning, then I drink a glass of water"'
-                    : '"Wenn ich morgens aufstehe, dann trinke ich ein Glas Wasser"'}
-                </Text>
+                <Text style={[styles.exampleLabel, { color: colors.primary }]}>{t('goals.theory_example_label')}</Text>
+                <Text style={[styles.exampleText, { color: colors.text }]}>{t('goals.theory_example')}</Text>
               </View>
               
-              <Text style={[styles.theorySubtitle, { color: colors.text }]}>
-                {isEn ? 'The Formula:' : 'Die Formel:'}
-              </Text>
+              <Text style={[styles.theorySubtitle, { color: colors.text }]}>{t('goals.theory_formula_title')}</Text>
               <View style={[styles.formulaBox, { backgroundColor: colors.secondary + '15' }]}>
-                <Text style={[styles.formulaText, { color: colors.secondary }]}>
-                  {isEn ? 'WHEN [situation/trigger]' : 'WENN [Situation/Ausloeser]'}
-                </Text>
-                <Text style={[styles.formulaText, { color: colors.secondary }]}>
-                  {isEn ? 'THEN [I will do my habit]' : 'DANN [werde ich meine Gewohnheit ausfuehren]'}
-                </Text>
+                <Text style={[styles.formulaText, { color: colors.secondary }]}>{t('goals.theory_formula_when')}</Text>
+                <Text style={[styles.formulaText, { color: colors.secondary }]}>{t('goals.theory_formula_then')}</Text>
               </View>
               
-              <Text style={[styles.theorySubtitle, { color: colors.text }]}>
-                {isEn ? 'Why does it work?' : 'Warum funktioniert es?'}
-              </Text>
+              <Text style={[styles.theorySubtitle, { color: colors.text }]}>{t('goals.theory_why_title')}</Text>
               <Text style={[styles.theoryParagraph, { color: colors.text }]}>
-                {isEn
-                  ? 'Studies show: People with If-Then plans achieve their goals'
-                  : 'Studien zeigen: Menschen mit Wenn-Dann Plaenen erreichen ihre Ziele'}
-                <Text style={[styles.highlight, { color: colors.primary }]}>
-                  {isEn ? ' 2-3x more often ' : ' 2-3x haeufiger '}
-                </Text>
-                {isEn
-                  ? 'than people who only have general resolutions.'
-                  : 'als Menschen, die nur allgemeine Vorsaetze haben.'}
+                {t('goals.theory_why_text')}
+                <Text style={[styles.highlight, { color: colors.primary }]}>{t('goals.theory_why_highlight')}</Text>
+                {t('goals.theory_why_text2')}
               </Text>
               
-              <Text style={[styles.theorySubtitle, { color: colors.text }]}>
-                {isEn ? 'Tips for your habits:' : 'Tipps fuer deine Gewohnheiten:'}
-              </Text>
-              <Text style={[styles.tipsList, { color: colors.textLight }]}>
-                {isEn
-                  ? '• Choose a specific trigger (time, place, action)\n• Keep the habit tiny\n• Formulate it in your own words\n• Link it to existing routines'
-                  : '• Waehle einen konkreten Ausloeser (Zeit, Ort, Handlung)\n• Halte die Gewohnheit winzig klein\n• Formuliere es in deinen eigenen Worten\n• Verknuepfe es mit bestehenden Routinen'}
-              </Text>
+              <Text style={[styles.theorySubtitle, { color: colors.text }]}>{t('goals.theory_tips_title')}</Text>
+              <Text style={[styles.tipsList, { color: colors.textLight }]}>{t('goals.theory_tips')}</Text>
             </ScrollView>
             
-            <TouchableOpacity
-              style={[styles.modalCloseButton, { backgroundColor: colors.primary }]}
-              onPress={() => setShowTheory(false)}
-            >
-              <Text style={styles.modalCloseText}>
-                {isEn ? 'Got it! 👍' : 'Verstanden! 👍'}
-              </Text>
+            <TouchableOpacity style={[styles.modalCloseButton, { backgroundColor: colors.primary }]} onPress={() => setShowTheory(false)}>
+              <Text style={styles.modalCloseText}>{t('goals.got_it')} 👍</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
       {/* Suggestions Modal */}
-      <Modal
-        transparent
-        animationType="slide"
-        visible={showSuggestions}
-        onRequestClose={() => setShowSuggestions(false)}
-      >
+      <Modal transparent animationType="slide" visible={showSuggestions} onRequestClose={() => setShowSuggestions(false)}>
         <View style={styles.modalOverlay}>
           <View style={[styles.suggestionsModalContent, { backgroundColor: colors.card }]}>
-            <Text style={[styles.suggestionsTitle, { color: colors.text }]}>
-              {isEn ? '💡 Ideas for habit' : '💡 Vorschlaege fuer Gewohnheit'} {currentGoalIndex + 1}
-            </Text>
-            <Text style={[styles.suggestionsSubtitle, { color: colors.textLight }]}>
-              {isEn ? 'Tap to apply or get inspired' : 'Tippe zum Uebernehmen oder lass dich inspirieren'}
-            </Text>
+            <Text style={[styles.suggestionsTitle, { color: colors.text }]}>💡 {t('goals.ideas_title')} {currentGoalIndex + 1}</Text>
+            <Text style={[styles.suggestionsSubtitle, { color: colors.textLight }]}>{t('goals.ideas_subtitle')}</Text>
             
             <ScrollView style={styles.suggestionsList}>
-              {getLocalizedSuggestions(isEn).map((item, index) => (
+              {getSuggestions().map((item, index) => (
                 <View key={index} style={[styles.suggestionGroup, { backgroundColor: colors.background }]}>
-                  <Text style={[styles.suggestionWenn, { color: colors.primary }]}>
-                    {item.wenn}...
-                  </Text>
+                  <Text style={[styles.suggestionWenn, { color: colors.primary }]}>{item.wenn}...</Text>
                   {item.dann.map((dann, dannIndex) => (
                     <TouchableOpacity
                       key={dannIndex}
                       style={[styles.suggestionDann, { borderColor: colors.secondary + '50' }]}
                       onPress={() => applySuggestion(item.wenn, dann)}
                     >
-                      <Text style={[styles.suggestionDannText, { color: colors.text }]}>
-                        → {dann}
-                      </Text>
+                      <Text style={[styles.suggestionDannText, { color: colors.text }]}>→ {dann}</Text>
                       <Ionicons name="add-circle" size={20} color={colors.secondary} />
                     </TouchableOpacity>
                   ))}
@@ -547,10 +386,7 @@ export default function GoalsScreen() {
               ))}
             </ScrollView>
             
-            <TouchableOpacity
-              style={[styles.modalCloseButton, { backgroundColor: colors.textLight }]}
-              onPress={() => setShowSuggestions(false)}
-            >
+            <TouchableOpacity style={[styles.modalCloseButton, { backgroundColor: colors.textLight }]} onPress={() => setShowSuggestions(false)}>
               <Text style={styles.modalCloseText}>{t('common.close')}</Text>
             </TouchableOpacity>
           </View>
