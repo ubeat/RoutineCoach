@@ -100,7 +100,7 @@
     "completed": "Completed",
     "not_completed": "Not completed",
     "mood_question": "How are you feeling today?",
-    "mood_scale": "{{value}}/10",
+    "mood_scale": "Mood on a scale from 1-10",
     "notes_placeholder": "Optional notes about your day...",
     "submit": "Complete check-in",
     "submitting": "Saving...",
