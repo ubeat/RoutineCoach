@@ -1,24 +1,29 @@
-diff --git a/frontend/app/profile.tsx b/frontend/app/profile.tsx
-index d386e50..7dd74db 100644
---- a/frontend/app/profile.tsx
-+++ b/frontend/app/profile.tsx
-@@ -97,10 +97,18 @@ export default function ProfileScreen() {
-     'early_bird': { emoji: '🐦', description: 'Check-in vor 8 Uhr morgens - Fruehaufsteher!' },
-     'night_owl': { emoji: '🦉', description: 'Check-in nach 22 Uhr - Nachtmensch!' },
-     'comeback': { emoji: '🔄', description: 'Nach einer Pause wieder zurueckgekommen - Respekt!' },
--  }; 
-+  };
-+
-+  const colors = settings?.appearance?.color_palette 
-     ? (COLOR_PALETTES[settings.appearance.color_palette] || COLOR_PALETTES.sonnenuntergang)
-     : COLOR_PALETTES.sonnenuntergang;
- 
-+  const openBadgeDetail = (badge: Badge, earned: boolean) => {
-+    setSelectedBadge(badge);
-+    setBadgeEarned(earned);
-+    setShowBadgeModal(true);
-+  };
-+
-   // Einladungstext für alle Methoden
-   const getInviteMessage = (code: string) => 
-     `💜 Lass uns gemeinsam gute Gewohnheiten aufbauen! Werde meine Wegbegleiterin bei "Schritt fuer Schritt". Dein Code: ${code}`;
+diff --git a/model.patch b/model.patch
+index 4c8043f..e69de29 100644
+--- a/model.patch
++++ b/model.patch
+@@ -1,24 +0,0 @@
+-diff --git a/frontend/app/profile.tsx b/frontend/app/profile.tsx
+-index d386e50..7dd74db 100644
+---- a/frontend/app/profile.tsx
+-+++ b/frontend/app/profile.tsx
+-@@ -97,10 +97,18 @@ export default function ProfileScreen() {
+-     'early_bird': { emoji: '🐦', description: 'Check-in vor 8 Uhr morgens - Fruehaufsteher!' },
+-     'night_owl': { emoji: '🦉', description: 'Check-in nach 22 Uhr - Nachtmensch!' },
+-     'comeback': { emoji: '🔄', description: 'Nach einer Pause wieder zurueckgekommen - Respekt!' },
+--  }; 
+-+  };
+-+
+-+  const colors = settings?.appearance?.color_palette 
+-     ? (COLOR_PALETTES[settings.appearance.color_palette] || COLOR_PALETTES.sonnenuntergang)
+-     : COLOR_PALETTES.sonnenuntergang;
+- 
+-+  const openBadgeDetail = (badge: Badge, earned: boolean) => {
+-+    setSelectedBadge(badge);
+-+    setBadgeEarned(earned);
+-+    setShowBadgeModal(true);
+-+  };
+-+
+-   // Einladungstext für alle Methoden
+-   const getInviteMessage = (code: string) => 
+-     `💜 Lass uns gemeinsam gute Gewohnheiten aufbauen! Werde meine Wegbegleiterin bei "Schritt fuer Schritt". Dein Code: ${code}`;
