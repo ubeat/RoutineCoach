@@ -684,11 +684,12 @@ DEIN STIL:
 WICHTIG: Du führst einen Dialog - reagiere auf das, was die Person sagt, und stelle Folgefragen."""
 
 @api_router.post("/weekly-review")
-async def get_weekly_review(request: WeeklyReviewRequest):
+@limiter.limit(AI_RATE_LIMIT)
+async def get_weekly_review(request: Request, review_request: WeeklyReviewRequest):
     """Generiert einen ehrlichen, aufbauenden Wochen-Auswertungstext (Premium Feature)"""
     
     # Check premium status
-    premium_status = await check_premium_status(request.device_id)
+    premium_status = await check_premium_status(review_request.device_id)
     if not premium_status.get("is_premium"):
         raise HTTPException(
             status_code=403, 
@@ -697,7 +698,7 @@ async def get_weekly_review(request: WeeklyReviewRequest):
     
     try:
         # Get week's data
-        device_id = request.device_id
+        device_id = review_request.device_id
         week_start = get_week_start()
         week_end = week_start + timedelta(days=7)
         
