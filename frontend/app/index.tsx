@@ -17,10 +17,10 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-const WEEKDAYS = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 const COLORS = {
   primary: '#FF6B6B',
   secondary: '#4ECDC4',
@@ -35,6 +35,7 @@ const COLORS = {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [deviceId, setDeviceId] = useState('');
@@ -48,8 +49,16 @@ export default function HomeScreen() {
   const [nameInput, setNameInput] = useState('');
 
   const today = new Date();
-  const dayName = WEEKDAYS[today.getDay()];
   const isSunday = today.getDay() === 0;
+  
+  // Get localized weekday
+  const getLocalizedWeekday = () => {
+    const weekdays = [
+      t('days.sunday'), t('days.monday'), t('days.tuesday'), 
+      t('days.wednesday'), t('days.thursday'), t('days.friday'), t('days.saturday')
+    ];
+    return weekdays[today.getDay()];
+  };
 
   const getDeviceId = async () => {
     let id = await AsyncStorage.getItem('deviceId');
