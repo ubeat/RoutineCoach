@@ -461,25 +461,25 @@ export default function ProfileScreen() {
         <View style={[styles.card, { backgroundColor: colors.card }]}>
           <View style={styles.cardHeader}>
             <Ionicons name="people" size={24} color={colors.secondary} />
-            <Text style={[styles.cardTitle, { color: colors.text }]}>{isEn ? 'Your Companion 💜' : 'Deine Wegbegleiterin 💜'}</Text>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>{t('profile.companion')} 💜</Text>
           </View>
           
           {partnerInfo?.has_partner ? (
             <View style={styles.partnerInfo}>
               <Text style={[styles.partnerConnectedText, { color: colors.text }]}>
-                {isEn ? 'You are connected! Together you can do it.' : 'Ihr seid verbunden! Gemeinsam schafft ihr das.'}
+                {t('profile.companion_connected')}
               </Text>
               <View style={styles.partnerStats}>
                 <View style={styles.partnerStat}>
                   <Ionicons name="flame" size={20} color="#FF4500" />
                   <Text style={[styles.partnerStatText, { color: colors.text }]}>
-                    {partnerInfo.partner.streak} {isEn ? 'day streak' : 'Tage Streak'}
+                    {partnerInfo.partner.streak} {t('profile.companion_streak')}
                   </Text>
                 </View>
                 <View style={styles.partnerStat}>
                   <Ionicons name="star" size={20} color="#FFD700" />
                   <Text style={[styles.partnerStatText, { color: colors.text }]}>
-                    Level {partnerInfo.partner.level}
+                    {t('profile.level')} {partnerInfo.partner.level}
                   </Text>
                 </View>
                 <View style={styles.partnerStat}>
@@ -490,8 +490,8 @@ export default function ProfileScreen() {
                   />
                   <Text style={[styles.partnerStatText, { color: colors.text }]}>
                     {partnerInfo.partner.checked_in_today 
-                      ? (isEn ? 'Checked in today' : 'Heute eingecheckt') 
-                      : (isEn ? 'Not checked in yet' : 'Noch nicht eingecheckt')}
+                      ? t('profile.checked_in_today') 
+                      : t('profile.not_checked_in')}
                   </Text>
                 </View>
               </View>
@@ -499,20 +499,18 @@ export default function ProfileScreen() {
                 style={[styles.removePartnerButton, { borderColor: colors.primary }]}
                 onPress={removePartner}
               >
-                <Text style={[styles.removePartnerText, { color: colors.primary }]}>{isEn ? 'Disconnect' : 'Verbindung lösen'}</Text>
+                <Text style={[styles.removePartnerText, { color: colors.primary }]}>{t('profile.disconnect')}</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View>
               <Text style={[styles.partnerExplainText, { color: colors.textLight }]}>
-                {isEn 
-                  ? 'A companion motivates you and you support each other. Together you stay on track!'
-                  : 'Eine Wegbegleiterin motiviert dich und ihr unterstützt euch gegenseitig. Gemeinsam bleibt ihr eher dran!'}
+                {t('profile.companion_explain')}
               </Text>
               {partnerInfo?.pending_invite && (
                 <View style={[styles.pendingInvite, { backgroundColor: colors.background }]}>
                   <Text style={[styles.pendingText, { color: colors.textLight }]}>
-                    {isEn ? 'Your invite code:' : 'Dein Einladungscode:'} 
+                    {t('profile.your_invite_code')} 
                   </Text>
                   <Text style={[styles.inviteCodeDisplay, { color: colors.primary }]}>
                     {partnerInfo.pending_invite.invite_code}
@@ -524,7 +522,7 @@ export default function ProfileScreen() {
                 onPress={() => setShowPartnerModal(true)}
               >
                 <Ionicons name="person-add" size={20} color="#FFF" />
-                <Text style={styles.partnerButtonText}>{isEn ? 'Invite Companion' : 'Wegbegleiterin einladen'}</Text>
+                <Text style={styles.partnerButtonText}>{t('profile.invite_companion')}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -534,7 +532,7 @@ export default function ProfileScreen() {
         <View style={[styles.card, { backgroundColor: colors.card }]}>
           <View style={styles.cardHeader}>
             <Ionicons name="podium" size={24} color={colors.accent} />
-            <Text style={[styles.cardTitle, { color: colors.text }]}>{isEn ? 'Leaderboard' : 'Rangliste'}</Text>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>{t('profile.leaderboard')}</Text>
           </View>
           <View style={styles.leaderboard}>
             {leaderboard.slice(0, 5).map((entry, index) => (
