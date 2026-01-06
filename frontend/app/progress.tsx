@@ -134,7 +134,6 @@ const RadarChart = ({ data, labels, size = 250, colors }: { data: number[], labe
 export default function ProgressScreen() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
-  const isEn = i18n.language === 'en';
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [summary, setSummary] = useState<any>(null);
@@ -150,9 +149,10 @@ export default function ProgressScreen() {
   const [sendingMessage, setSendingMessage] = useState(false);
   const [loadingCoaching, setLoadingCoaching] = useState(false);
 
-  const WEEKDAYS_SHORT = isEn 
-    ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-    : ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+  const WEEKDAYS_SHORT = [
+    t('days.mon'), t('days.tue'), t('days.wed'), t('days.thu'), 
+    t('days.fri'), t('days.sat'), t('days.sun')
+  ];
 
   const colors = settings?.appearance?.color_palette 
     ? (COLOR_PALETTES[settings.appearance.color_palette] || COLOR_PALETTES.sonnenuntergang)
@@ -217,9 +217,7 @@ export default function ProgressScreen() {
       console.error('Error starting coaching:', error);
       setCoachingMessages([{
         role: 'coach',
-        content: isEn 
-          ? 'Hello! 💜 Let\'s look at your week together. How are you feeling right now?'
-          : 'Hallo! 💜 Lass uns gemeinsam auf deine Woche schauen. Wie fühlst du dich gerade?',
+        content: t('coaching.opening'),
       }]);
     } finally {
       setLoadingCoaching(false);
@@ -254,9 +252,7 @@ export default function ProgressScreen() {
       console.error('Error sending message:', error);
       setCoachingMessages([...updatedMessages, {
         role: 'coach',
-        content: isEn 
-          ? 'I understand. What do you think could help you with that? 💜'
-          : 'Das verstehe ich. Was denkst du, könnte dir dabei helfen? 💜',
+        content: t('coaching.fallback'),
       }]);
     } finally {
       setSendingMessage(false);
@@ -296,8 +292,8 @@ export default function ProgressScreen() {
   const checkins = summary?.checkins || [];
 
   const radarLabels = goals.length > 0 
-    ? goals.map((_g: string, i: number) => isEn ? `Goal ${i + 1}` : `Ziel ${i + 1}`)
-    : isEn ? ['Goal 1', 'Goal 2', 'Goal 3'] : ['Ziel 1', 'Ziel 2', 'Ziel 3'];
+    ? goals.map((_g: string, i: number) => `${t('progress.goal')} ${i + 1}`)
+    : [`${t('progress.goal')} 1`, `${t('progress.goal')} 2`, `${t('progress.goal')} 3`];
 
   const moodData = checkins.map((c: any) => c.mood_scale || 5);
 
@@ -312,39 +308,31 @@ export default function ProgressScreen() {
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>
             {userName 
-              ? (isEn ? `${userName}'s Week` : `${userName}s Woche`) 
-              : (isEn ? 'Your Week' : 'Deine Woche')} 📊
+              ? t('progress.title_with_name', { name: userName })
+              : t('progress.title')} 📊
           </Text>
           <Text style={[styles.subtitle, { color: colors.textLight }]}>
-            {isEn ? `${daysTracked} of 7 days tracked` : `${daysTracked} von 7 Tagen erfasst`}
+            {t('progress.days_tracked', { count: daysTracked })}
           </Text>
         </View>
 
         {daysTracked === 0 ? (
           <View style={styles.emptyContainer}>
             <Ionicons name="analytics-outline" size={80} color={colors.textLight} />
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>
-              {isEn ? 'No data yet' : 'Noch keine Daten'}
-            </Text>
-            <Text style={[styles.emptyText, { color: colors.textLight }]}>
-              {isEn 
-                ? 'Start with the daily check-in to see your progress.'
-                : 'Starte mit dem täglichen Check-in, um deinen Fortschritt zu sehen.'}
-            </Text>
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('progress.no_data')}</Text>
+            <Text style={[styles.emptyText, { color: colors.textLight }]}>{t('progress.no_data_hint')}</Text>
             <TouchableOpacity 
               style={[styles.startButton, { backgroundColor: colors.primary }]} 
               onPress={() => router.push('/checkin')}
             >
-              <Text style={styles.startButtonText}>{isEn ? 'Start now' : 'Jetzt starten'}</Text>
+              <Text style={styles.startButtonText}>{t('progress.start_now')}</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <>
             {/* Spiderweb Chart */}
             <View style={[styles.card, { backgroundColor: colors.card }]}>
-              <Text style={[styles.cardTitle, { color: colors.text }]}>
-                {isEn ? 'Success rate per habit' : 'Erfolgsrate pro Gewohnheit'}
-              </Text>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>{t('progress.success_rate')}</Text>
               <View style={styles.chartContainer}>
                 <RadarChart
                   data={successRates}
@@ -376,16 +364,12 @@ export default function ProgressScreen() {
               <View style={[styles.statCard, { backgroundColor: colors.secondary + '30' }]}>
                 <Ionicons name="trophy" size={32} color={colors.secondary} />
                 <Text style={[styles.statValue, { color: colors.text }]}>{Math.round(overallSuccess)}%</Text>
-                <Text style={[styles.statLabel, { color: colors.textLight }]}>
-                  {isEn ? 'Overall success' : 'Gesamterfolg'}
-                </Text>
+                <Text style={[styles.statLabel, { color: colors.textLight }]}>{t('progress.overall_success')}</Text>
               </View>
               <View style={[styles.statCard, { backgroundColor: colors.accent + '40' }]}>
                 <Text style={styles.moodEmoji}>😊</Text>
                 <Text style={[styles.statValue, { color: colors.text }]}>{avgMood.toFixed(1)}</Text>
-                <Text style={[styles.statLabel, { color: colors.textLight }]}>
-                  {isEn ? 'Ø Mood' : 'Ø Stimmung'}
-                </Text>
+                <Text style={[styles.statLabel, { color: colors.textLight }]}>{t('progress.avg_mood')}</Text>
               </View>
             </View>
 
@@ -394,7 +378,7 @@ export default function ProgressScreen() {
               <View style={styles.reviewHeader}>
                 <Ionicons name="sparkles" size={24} color={colors.primary} />
                 <Text style={[styles.cardTitle, { color: colors.text, marginBottom: 0, marginLeft: 10 }]}>
-                  {isEn ? 'Your Weekly Review' : 'Deine Wochen-Auswertung'}
+                  {t('progress.weekly_review')}
                 </Text>
               </View>
               
@@ -402,7 +386,7 @@ export default function ProgressScreen() {
                 <View style={styles.reviewLoading}>
                   <ActivityIndicator color={colors.primary} />
                   <Text style={[styles.reviewLoadingText, { color: colors.textLight }]}>
-                    {isEn ? 'Creating your personal review...' : 'Erstelle deine persönliche Auswertung...'}
+                    {t('progress.creating_review')}
                   </Text>
                 </View>
               ) : weeklyReview ? (
@@ -423,9 +407,7 @@ export default function ProgressScreen() {
                   style={[styles.loadReviewButton, { backgroundColor: colors.primary }]}
                   onPress={fetchWeeklyReview}
                 >
-                  <Text style={styles.loadReviewButtonText}>
-                    {isEn ? 'Load review' : 'Auswertung laden'}
-                  </Text>
+                  <Text style={styles.loadReviewButtonText}>{t('progress.load_review')}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -440,14 +422,8 @@ export default function ProgressScreen() {
                   <Ionicons name="chatbubbles" size={28} color="#FFF" />
                 </View>
                 <View style={styles.coachingTextContainer}>
-                  <Text style={styles.coachingBannerTitle}>
-                    {isEn ? 'Reflection Coaching 💜' : 'Reflexions-Coaching 💜'}
-                  </Text>
-                  <Text style={styles.coachingBannerSubtitle}>
-                    {isEn 
-                      ? 'Find out what worked and what didn\'t'
-                      : 'Finde heraus, was funktioniert hat und was nicht'}
-                  </Text>
+                  <Text style={styles.coachingBannerTitle}>{t('progress.coaching_title')} 💜</Text>
+                  <Text style={styles.coachingBannerSubtitle}>{t('progress.coaching_subtitle')}</Text>
                 </View>
                 <Ionicons name="chevron-forward" size={24} color="#FFF" />
               </View>
@@ -455,9 +431,7 @@ export default function ProgressScreen() {
 
             {/* Days Overview */}
             <View style={[styles.card, { backgroundColor: colors.card }]}>
-              <Text style={[styles.cardTitle, { color: colors.text }]}>
-                {isEn ? 'Daily Overview' : 'Tagesübersicht'}
-              </Text>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>{t('progress.daily_overview')}</Text>
               <View style={styles.daysGrid}>
                 {WEEKDAYS_SHORT.map((day, index) => {
                   const checkin = checkins[index];
@@ -495,9 +469,7 @@ export default function ProgressScreen() {
             {/* Mood Trend */}
             {moodData.length > 0 && (
               <View style={[styles.card, { backgroundColor: colors.card }]}>
-                <Text style={[styles.cardTitle, { color: colors.text }]}>
-                  {isEn ? 'Mood Trend' : 'Stimmungsverlauf'}
-                </Text>
+                <Text style={[styles.cardTitle, { color: colors.text }]}>{t('progress.mood_trend')}</Text>
                 <View style={styles.moodTrend}>
                   {moodData.map((mood: number, index: number) => (
                     <View key={index} style={styles.moodBar}>
@@ -532,22 +504,20 @@ export default function ProgressScreen() {
                   />
                   <Text style={[styles.weekCompleteTitle, { color: colors.text }]}>
                     {overallSuccess >= 70 
-                      ? (isEn ? 'Fantastic week! 🎉' : 'Fantastische Woche! 🎉') 
-                      : (isEn ? 'Week completed' : 'Woche beendet')}
+                      ? t('progress.week_complete_great') 
+                      : t('progress.week_complete')}
                   </Text>
                   <Text style={[styles.weekCompleteText, { color: colors.textLight }]}>
                     {overallSuccess >= 70 
-                      ? (isEn ? 'You achieved your goals brilliantly! Keep it up!' : 'Du hast deine Ziele großartig erreicht! Weiter so!')
-                      : (isEn ? 'Every week is a new beginning. What do you want to do differently next week?' : 'Jede Woche ist ein neuer Anfang. Was möchtest du nächste Woche anders machen?')
+                      ? t('progress.week_complete_message_great')
+                      : t('progress.week_complete_message')
                     }
                   </Text>
                   <TouchableOpacity 
                     style={[styles.newWeekButton, { backgroundColor: colors.primary }]} 
                     onPress={() => router.push('/goals')}
                   >
-                    <Text style={styles.newWeekButtonText}>
-                      {isEn ? 'Set new weekly goals' : 'Neue Wochenziele setzen'}
-                    </Text>
+                    <Text style={styles.newWeekButtonText}>{t('progress.set_new_goals')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -574,7 +544,7 @@ export default function ProgressScreen() {
               <View style={styles.coachingHeaderLeft}>
                 <Ionicons name="chatbubbles" size={24} color={colors.primary} />
                 <Text style={[styles.coachingHeaderTitle, { color: colors.text }]}>
-                  {isEn ? 'Reflection Coaching' : 'Reflexions-Coaching'}
+                  {t('progress.coaching_title')}
                 </Text>
               </View>
               <TouchableOpacity onPress={() => setShowCoachingModal(false)}>
@@ -590,7 +560,7 @@ export default function ProgressScreen() {
                 <View style={styles.coachingLoading}>
                   <ActivityIndicator color={colors.primary} />
                   <Text style={[styles.coachingLoadingText, { color: colors.textLight }]}>
-                    {isEn ? 'Coach is preparing...' : 'Coach bereitet sich vor...'}
+                    {t('progress.coach_preparing')}
                   </Text>
                 </View>
               ) : (
@@ -628,7 +598,7 @@ export default function ProgressScreen() {
             <View style={[styles.inputContainer, { borderTopColor: colors.background }]}>
               <TextInput
                 style={[styles.messageInput, { backgroundColor: colors.background, color: colors.text }]}
-                placeholder={isEn ? 'Your answer...' : 'Deine Antwort...'}
+                placeholder={t('progress.your_answer')}
                 placeholderTextColor={colors.textLight}
                 value={userInput}
                 onChangeText={setUserInput}
