@@ -1008,7 +1008,7 @@ export default function SettingsScreen() {
                           {goal || t('settings.goal_number', { number: index + 1 })}
                         </Text>
                         <Text style={[styles.individualTimeText, { color: colors.primary }]}>
-                          {settings.habit_reminders.individual_times[index]} {i18n.language === 'en' ? 'o\'clock' : 'Uhr'}
+                          {settings.habit_reminders.individual_times[index]} {t('settings.oclock')}
                         </Text>
                       </View>
                       <Ionicons name="alarm" size={20} color={colors.primary} />
