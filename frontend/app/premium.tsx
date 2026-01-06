@@ -259,7 +259,7 @@ export default function PremiumScreen() {
             </View>
 
             {/* Features */}
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Was du bekommst</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Premium beinhaltet</Text>
             {PREMIUM_FEATURES.map((feature, index) => (
               <View key={index} style={[styles.featureItem, { backgroundColor: colors.card }]}>
                 <View style={[styles.featureIcon, { backgroundColor: colors.primary + '20' }]}>
@@ -271,6 +271,32 @@ export default function PremiumScreen() {
                     {feature.description}
                   </Text>
                 </View>
+                <Ionicons name="lock-closed" size={16} color={colors.textLight} />
+              </View>
+            ))}
+            
+            {/* Location reminder note */}
+            <View style={[styles.noteBox, { backgroundColor: colors.accent + '30' }]}>
+              <Ionicons name="information-circle" size={18} color={colors.text} />
+              <Text style={[styles.noteText, { color: colors.text }]}>
+                Orts-Erinnerungen funktionieren nur auf dem Handy (nicht im Web-Browser).
+              </Text>
+            </View>
+
+            {/* Free Features */}
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Immer kostenlos ✓</Text>
+            {FREE_FEATURES.map((feature, index) => (
+              <View key={index} style={[styles.featureItem, { backgroundColor: colors.card }]}>
+                <View style={[styles.featureIcon, { backgroundColor: colors.secondary + '20' }]}>
+                  <Ionicons name={feature.icon as any} size={24} color={colors.secondary} />
+                </View>
+                <View style={styles.featureText}>
+                  <Text style={[styles.featureTitle, { color: colors.text }]}>{feature.title}</Text>
+                  <Text style={[styles.featureDescription, { color: colors.textLight }]}>
+                    {feature.description}
+                  </Text>
+                </View>
+                <Ionicons name="checkmark-circle" size={20} color={colors.secondary} />
               </View>
             ))}
 
