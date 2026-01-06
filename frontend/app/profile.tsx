@@ -412,8 +412,8 @@ export default function ProfileScreen() {
           <Ionicons name="flag" size={24} color={colors.text} />
           <Text style={[styles.challengeButtonText, { color: colors.text }]}>
             {profile?.active_challenge 
-              ? (isEn ? 'Change Challenge' : 'Challenge wechseln') 
-              : (isEn ? 'Start Weekly Challenge' : 'Wochen-Challenge starten')}
+              ? t('profile.change_challenge') 
+              : t('profile.start_challenge')}
           </Text>
         </TouchableOpacity>
 
@@ -422,7 +422,7 @@ export default function ProfileScreen() {
           <View style={styles.cardHeader}>
             <Ionicons name="medal" size={24} color={colors.primary} />
             <Text style={[styles.cardTitle, { color: colors.text }]}>
-              {isEn ? 'Badges' : 'Abzeichen'} ({earnedBadges.length}/{allBadges.length})
+              {t('profile.badges')} ({earnedBadges.length}/{allBadges.length})
             </Text>
           </View>
           <View style={styles.badgesGrid}>
