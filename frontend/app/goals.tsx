@@ -279,6 +279,17 @@ export default function GoalsScreen() {
             </View>
           </TouchableOpacity>
 
+          {/* Warum nur 3 Gewohnheiten - Erklaerung */}
+          <View style={[styles.whyThreeBox, { backgroundColor: colors.card }]}>
+            <View style={styles.whyThreeHeader}>
+              <Text style={styles.brainEmoji}>🧠</Text>
+              <Text style={[styles.whyThreeTitle, { color: colors.text }]}>Warum nur 3 Gewohnheiten?</Text>
+            </View>
+            <Text style={[styles.whyThreeText, { color: colors.textLight }]}>
+              Forschung zeigt: Weniger ist mehr! Unser Gehirn kann nur begrenzt neue Verhaltensweisen gleichzeitig verarbeiten. Mit 1-3 Gewohnheiten hast du die beste Chance auf echten, nachhaltigen Erfolg. Qualitaet vor Quantitaet! 💪
+            </Text>
+          </View>
+
           {/* AI Advice Banner */}
           {isSunday && (
             <TouchableOpacity 
