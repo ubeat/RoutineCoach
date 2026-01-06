@@ -71,6 +71,7 @@ export default function GoalsScreen() {
   
   // Goal mode: 'simple' or 'wenn-dann'
   const [goalMode, setGoalMode] = useState<'simple' | 'wenn-dann'>('simple');
+  const { t } = useTranslation();
   
   // For Wenn-Dann goals
   const [wennDannGoals, setWennDannGoals] = useState<Goal[]>([
