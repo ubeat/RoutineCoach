@@ -766,7 +766,7 @@ export default function ProfileScreen() {
                 </View>
                 
                 <Text style={[styles.badgeModalTitle, { color: colors.text }]}>
-                  {selectedBadge.name}
+                  {getBadgeName(selectedBadge)}
                 </Text>
                 
                 <View style={[
