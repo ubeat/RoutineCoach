@@ -1723,18 +1723,36 @@ class JournalEntryCreate(BaseModel):
     gratitudes: List[str] = []
     mood_note: Optional[str] = None
 
-REFLECTION_QUESTIONS = [
-    "Was war heute dein groesster Erfolg?",
-    "Wofuer bist du heute dankbar?",
+REFLECTION_QUESTIONS_DE = [
+    "Was war heute dein größter Erfolg?",
+    "Wofür bist du heute dankbar?",
     "Was hast du heute gelernt?",
-    "Was haettest du heute anders machen koennen?",
+    "Was hättest du heute anders machen können?",
     "Wer hat dir heute geholfen oder dich inspiriert?",
-    "Was hat dich heute gluecklich gemacht?",
+    "Was hat dich heute glücklich gemacht?",
     "Welche Herausforderung hast du heute gemeistert?",
-    "Was moechtest du morgen erreichen?",
-    "Wie hast du heute fuer dich selbst gesorgt?",
+    "Was möchtest du morgen erreichen?",
+    "Wie hast du heute für dich selbst gesorgt?",
     "Was war der beste Moment des Tages?"
 ]
+
+REFLECTION_QUESTIONS_EN = [
+    "What was your biggest success today?",
+    "What are you grateful for today?",
+    "What did you learn today?",
+    "What could you have done differently today?",
+    "Who helped or inspired you today?",
+    "What made you happy today?",
+    "What challenge did you overcome today?",
+    "What do you want to achieve tomorrow?",
+    "How did you take care of yourself today?",
+    "What was the best moment of the day?"
+]
+
+def get_reflection_question(language: str = "de") -> str:
+    import random
+    questions = REFLECTION_QUESTIONS_EN if language == "en" else REFLECTION_QUESTIONS_DE
+    return random.choice(questions)
 
 @api_router.get("/journal/{device_id}")
 async def get_journal_entries(device_id: str, limit: int = 30):
