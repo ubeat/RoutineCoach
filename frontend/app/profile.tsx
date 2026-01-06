@@ -161,7 +161,7 @@ export default function ProfileScreen() {
       if (!deviceId) return;
 
       const [gamRes, challengesRes, partnerRes, leaderboardRes, settingsRes] = await Promise.all([
-        axios.get(`${API_URL}/api/gamification/${deviceId}`),
+        axios.get(`${API_URL}/api/gamification/${deviceId}?language=${i18n.language}`),
         axios.get(`${API_URL}/api/challenges?language=${i18n.language}`),
         axios.get(`${API_URL}/api/social/partner/${deviceId}`),
         axios.get(`${API_URL}/api/social/leaderboard?device_id=${deviceId}&language=${i18n.language}`),
