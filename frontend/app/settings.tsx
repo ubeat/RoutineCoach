@@ -319,6 +319,18 @@ export default function SettingsScreen() {
     loadUserName();
   }, []);
 
+  // Scroll to language section if requested via route param
+  useEffect(() => {
+    if (searchParams.scrollTo === 'language' && !loading) {
+      // Wait for content to be rendered, then scroll
+      setTimeout(() => {
+        if (languageSectionY.current > 0) {
+          scrollViewRef.current?.scrollTo({ y: languageSectionY.current - 50, animated: true });
+        }
+      }, 500);
+    }
+  }, [searchParams.scrollTo, loading]);
+
   // Load stored geofences on mount
   useEffect(() => {
     loadStoredGeofences();
