@@ -837,11 +837,12 @@ Meine Empfehlung: Lass uns nächste Woche mit winzigen Schritten starten. Was w�
         }
 
 @api_router.post("/coaching/message")
-async def coaching_message(request: CoachingMessageRequest):
+@limiter.limit(AI_RATE_LIMIT)
+async def coaching_message(request: Request, coaching_request: CoachingMessageRequest):
     """Führt einen lösungsorientierten Coaching-Dialog (Premium Feature)"""
     
     # Check premium status
-    premium_status = await check_premium_status(request.device_id)
+    premium_status = await check_premium_status(coaching_request.device_id)
     if not premium_status.get("is_premium"):
         raise HTTPException(
             status_code=403, 
