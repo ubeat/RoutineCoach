@@ -836,7 +836,7 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView style={styles.scrollView}>
+      <ScrollView ref={scrollViewRef} style={styles.scrollView}>
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>{t('settings.title')}</Text>
         </View>
