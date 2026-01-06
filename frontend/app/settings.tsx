@@ -278,6 +278,10 @@ export default function SettingsScreen() {
     index?: number;
   }>({ visible: false, type: 'habit' });
   const [tempTime, setTempTime] = useState({ hour: '08', minute: '00' });
+  
+  // ScrollView ref for auto-scrolling to language section
+  const scrollViewRef = useRef<ScrollView>(null);
+  const languageSectionY = useRef(0);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [settingLocation, setSettingLocation] = useState<number | null>(null);
   
