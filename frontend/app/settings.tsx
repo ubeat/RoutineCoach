@@ -1555,7 +1555,7 @@ export default function SettingsScreen() {
                   styles.soundOptionText,
                   { color: settings.appearance.notification_sound === sound.id ? colors.primary : colors.text }
                 ]}>
-                  {sound.name}
+                  {getSoundName(sound.id)}
                 </Text>
                 {settings.appearance.notification_sound === sound.id && (
                   <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
