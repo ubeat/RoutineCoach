@@ -877,19 +877,19 @@ export default function SettingsScreen() {
         <View style={[styles.section, { backgroundColor: colors.card }]}>
           <View style={styles.sectionHeader}>
             <Ionicons name="person-circle" size={24} color={colors.primary} />
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Dein Profil</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('settings.your_profile')}</Text>
           </View>
           
           <View style={styles.profileNameContainer}>
             <Text style={[styles.profileNameLabel, { color: colors.textLight }]}>
-              Wie sollen wir dich nennen?
+              {t('settings.name_question')}
             </Text>
             <View style={styles.profileNameInputRow}>
               <TextInput
                 style={[styles.profileNameInput, { backgroundColor: colors.background, color: colors.text }]}
                 value={userName}
                 onChangeText={saveUserName}
-                placeholder="Dein Name"
+                placeholder={t('settings.your_name')}
                 placeholderTextColor={colors.textLight}
                 maxLength={20}
               />
