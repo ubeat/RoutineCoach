@@ -821,7 +821,7 @@ export default function SettingsScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView style={styles.scrollView}>
         <View style={styles.header}>
-          <Text style={[styles.title, { color: colors.text }]}>Einstellungen</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{t('settings.title')}</Text>
         </View>
 
         {/* Premium & Admin Section */}
@@ -834,9 +834,9 @@ export default function SettingsScreen() {
               <Ionicons name="diamond" size={24} color="#FFF" />
             </View>
             <View style={styles.premiumButtonContent}>
-              <Text style={[styles.premiumButtonTitle, { color: colors.text }]}>Premium</Text>
+              <Text style={[styles.premiumButtonTitle, { color: colors.text }]}>{t('settings.premium')}</Text>
               <Text style={[styles.premiumButtonSubtitle, { color: colors.textLight }]}>
-                KI-Coach & Wochenanalysen
+                {t('settings.premium_subtitle')}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={colors.textLight} />
@@ -851,7 +851,7 @@ export default function SettingsScreen() {
             <View style={[styles.adminIconBg, { backgroundColor: colors.primary + '20' }]}>
               <Ionicons name="shield-checkmark" size={20} color={colors.primary} />
             </View>
-            <Text style={[styles.adminButtonText, { color: colors.textLight }]}>Admin-Bereich</Text>
+            <Text style={[styles.adminButtonText, { color: colors.textLight }]}>{t('settings.admin')}</Text>
             <Ionicons name="chevron-forward" size={18} color={colors.textLight} />
           </TouchableOpacity>
         </View>
