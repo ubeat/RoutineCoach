@@ -113,6 +113,7 @@ export default function CheckinScreen() {
         habits_completed: habitsStr,
         mood_emoji: selectedMoodEmoji,
         mood_scale: moodScale,
+        language: i18n.language || 'de',
       });
 
       setAiResponse(response.data.ai_response);
