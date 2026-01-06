@@ -174,12 +174,14 @@ export default function CheckinScreen() {
           )}
 
           <TouchableOpacity style={styles.backButton} onPress={() => router.push('/')}>
-            <Text style={styles.backButtonText}>Zurueck zur Uebersicht</Text>
+            <Text style={styles.backButtonText}>{t('common.back')}</Text>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
     );
   }
+
+  const MOOD_EMOJIS = getMoodEmojis();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -189,13 +191,13 @@ export default function CheckinScreen() {
       >
         <ScrollView style={styles.scrollView}>
           <View style={styles.header}>
-            <Text style={styles.title}>Taeglicher Check-In</Text>
-            <Text style={styles.subtitle}>Wie lief dein Tag?</Text>
+            <Text style={styles.title}>{t('checkin.title')}</Text>
+            <Text style={styles.subtitle}>{t('checkin.subtitle')}</Text>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Hast du deine Gewohnheiten erledigt?</Text>
-            <Text style={styles.sectionHint}>Tippe auf die Gewohnheit zum Markieren</Text>
+            <Text style={styles.sectionTitle}>{t('checkin.how_did_it_go')}</Text>
+            <Text style={styles.sectionHint}>{t('checkin.tap_to_mark', 'Tippe auf die Gewohnheit zum Markieren')}</Text>
             
             {goals.map((goal, index) => (
               <TouchableOpacity
@@ -225,13 +227,13 @@ export default function CheckinScreen() {
 
             <View style={styles.summaryContainer}>
               <Text style={styles.summaryText}>
-                Ergebnis: {habitsCompleted.map(h => h ? 'y' : 'n').join('')}
+                {t('checkin.result', 'Ergebnis')}: {habitsCompleted.map(h => h ? 'y' : 'n').join('')}
               </Text>
             </View>
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Wie fuehlst du dich heute?</Text>
+            <Text style={styles.sectionTitle}>{t('checkin.mood_question')}</Text>
             
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.emojiScroll}>
               {MOOD_EMOJIS.map((mood, index) => (
