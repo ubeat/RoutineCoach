@@ -1634,8 +1634,19 @@ async def award_badge(device_id: str, badge_id: str):
     return {"badge": BADGES[badge_id], "awarded": True}
 
 @api_router.get("/challenges")
-async def get_available_challenges():
-    return {"challenges": WEEKLY_CHALLENGES}
+async def get_available_challenges(language: str = "de"):
+    # Return challenges with localized name and description
+    localized_challenges = []
+    for c in WEEKLY_CHALLENGES:
+        localized_challenges.append({
+            "id": c["id"],
+            "name": c.get(f"name_{language}", c.get("name_de", "")),
+            "description": c.get(f"description_{language}", c.get("description_de", "")),
+            "target": c["target"],
+            "xp_reward": c["xp_reward"],
+            "type": c["type"]
+        })
+    return {"challenges": localized_challenges}
 
 @api_router.post("/gamification/{device_id}/start-challenge")
 async def start_challenge(device_id: str, challenge_id: str):
