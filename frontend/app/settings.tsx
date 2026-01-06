@@ -502,8 +502,8 @@ export default function SettingsScreen() {
       }
 
       Alert.alert(
-        i18n.language === 'en' ? 'Saved!' : 'Gespeichert!', 
-        i18n.language === 'en' ? 'Your settings have been saved.' : 'Deine Einstellungen wurden gespeichert.'
+        t('settings.saved_title'), 
+        t('settings.saved_message')
       );
     } catch (error) {
       console.error('Error saving settings:', error);
