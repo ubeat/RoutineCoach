@@ -1189,7 +1189,7 @@ export default function SettingsScreen() {
         <View style={[styles.section, { backgroundColor: colors.card }]}>
           <View style={styles.sectionHeader}>
             <Ionicons name="color-palette" size={24} color={colors.accent} />
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Aussehen</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('settings.appearance')}</Text>
           </View>
 
           <TouchableOpacity
@@ -1202,13 +1202,13 @@ export default function SettingsScreen() {
               <View style={[styles.colorDot, { backgroundColor: colors.accent }]} />
             </View>
             <Text style={[styles.colorName, { color: colors.text }]}>
-              {COLOR_PALETTES[settings.appearance.color_palette]?.name || 'Sonnenuntergang'}
+              {getColorPaletteName(settings.appearance.color_palette)}
             </Text>
             <Ionicons name="chevron-forward" size={20} color={colors.textLight} />
           </TouchableOpacity>
 
           <Text style={[styles.subLabel, { color: colors.textLight, marginTop: 15 }]}>
-            Benachrichtigungston:
+            {t('settings.notification_sound')}:
           </Text>
           <TouchableOpacity
             style={[styles.soundButton, { backgroundColor: colors.background }]}
@@ -1216,7 +1216,7 @@ export default function SettingsScreen() {
           >
             <Ionicons name="musical-notes" size={20} color={colors.primary} />
             <Text style={[styles.soundText, { color: colors.text }]}>
-              {NOTIFICATION_SOUNDS.find(s => s.id === settings.appearance.notification_sound)?.name || 'Standard'}
+              {getSoundName(settings.appearance.notification_sound)}
             </Text>
             <Ionicons name="chevron-forward" size={20} color={colors.textLight} />
           </TouchableOpacity>
