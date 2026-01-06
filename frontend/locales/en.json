@@ -300,6 +300,8 @@
     "choose_location_map": "Choose location on map",
     "selected_location": "Selected location:",
     "location_set": "Location set",
+    "location_web_note": "Note: Location reminders only work in the mobile app.",
+    "location_mobile_note": "You will receive a reminder when you are near this location.",
     "location_hint_web": "Note: Location reminders only work in the mobile app.",
     "location_hint_mobile": "You will receive a reminder when you are near this location.",
     "location_permission_title": "Location Permission",
