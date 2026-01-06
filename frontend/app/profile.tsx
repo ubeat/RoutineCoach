@@ -302,10 +302,10 @@ export default function ProfileScreen() {
       >
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>
-            {userName ? (isEn ? `${userName}'s Achievements` : `${userName}s Erfolge`) : (isEn ? 'Your Achievements' : 'Deine Erfolge')} 🏆
+            {userName ? t('profile.title_with_name', { name: userName }) : t('profile.title')} 🏆
           </Text>
           <Text style={[styles.subtitle, { color: colors.textLight }]}>
-            {isEn ? 'Every small step counts - you are doing great!' : 'Jeder kleine Schritt zählt - du machst das großartig!'}
+            {t('profile.subtitle')}
           </Text>
         </View>
 
@@ -316,8 +316,8 @@ export default function ProfileScreen() {
               <Ionicons name={currentLevel?.icon as any || 'star'} size={40} color="#FFF" />
             </View>
             <View style={styles.levelInfo}>
-              <Text style={styles.levelName}>Level {currentLevel?.level || 1}</Text>
-              <Text style={styles.levelTitle}>{currentLevel?.name || (isEn ? 'Beginner' : 'Anfänger')}</Text>
+              <Text style={styles.levelName}>{t('profile.level')} {currentLevel?.level || 1}</Text>
+              <Text style={styles.levelTitle}>{currentLevel?.name || t('profile.beginner')}</Text>
             </View>
             <TouchableOpacity 
               style={styles.xpBadge}
@@ -335,7 +335,7 @@ export default function ProfileScreen() {
                 <View style={[styles.xpProgressFill, { width: `${Math.min(xpProgress, 100)}%` }]} />
               </View>
               <Text style={styles.xpProgressText}>
-                {isEn ? `${(nextLevel?.xp_required || 0) - (profile?.xp || 0)} XP until Level ${nextLevel?.level}` : `Noch ${(nextLevel?.xp_required || 0) - (profile?.xp || 0)} XP bis Level ${nextLevel?.level}`}
+                {t('profile.xp_until_next', { xp: (nextLevel?.xp_required || 0) - (profile?.xp || 0), level: nextLevel?.level })}
               </Text>
             </View>
           )}
@@ -345,7 +345,7 @@ export default function ProfileScreen() {
             onPress={() => setShowXPInfoModal(true)}
           >
             <Ionicons name="information-circle-outline" size={16} color="rgba(255,255,255,0.9)" />
-            <Text style={styles.xpInfoLinkText}>{isEn ? 'How do I earn XP?' : 'Wie verdiene ich XP-Punkte?'}</Text>
+            <Text style={styles.xpInfoLinkText}>{t('profile.how_to_earn_xp')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -355,19 +355,19 @@ export default function ProfileScreen() {
             <View style={styles.streakItem}>
               <Ionicons name="flame" size={32} color="#FF4500" />
               <Text style={[styles.streakNumber, { color: colors.text }]}>{profile?.current_streak || 0}</Text>
-              <Text style={[styles.streakLabel, { color: colors.textLight }]}>{isEn ? 'Current Streak' : 'Aktueller Streak'}</Text>
+              <Text style={[styles.streakLabel, { color: colors.textLight }]}>{t('profile.current_streak')}</Text>
             </View>
             <View style={styles.streakDivider} />
             <View style={styles.streakItem}>
               <Ionicons name="trophy" size={32} color="#FFD700" />
               <Text style={[styles.streakNumber, { color: colors.text }]}>{profile?.longest_streak || 0}</Text>
-              <Text style={[styles.streakLabel, { color: colors.textLight }]}>{isEn ? 'Longest Streak' : 'Längster Streak'}</Text>
+              <Text style={[styles.streakLabel, { color: colors.textLight }]}>{t('profile.longest_streak')}</Text>
             </View>
             <View style={styles.streakDivider} />
             <View style={styles.streakItem}>
               <Ionicons name="checkmark-done" size={32} color={colors.secondary} />
               <Text style={[styles.streakNumber, { color: colors.text }]}>{profile?.total_habits_completed || 0}</Text>
-              <Text style={[styles.streakLabel, { color: colors.textLight }]}>{isEn ? 'Habits done' : 'Habits erledigt'}</Text>
+              <Text style={[styles.streakLabel, { color: colors.textLight }]}>{t('profile.habits_done')}</Text>
             </View>
           </View>
         </View>
@@ -377,7 +377,7 @@ export default function ProfileScreen() {
           <View style={[styles.card, { backgroundColor: '#FFF3E0', borderColor: '#FFB74D', borderWidth: 1 }]}>
             <View style={styles.cardHeader}>
               <Ionicons name="flag" size={24} color="#FF9800" />
-              <Text style={[styles.cardTitle, { color: '#E65100' }]}>{isEn ? 'Active Challenge' : 'Aktive Challenge'}</Text>
+              <Text style={[styles.cardTitle, { color: '#E65100' }]}>{t('profile.active_challenge')}</Text>
             </View>
             {(() => {
               const challenge = challenges.find(c => c.id === profile.active_challenge);
