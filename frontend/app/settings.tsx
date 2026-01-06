@@ -1023,7 +1023,9 @@ export default function SettingsScreen() {
                   </Text>
                 </View>
                 <Text style={[styles.geoHint, { color: colors.textLight }]}>
-                  Werde erinnert, wenn du an einem bestimmten Ort ankommst.
+                  {i18n.language === 'en' 
+                    ? 'Get notified when you arrive at a specific location.'
+                    : 'Werde erinnert, wenn du an einem bestimmten Ort ankommst.'}
                 </Text>
 
                 {goals.map((goal, index) => {
