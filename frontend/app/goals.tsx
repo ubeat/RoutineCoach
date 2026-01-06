@@ -265,10 +265,10 @@ export default function GoalsScreen() {
               <Ionicons name="school" size={24} color={colors.text} />
               <View style={styles.theoryBannerText}>
                 <Text style={[styles.theoryBannerTitle, { color: colors.text }]}>
-                  Die Wenn-Dann Methode
+                  {t('goals.theory_title')}
                 </Text>
                 <Text style={[styles.theoryBannerSubtitle, { color: colors.textLight }]}>
-                  Wissenschaftlich bewaehrt • Tippe zum Lernen
+                  {t('goals.theory_subtitle')}
                 </Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color={colors.textLight} />
@@ -279,10 +279,10 @@ export default function GoalsScreen() {
           <View style={[styles.whyThreeBox, { backgroundColor: colors.card }]}>
             <View style={styles.whyThreeHeader}>
               <Text style={styles.brainEmoji}>🧠</Text>
-              <Text style={[styles.whyThreeTitle, { color: colors.text }]}>Warum nur 3 Gewohnheiten?</Text>
+              <Text style={[styles.whyThreeTitle, { color: colors.text }]}>{t('goals.why_three_title')}</Text>
             </View>
             <Text style={[styles.whyThreeText, { color: colors.textLight }]}>
-              Forschung zeigt: Weniger ist mehr! Unser Gehirn kann nur begrenzt neue Verhaltensweisen gleichzeitig verarbeiten. Mit 1-3 Gewohnheiten hast du die beste Chance auf echten, nachhaltigen Erfolg. Qualitaet vor Quantitaet! 💪
+              {t('goals.why_three_text')} 💪
             </Text>
           </View>
 
