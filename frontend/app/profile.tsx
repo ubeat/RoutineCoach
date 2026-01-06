@@ -493,7 +493,7 @@ export default function ProfileScreen() {
                     styles.badgeName, 
                     { color: isEarned ? colors.text : colors.textLight }
                   ]} numberOfLines={1}>
-                    {badge.name}
+                    {getBadgeName(badge)}
                   </Text>
                 </TouchableOpacity>
               );
