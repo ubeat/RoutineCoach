@@ -1339,89 +1339,127 @@ async def get_cached_notifications(device_id: str):
 BADGES = {
     "first_checkin": {
         "id": "first_checkin",
-        "name": "Erster Schritt",
-        "description": "Dein erster Check-In!",
+        "name_de": "Erster Schritt",
+        "name_en": "First Step",
+        "description_de": "Dein erster Check-In!",
+        "description_en": "Your first check-in!",
         "icon": "footsteps",
         "color": "#4ECDC4"
     },
     "week_warrior": {
         "id": "week_warrior",
-        "name": "Wochen-Krieger",
-        "description": "7 Tage am Stueck eingecheckt",
+        "name_de": "Wochen-Krieger",
+        "name_en": "Week Warrior",
+        "description_de": "7 Tage am Stück eingecheckt",
+        "description_en": "Checked in 7 days in a row",
         "icon": "shield",
         "color": "#FF6B6B"
     },
     "perfect_week": {
         "id": "perfect_week",
-        "name": "Perfekte Woche",
-        "description": "Alle Habits eine Woche lang erledigt",
+        "name_de": "Perfekte Woche",
+        "name_en": "Perfect Week",
+        "description_de": "Alle Habits eine Woche lang erledigt",
+        "description_en": "Completed all habits for a week",
         "icon": "trophy",
         "color": "#FFE66D"
     },
     "morning_person": {
         "id": "morning_person",
-        "name": "Fruehaufsteher",
-        "description": "10x vor 8 Uhr eingecheckt",
+        "name_de": "Frühaufsteher",
+        "name_en": "Early Bird",
+        "description_de": "10x vor 8 Uhr eingecheckt",
+        "description_en": "Checked in before 8 AM 10 times",
         "icon": "sunny",
         "color": "#FFA500"
     },
     "streak_master_7": {
         "id": "streak_master_7",
-        "name": "Streak-Meister",
-        "description": "7-Tage-Streak erreicht",
+        "name_de": "Streak-Meister",
+        "name_en": "Streak Master",
+        "description_de": "7-Tage-Streak erreicht",
+        "description_en": "Reached a 7-day streak",
         "icon": "flame",
         "color": "#FF4500"
     },
     "streak_master_14": {
         "id": "streak_master_14",
-        "name": "Streak-Legende",
-        "description": "14-Tage-Streak erreicht",
+        "name_de": "Streak-Legende",
+        "name_en": "Streak Legend",
+        "description_de": "14-Tage-Streak erreicht",
+        "description_en": "Reached a 14-day streak",
         "icon": "flame",
         "color": "#FF6347"
     },
     "streak_master_30": {
         "id": "streak_master_30",
-        "name": "Streak-Gott",
-        "description": "30-Tage-Streak erreicht",
+        "name_de": "Streak-Gott",
+        "name_en": "Streak God",
+        "description_de": "30-Tage-Streak erreicht",
+        "description_en": "Reached a 30-day streak",
         "icon": "flame",
         "color": "#DC143C"
     },
     "habit_hero": {
         "id": "habit_hero",
-        "name": "Habit-Held",
-        "description": "50 Habits insgesamt erledigt",
+        "name_de": "Habit-Held",
+        "name_en": "Habit Hero",
+        "description_de": "50 Habits insgesamt erledigt",
+        "description_en": "Completed 50 habits in total",
         "icon": "star",
         "color": "#A78BFA"
     },
     "journal_writer": {
         "id": "journal_writer",
-        "name": "Tagebuch-Schreiber",
-        "description": "10 Journal-Eintraege geschrieben",
+        "name_de": "Tagebuch-Schreiber",
+        "name_en": "Journal Writer",
+        "description_de": "10 Journal-Einträge geschrieben",
+        "description_en": "Wrote 10 journal entries",
         "icon": "book",
         "color": "#F472B6"
     },
     "gratitude_guru": {
         "id": "gratitude_guru",
-        "name": "Dankbarkeits-Guru",
-        "description": "30 Dankbarkeiten aufgeschrieben",
+        "name_de": "Dankbarkeits-Guru",
+        "name_en": "Gratitude Guru",
+        "description_de": "30 Dankbarkeiten aufgeschrieben",
+        "description_en": "Wrote down 30 gratitudes",
         "icon": "heart",
         "color": "#EC4899"
     },
     "social_butterfly": {
         "id": "social_butterfly",
-        "name": "Sozialer Schmetterling",
-        "description": "Einen Partner eingeladen",
+        "name_de": "Sozialer Schmetterling",
+        "name_en": "Social Butterfly",
+        "description_de": "Einen Partner eingeladen",
+        "description_en": "Invited a partner",
         "icon": "people",
         "color": "#06B6D4"
     },
     "challenger": {
         "id": "challenger",
-        "name": "Herausforderer",
-        "description": "Erste Wochen-Challenge abgeschlossen",
+        "name_de": "Herausforderer",
+        "name_en": "Challenger",
+        "description_de": "Erste Wochen-Challenge abgeschlossen",
+        "description_en": "Completed first weekly challenge",
         "icon": "flag",
         "color": "#8B5CF6"
     }
 }
+
+def get_localized_badge(badge_data: dict, language: str = "de") -> dict:
+    """Return badge with localized name and description"""
+    return {
+        "id": badge_data["id"],
+        "name": badge_data.get(f"name_{language}", badge_data.get("name_de", "")),
+        "description": badge_data.get(f"description_{language}", badge_data.get("description_de", "")),
+        "icon": badge_data["icon"],
+        "color": badge_data["color"]
+    }
+
+def get_all_localized_badges(language: str = "de") -> list:
+    """Return all badges with localized names and descriptions"""
+    return [get_localized_badge(b, language) for b in BADGES.values()]
 
 # Level definitions
 LEVELS = [
