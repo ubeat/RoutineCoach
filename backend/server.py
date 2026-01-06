@@ -75,6 +75,7 @@ class DailyCheckInCreate(BaseModel):
     habits_completed: str  # e.g., "yyy" or "ynn"
     mood_emoji: str
     mood_scale: int  # 1-10
+    language: str = "de"  # User's language preference
 
 class DailyCheckIn(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
