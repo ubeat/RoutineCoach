@@ -1782,7 +1782,7 @@ async def get_today_journal(device_id: str, language: str = "de"):
     }
 
 @api_router.post("/journal")
-async def create_or_update_journal(input: JournalEntryCreate):
+async def create_or_update_journal(input: JournalEntryCreate, language: str = "de"):
     today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
     today_end = today_start + timedelta(days=1)
     
@@ -1791,8 +1791,7 @@ async def create_or_update_journal(input: JournalEntryCreate):
         "date": {"$gte": today_start, "$lt": today_end}
     })
     
-    import random
-    question = random.choice(REFLECTION_QUESTIONS)
+    question = get_reflection_question(language)
     
     if existing:
         await db.journal.update_one(
