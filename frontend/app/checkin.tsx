@@ -254,7 +254,7 @@ export default function CheckinScreen() {
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>Stimmung auf einer Skala von 1-10</Text>
+            <Text style={styles.sectionTitle}>{t('checkin.mood_scale', 'Mood on a scale from 1-10')}</Text>
             <Text style={styles.scaleValue}>{moodScale}</Text>
             <View style={styles.scaleContainer}>
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
