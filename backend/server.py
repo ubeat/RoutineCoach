@@ -227,11 +227,15 @@ def get_goal_week_start(dt: datetime = None) -> datetime:
     # Otherwise, goals are for the current week
     return get_week_start(dt)
 
-# AI Coach function
+# AI Coach function - with multilingual support
 async def get_ai_coach_response(request: AICoachRequest) -> str:
     try:
         api_key = os.environ.get('EMERGENT_LLM_KEY')
+        language = request.language or "de"
+        
         if not api_key:
+            if language == "en":
+                return "Well done! Keep going with your habits! 💪"
             return "Toll gemacht! Weiter so mit deinen Gewohnheiten! 💪"
         
         # Parse habits completed
@@ -239,30 +243,60 @@ async def get_ai_coach_response(request: AICoachRequest) -> str:
         completed_count = sum(completed)
         total_habits = len(completed)
         
-        # Build context
+        # Build context based on language
         goals_text = "\n".join([f"{i+1}. {g}" for i, g in enumerate(request.goals)])
-        completed_text = "\n".join([
-            f"- {request.goals[i]}: {'✅ Erledigt' if completed[i] else '❌ Nicht erledigt'}" 
-            for i in range(min(len(completed), len(request.goals)))
-        ])
         
-        week_days = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
-        day_name = week_days[request.day_of_week]
-        
-        mood_description = "sehr schlecht" if request.mood_scale <= 2 else \
-                          "schlecht" if request.mood_scale <= 4 else \
-                          "okay" if request.mood_scale <= 6 else \
-                          "gut" if request.mood_scale <= 8 else "ausgezeichnet"
-        
-        system_message = """Du bist ein freundlicher, motivierender Gewohnheits-Coach, der auf Deutsch spricht. 
+        if language == "en":
+            completed_text = "\n".join([
+                f"- {request.goals[i]}: {'✅ Done' if completed[i] else '❌ Not done'}" 
+                for i in range(min(len(completed), len(request.goals)))
+            ])
+            week_days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            mood_description = "very bad" if request.mood_scale <= 2 else \
+                              "bad" if request.mood_scale <= 4 else \
+                              "okay" if request.mood_scale <= 6 else \
+                              "good" if request.mood_scale <= 8 else "excellent"
+            
+            system_message = """You are a friendly, motivating habit coach who speaks English. 
+Your task is to support people with their daily habits.
+Be encouraging, positive and give helpful tips.
+Keep your responses short (2-3 sentences) but warm.
+Sometimes add an inspiring quote or practical tip.
+Use appropriate emojis to make the message friendlier.
+Vary your responses - be creative and diverse!"""
+            
+            user_prompt = f"""Today is {week_days[request.day_of_week]}. 
+
+My 3 weekly goals:
+{goals_text}
+
+Today I did:
+{completed_text}
+
+My mood: {request.mood_emoji} ({request.mood_scale}/10 - {mood_description})
+
+Please give me a short, encouraging message based on my progress today."""
+        else:
+            # German (default)
+            completed_text = "\n".join([
+                f"- {request.goals[i]}: {'✅ Erledigt' if completed[i] else '❌ Nicht erledigt'}" 
+                for i in range(min(len(completed), len(request.goals)))
+            ])
+            week_days = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
+            mood_description = "sehr schlecht" if request.mood_scale <= 2 else \
+                              "schlecht" if request.mood_scale <= 4 else \
+                              "okay" if request.mood_scale <= 6 else \
+                              "gut" if request.mood_scale <= 8 else "ausgezeichnet"
+            
+            system_message = """Du bist ein freundlicher, motivierender Gewohnheits-Coach, der auf Deutsch spricht. 
 Deine Aufgabe ist es, Menschen bei ihren täglichen Gewohnheiten zu unterstützen.
 Sei ermutigend, positiv und gib hilfreiche Tipps.
 Halte deine Antworten kurz (2-3 Sätze) aber herzlich.
 Füge manchmal ein inspirierendes Zitat oder einen praktischen Tipp hinzu.
 Verwende passende Emojis um die Nachricht freundlicher zu machen.
 Variiere deine Antworten - sei kreativ und abwechslungsreich!"""
-        
-        user_prompt = f"""Heute ist {day_name}. 
+            
+            user_prompt = f"""Heute ist {week_days[request.day_of_week]}. 
 
 Meine 3 Wochenziele:
 {goals_text}
@@ -286,14 +320,23 @@ Bitte gib mir eine kurze, ermutigende Nachricht basierend auf meinem Fortschritt
         return response
     except Exception as e:
         logger.error(f"AI Coach error: {e}")
-        # Fallback responses in German
-        fallback_responses = [
-            "Toll gemacht heute! Jeder kleine Schritt zählt auf dem Weg zu deinen Zielen. 🌟",
-            "Weiter so! Beständigkeit ist der Schlüssel zum Erfolg. 💪",
-            "Glaube an dich! Du schaffst das! 🎯",
-            "Morgen ist ein neuer Tag voller Möglichkeiten! ✨",
-            "Sei stolz auf jeden Fortschritt, egal wie klein! 🌈"
-        ]
+        # Fallback responses based on language
+        if request.language == "en":
+            fallback_responses = [
+                "Well done today! Every small step counts on the way to your goals. 🌟",
+                "Keep going! Consistency is the key to success. 💪",
+                "Believe in yourself! You can do it! 🎯",
+                "Tomorrow is a new day full of possibilities! ✨",
+                "Be proud of every progress, no matter how small! 🌈"
+            ]
+        else:
+            fallback_responses = [
+                "Toll gemacht heute! Jeder kleine Schritt zählt auf dem Weg zu deinen Zielen. 🌟",
+                "Weiter so! Beständigkeit ist der Schlüssel zum Erfolg. 💪",
+                "Glaube an dich! Du schaffst das! 🎯",
+                "Morgen ist ein neuer Tag voller Möglichkeiten! ✨",
+                "Sei stolz auf jeden Fortschritt, egal wie klein! 🌈"
+            ]
         import random
         return random.choice(fallback_responses)
 
