@@ -316,9 +316,14 @@ export default function ProfileScreen() {
               <Text style={styles.levelName}>Level {currentLevel?.level || 1}</Text>
               <Text style={styles.levelTitle}>{currentLevel?.name || 'Anfaenger'}</Text>
             </View>
-            <View style={styles.xpBadge}>
+            <TouchableOpacity 
+              style={styles.xpBadge}
+              onPress={() => setShowXPInfoModal(true)}
+              activeOpacity={0.7}
+            >
               <Text style={styles.xpText}>{profile?.xp || 0} XP</Text>
-            </View>
+              <Ionicons name="help-circle-outline" size={14} color="rgba(255,255,255,0.8)" style={{ marginLeft: 4 }} />
+            </TouchableOpacity>
           </View>
           
           {nextLevel && (
@@ -331,6 +336,15 @@ export default function ProfileScreen() {
               </Text>
             </View>
           )}
+          
+          {/* XP Info Link */}
+          <TouchableOpacity 
+            style={styles.xpInfoLink}
+            onPress={() => setShowXPInfoModal(true)}
+          >
+            <Ionicons name="information-circle-outline" size={16} color="rgba(255,255,255,0.9)" />
+            <Text style={styles.xpInfoLinkText}>Wie verdiene ich XP-Punkte?</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Streak Card */}
