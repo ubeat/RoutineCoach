@@ -107,9 +107,7 @@ export default function ProfileScreen() {
   };
 
   const getInviteMessage = (code: string) => 
-    isEn 
-      ? `💜 Let's build good habits together! Become my companion at "Step by Step". Your code: ${code}`
-      : `💜 Lass uns gemeinsam gute Gewohnheiten aufbauen! Werde meine Wegbegleiterin bei "Schritt für Schritt". Dein Code: ${code}`;
+    `💜 ${t('profile.invite_message', { code })}`;
 
   const fetchData = useCallback(async () => {
     try {
