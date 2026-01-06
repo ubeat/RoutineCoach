@@ -627,5 +627,4 @@ const styles = StyleSheet.create({
   suggestionWenn: { fontSize: 14, fontWeight: '600', marginBottom: 8 },
   suggestionDann: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 10, borderRadius: 8, borderWidth: 1, marginBottom: 6 },
   suggestionDannText: { flex: 1, fontSize: 14 },
-  pink: '#F472B6',
 });
