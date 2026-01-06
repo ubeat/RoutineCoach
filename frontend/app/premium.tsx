@@ -95,7 +95,7 @@ export default function PremiumScreen() {
 
   const redeemPromoCode = async () => {
     if (!promoCode.trim()) {
-      Alert.alert(isEn ? 'Note' : 'Hinweis', isEn ? 'Please enter a promo code.' : 'Bitte gib einen Promo-Code ein.');
+      Alert.alert(t('common.note'), t('premium.enter_code_hint'));
       return;
     }
 
@@ -106,11 +106,11 @@ export default function PremiumScreen() {
         code: promoCode.trim().toUpperCase(),
       });
 
-      Alert.alert(isEn ? 'Success! 🎉' : 'Erfolg! 🎉', response.data.message);
+      Alert.alert(t('premium.redeem_success') + ' 🎉', response.data.message);
       setPromoCode('');
       fetchSubscriptionStatus();
     } catch (error: any) {
-      const message = error.response?.data?.detail || (isEn ? 'Code could not be redeemed.' : 'Code konnte nicht eingelöst werden.');
+      const message = error.response?.data?.detail || t('premium.redeem_error');
       Alert.alert(t('common.error'), message);
     } finally {
       setRedeeming(false);
@@ -130,7 +130,7 @@ export default function PremiumScreen() {
         await Linking.openURL(response.data.checkout_url);
       }
     } catch (error: any) {
-      const message = error.response?.data?.detail || (isEn ? 'Stripe payment could not be started.' : 'Stripe-Zahlung konnte nicht gestartet werden.');
+      const message = error.response?.data?.detail || t('premium.stripe_error');
       Alert.alert(t('common.error'), message);
     } finally {
       setPaymentLoading(null);
@@ -150,7 +150,7 @@ export default function PremiumScreen() {
         await Linking.openURL(response.data.approval_url);
       }
     } catch (error: any) {
-      const message = error.response?.data?.detail || (isEn ? 'PayPal payment could not be started.' : 'PayPal-Zahlung konnte nicht gestartet werden.');
+      const message = error.response?.data?.detail || t('premium.paypal_error');
       Alert.alert(t('common.error'), message);
     } finally {
       setPaymentLoading(null);
@@ -160,7 +160,7 @@ export default function PremiumScreen() {
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString(isEn ? 'en-US' : 'de-DE', {
+    return date.toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'de-DE', {
       day: '2-digit',
       month: 'long',
       year: 'numeric',
