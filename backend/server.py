@@ -863,8 +863,8 @@ async def coaching_message(request: Request, coaching_request: CoachingMessageRe
             }
         
         # Build conversation context
-        context = request.context
-        history = request.conversation_history
+        context = coaching_request.context
+        history = coaching_request.conversation_history
         
         # Create context summary
         context_summary = ""
@@ -886,11 +886,11 @@ KONTEXT DER WOCHE:
             role = "Nutzer" if msg.get("role") == "user" else "Coach"
             messages_for_llm += f"{role}: {msg.get('content', '')}\n"
         
-        messages_for_llm += f"\nNutzer: {request.user_message}\n\nCoach:"
+        messages_for_llm += f"\nNutzer: {coaching_request.user_message}\n\nCoach:"
         
         chat = LlmChat(
             api_key=api_key,
-            session_id=f"coaching-{request.device_id}-{datetime.utcnow().isoformat()}",
+            session_id=f"coaching-{coaching_request.device_id}-{datetime.utcnow().isoformat()}",
             system_message=COACHING_SYSTEM_PROMPT
         ).with_model("openai", "gpt-4o")
         
