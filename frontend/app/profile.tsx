@@ -605,9 +605,9 @@ export default function ProfileScreen() {
         <View style={styles.modalOverlay}>
           <ScrollView>
             <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>{isEn ? 'Invite Companion 💜' : 'Wegbegleiterin einladen 💜'}</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>{t('profile.invite_title')} 💜</Text>
               <Text style={[styles.modalSubtitle, { color: colors.textLight }]}>
-                {isEn ? 'Together it is more fun and you stay on track!' : 'Gemeinsam macht es mehr Spaß und ihr bleibt eher dran!'}
+                {t('profile.invite_subtitle')}
               </Text>
               
               {!generatedCode ? (
@@ -617,17 +617,17 @@ export default function ProfileScreen() {
                     onPress={createInvite}
                   >
                     <Ionicons name="sparkles" size={20} color="#FFF" />
-                    <Text style={styles.inviteButtonText}>{isEn ? 'Create invite code' : 'Einladungscode erstellen'}</Text>
+                    <Text style={styles.inviteButtonText}>{t('profile.create_invite')}</Text>
                   </TouchableOpacity>
                   
-                  <Text style={[styles.orText, { color: colors.textLight }]}>- {isEn ? 'or' : 'oder'} -</Text>
+                  <Text style={[styles.orText, { color: colors.textLight }]}>- {t('common.or')} -</Text>
                   
-                  <Text style={[styles.inputLabel, { color: colors.text }]}>{isEn ? 'Got a code?' : 'Du hast einen Code erhalten?'}</Text>
+                  <Text style={[styles.inputLabel, { color: colors.text }]}>{t('profile.got_code')}</Text>
                   <TextInput
                     style={[styles.codeInput, { borderColor: colors.primary, color: colors.text }]}
                     value={inviteCode}
                     onChangeText={setInviteCode}
-                    placeholder={isEn ? 'e.g. ABC123' : 'z.B. ABC123'}
+                    placeholder={t('profile.code_placeholder')}
                     placeholderTextColor={colors.textLight}
                     autoCapitalize="characters"
                     maxLength={8}
@@ -637,7 +637,7 @@ export default function ProfileScreen() {
                     style={[styles.acceptButton, { backgroundColor: colors.primary }]}
                     onPress={acceptInvite}
                   >
-                    <Text style={styles.acceptButtonText}>{isEn ? 'Redeem code' : 'Code einlösen'}</Text>
+                    <Text style={styles.acceptButtonText}>{t('profile.redeem_code')}</Text>
                   </TouchableOpacity>
                 </>
               ) : (
@@ -652,12 +652,12 @@ export default function ProfileScreen() {
                   </View>
                   
                   <View style={[styles.codeDisplayBox, { backgroundColor: colors.background }]}>
-                    <Text style={[styles.codeLabel, { color: colors.textLight }]}>{isEn ? 'Your invite code:' : 'Dein Einladungscode:'}</Text>
+                    <Text style={[styles.codeLabel, { color: colors.textLight }]}>{t('profile.your_invite_code')}</Text>
                     <Text style={[styles.generatedCodeText, { color: colors.primary }]}>{generatedCode}</Text>
                   </View>
                   
                   <Text style={[styles.shareMethodsTitle, { color: colors.text }]}>
-                    {isEn ? 'Share via:' : 'Teilen via:'}
+                    {t('profile.share_via')}
                   </Text>
                   
                   <View style={styles.shareButtonsGrid}>
@@ -671,21 +671,21 @@ export default function ProfileScreen() {
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.shareMethodButton, { backgroundColor: '#EA4335' }]} onPress={shareViaEmail}>
                       <Ionicons name="mail" size={24} color="#FFF" />
-                      <Text style={styles.shareMethodText}>{isEn ? 'Email' : 'E-Mail'}</Text>
+                      <Text style={styles.shareMethodText}>{t('profile.email')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.shareMethodButton, { backgroundColor: colors.secondary }]} onPress={shareViaGeneral}>
                       <Ionicons name="share-social" size={24} color="#FFF" />
-                      <Text style={styles.shareMethodText}>{isEn ? 'More...' : 'Mehr...'}</Text>
+                      <Text style={styles.shareMethodText}>{t('profile.more')}</Text>
                     </TouchableOpacity>
                   </View>
                   
                   <TouchableOpacity style={[styles.copyCodeButton, { borderColor: colors.primary }]} onPress={copyCodeToClipboard}>
                     <Ionicons name="copy-outline" size={20} color={colors.primary} />
-                    <Text style={[styles.copyCodeText, { color: colors.primary }]}>{isEn ? 'Copy code' : 'Code kopieren'}</Text>
+                    <Text style={[styles.copyCodeText, { color: colors.primary }]}>{t('profile.copy_code')}</Text>
                   </TouchableOpacity>
                   
                   <TouchableOpacity style={styles.newCodeButton} onPress={() => setGeneratedCode(null)}>
-                    <Text style={[styles.newCodeText, { color: colors.textLight }]}>{isEn ? 'Create new code' : 'Neuen Code erstellen'}</Text>
+                    <Text style={[styles.newCodeText, { color: colors.textLight }]}>{t('profile.new_code')}</Text>
                   </TouchableOpacity>
                 </>
               )}
