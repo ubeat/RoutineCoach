@@ -35,7 +35,7 @@ const COLORS = {
 
 export default function CheckinScreen() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [goals, setGoals] = useState<string[]>([]);
@@ -46,18 +46,18 @@ export default function CheckinScreen() {
   const [aiResponse, setAiResponse] = useState('');
   const [alreadyCheckedIn, setAlreadyCheckedIn] = useState(false);
 
-  // Mood emojis with translations
+  // Mood emojis with translations using t()
   const getMoodEmojis = () => [
-    { emoji: String.fromCodePoint(0x1F62D), label: t('moods.very_sad', 'Sehr traurig') },
-    { emoji: String.fromCodePoint(0x1F614), label: t('moods.sad', 'Traurig') },
-    { emoji: String.fromCodePoint(0x1F641), label: t('moods.not_good', 'Nicht gut') },
-    { emoji: String.fromCodePoint(0x1F615), label: t('moods.confused', 'Verwirrt') },
-    { emoji: String.fromCodePoint(0x1F610), label: t('moods.neutral', 'Neutral') },
-    { emoji: String.fromCodePoint(0x1F642), label: t('moods.okay', 'Okay') },
-    { emoji: String.fromCodePoint(0x1F60A), label: t('moods.good', 'Gut') },
-    { emoji: String.fromCodePoint(0x1F604), label: t('moods.very_good', 'Sehr gut') },
-    { emoji: String.fromCodePoint(0x1F929), label: t('moods.fantastic', 'Fantastisch') },
-    { emoji: String.fromCodePoint(0x1F970), label: t('moods.in_love', 'Verliebt') },
+    { emoji: String.fromCodePoint(0x1F62D), label: t('moods.very_sad') },
+    { emoji: String.fromCodePoint(0x1F614), label: t('moods.sad') },
+    { emoji: String.fromCodePoint(0x1F641), label: t('moods.not_good') },
+    { emoji: String.fromCodePoint(0x1F615), label: t('moods.confused') },
+    { emoji: String.fromCodePoint(0x1F610), label: t('moods.neutral') },
+    { emoji: String.fromCodePoint(0x1F642), label: t('moods.okay') },
+    { emoji: String.fromCodePoint(0x1F60A), label: t('moods.good') },
+    { emoji: String.fromCodePoint(0x1F604), label: t('moods.very_good') },
+    { emoji: String.fromCodePoint(0x1F929), label: t('moods.fantastic') },
+    { emoji: String.fromCodePoint(0x1F970), label: t('moods.in_love') },
   ];
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export default function CheckinScreen() {
     try {
       const deviceId = await AsyncStorage.getItem('deviceId');
       if (!deviceId) {
-        Alert.alert('Fehler', 'Bitte starte die App neu');
+        Alert.alert(t('common.error'), t('errors.generic'));
         return;
       }
 
@@ -98,7 +98,7 @@ export default function CheckinScreen() {
 
   const submitCheckin = async () => {
     if (!selectedMoodEmoji) {
-      Alert.alert(t('common.error'), t('checkin.select_mood', 'Bitte wähle deine Stimmung aus'));
+      Alert.alert(t('common.error'), t('checkin.select_mood'));
       return;
     }
 
@@ -198,7 +198,7 @@ export default function CheckinScreen() {
 
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>{t('checkin.how_did_it_go')}</Text>
-            <Text style={styles.sectionHint}>{t('checkin.tap_to_mark', 'Tippe auf die Gewohnheit zum Markieren')}</Text>
+            <Text style={styles.sectionHint}>{t('checkin.tap_to_mark')}</Text>
             
             {goals.map((goal, index) => (
               <TouchableOpacity
@@ -228,7 +228,7 @@ export default function CheckinScreen() {
 
             <View style={styles.summaryContainer}>
               <Text style={styles.summaryText}>
-                {t('checkin.result', 'Ergebnis')}: {habitsCompleted.map(h => h ? 'y' : 'n').join('')}
+                {t('checkin.result')}: {habitsCompleted.map(h => h ? 'y' : 'n').join('')}
               </Text>
             </View>
           </View>
@@ -254,7 +254,7 @@ export default function CheckinScreen() {
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.sectionTitle}>{t('checkin.mood_scale', 'Mood on a scale from 1-10')}</Text>
+            <Text style={styles.sectionTitle}>{t('checkin.mood_scale')}</Text>
             <Text style={styles.scaleValue}>{moodScale}</Text>
             <View style={styles.scaleContainer}>
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
@@ -287,7 +287,7 @@ export default function CheckinScreen() {
             ) : (
               <>
                 <Ionicons name="send" size={20} color="#FFF" />
-                <Text style={styles.submitButtonText}>Check-In abschicken</Text>
+                <Text style={styles.submitButtonText}>{t('checkin.submit')}</Text>
               </>
             )}
           </TouchableOpacity>
