@@ -2434,6 +2434,433 @@ async def list_subscriptions(admin_password: str, skip: int = 0, limit: int = 50
         "limit": limit
     }
 
+# ============================================
+# BACKUP & SYNC (Premium Feature)
+# ============================================
+
+class BackupData(BaseModel):
+    device_id: str
+    goals: Optional[list] = None
+    checkins: Optional[list] = None
+    settings: Optional[dict] = None
+    profile: Optional[dict] = None
+    journal: Optional[list] = None
+
+@api_router.post("/backup/create/{device_id}")
+async def create_backup(device_id: str):
+    """Create a full backup of user data (Premium Feature)"""
+    premium_status = await check_premium_status(device_id)
+    if not premium_status.get("is_premium"):
+        raise HTTPException(
+            status_code=403, 
+            detail="Cloud-Backup ist nur für Premium-Nutzer verfügbar."
+        )
+    
+    # Collect all user data
+    goals = await db.goals.find({"device_id": device_id}).to_list(100)
+    checkins = await db.daily_checkins.find({"device_id": device_id}).to_list(1000)
+    settings = await db.settings.find_one({"device_id": device_id})
+    profile = await db.profiles.find_one({"device_id": device_id})
+    journal = await db.journal.find({"device_id": device_id}).to_list(500)
+    
+    backup_data = {
+        "device_id": device_id,
+        "created_at": datetime.utcnow().isoformat(),
+        "version": "1.0",
+        "goals": serialize_doc(goals),
+        "checkins": serialize_doc(checkins),
+        "settings": serialize_doc(settings) if settings else None,
+        "profile": serialize_doc(profile) if profile else None,
+        "journal": serialize_doc(journal),
+    }
+    
+    # Store backup
+    await db.backups.update_one(
+        {"device_id": device_id},
+        {"$set": backup_data},
+        upsert=True
+    )
+    
+    return {
+        "success": True,
+        "message": "Backup erfolgreich erstellt!",
+        "backup_date": backup_data["created_at"],
+        "stats": {
+            "goals": len(goals),
+            "checkins": len(checkins),
+            "journal_entries": len(journal)
+        }
+    }
+
+@api_router.get("/backup/{device_id}")
+async def get_backup(device_id: str):
+    """Get the latest backup (Premium Feature)"""
+    premium_status = await check_premium_status(device_id)
+    if not premium_status.get("is_premium"):
+        raise HTTPException(status_code=403, detail="Cloud-Backup ist nur für Premium-Nutzer verfügbar.")
+    
+    backup = await db.backups.find_one({"device_id": device_id})
+    if not backup:
+        return {"has_backup": False}
+    
+    return {
+        "has_backup": True,
+        "backup_date": backup.get("created_at"),
+        "stats": {
+            "goals": len(backup.get("goals", [])),
+            "checkins": len(backup.get("checkins", [])),
+            "journal_entries": len(backup.get("journal", []))
+        }
+    }
+
+@api_router.post("/backup/restore/{device_id}")
+async def restore_backup(device_id: str, target_device_id: Optional[str] = None):
+    """Restore from backup (Premium Feature) - can restore to same or different device"""
+    premium_status = await check_premium_status(device_id)
+    if not premium_status.get("is_premium"):
+        raise HTTPException(status_code=403, detail="Cloud-Backup ist nur für Premium-Nutzer verfügbar.")
+    
+    backup = await db.backups.find_one({"device_id": device_id})
+    if not backup:
+        raise HTTPException(status_code=404, detail="Kein Backup gefunden.")
+    
+    restore_to = target_device_id or device_id
+    
+    # Restore goals
+    if backup.get("goals"):
+        for goal in backup["goals"]:
+            goal["device_id"] = restore_to
+            goal.pop("_id", None)
+        await db.goals.delete_many({"device_id": restore_to})
+        if backup["goals"]:
+            await db.goals.insert_many(backup["goals"])
+    
+    # Restore checkins
+    if backup.get("checkins"):
+        for checkin in backup["checkins"]:
+            checkin["device_id"] = restore_to
+            checkin.pop("_id", None)
+        await db.daily_checkins.delete_many({"device_id": restore_to})
+        if backup["checkins"]:
+            await db.daily_checkins.insert_many(backup["checkins"])
+    
+    # Restore settings
+    if backup.get("settings"):
+        settings = backup["settings"]
+        settings["device_id"] = restore_to
+        settings.pop("_id", None)
+        await db.settings.update_one(
+            {"device_id": restore_to},
+            {"$set": settings},
+            upsert=True
+        )
+    
+    # Restore profile
+    if backup.get("profile"):
+        profile = backup["profile"]
+        profile["device_id"] = restore_to
+        profile.pop("_id", None)
+        await db.profiles.update_one(
+            {"device_id": restore_to},
+            {"$set": profile},
+            upsert=True
+        )
+    
+    # Restore journal
+    if backup.get("journal"):
+        for entry in backup["journal"]:
+            entry["device_id"] = restore_to
+            entry.pop("_id", None)
+        await db.journal.delete_many({"device_id": restore_to})
+        if backup["journal"]:
+            await db.journal.insert_many(backup["journal"])
+    
+    return {
+        "success": True,
+        "message": "Backup erfolgreich wiederhergestellt!",
+        "restored_to": restore_to
+    }
+
+# ============================================
+# DETAILED STATISTICS (Premium Feature)
+# ============================================
+
+@api_router.get("/stats/detailed/{device_id}")
+async def get_detailed_stats(device_id: str, period: str = "month"):
+    """Get detailed statistics (Premium Feature)"""
+    premium_status = await check_premium_status(device_id)
+    if not premium_status.get("is_premium"):
+        raise HTTPException(
+            status_code=403, 
+            detail="Detaillierte Statistiken sind nur für Premium-Nutzer verfügbar."
+        )
+    
+    # Determine date range
+    now = datetime.utcnow()
+    if period == "week":
+        start_date = now - timedelta(days=7)
+    elif period == "month":
+        start_date = now - timedelta(days=30)
+    elif period == "quarter":
+        start_date = now - timedelta(days=90)
+    elif period == "year":
+        start_date = now - timedelta(days=365)
+    else:
+        start_date = now - timedelta(days=30)
+    
+    # Get all checkins in period
+    checkins = await db.daily_checkins.find({
+        "device_id": device_id,
+        "date": {"$gte": start_date.strftime("%Y-%m-%d")}
+    }).to_list(400)
+    
+    if not checkins:
+        return {
+            "period": period,
+            "total_days": 0,
+            "habit_completion": [],
+            "mood_trend": [],
+            "best_day": None,
+            "worst_day": None,
+            "average_mood": 0,
+            "total_habits_completed": 0
+        }
+    
+    # Calculate habit completion by day
+    daily_stats = {}
+    for checkin in checkins:
+        date = checkin.get("date")
+        results = checkin.get("results", "")
+        mood = checkin.get("mood", 5)
+        
+        completed = sum(1 for c in results if c == "1")
+        total = len(results) if results else 3
+        
+        daily_stats[date] = {
+            "date": date,
+            "completed": completed,
+            "total": total,
+            "rate": round(completed / total * 100, 1) if total > 0 else 0,
+            "mood": mood
+        }
+    
+    # Sort by date
+    sorted_stats = sorted(daily_stats.values(), key=lambda x: x["date"])
+    
+    # Find best and worst days
+    best_day = max(sorted_stats, key=lambda x: (x["rate"], x["mood"]))
+    worst_day = min(sorted_stats, key=lambda x: (x["rate"], x["mood"]))
+    
+    # Calculate averages
+    avg_mood = sum(s["mood"] for s in sorted_stats) / len(sorted_stats)
+    total_completed = sum(s["completed"] for s in sorted_stats)
+    
+    return {
+        "period": period,
+        "total_days": len(sorted_stats),
+        "daily_stats": sorted_stats,
+        "best_day": best_day,
+        "worst_day": worst_day,
+        "average_mood": round(avg_mood, 1),
+        "total_habits_completed": total_completed,
+        "completion_rate": round(sum(s["rate"] for s in sorted_stats) / len(sorted_stats), 1)
+    }
+
+# ============================================
+# MOOD CORRELATION (Premium Feature)
+# ============================================
+
+@api_router.get("/stats/mood-correlation/{device_id}")
+async def get_mood_correlation(device_id: str):
+    """Analyze mood patterns and correlations (Premium Feature)"""
+    premium_status = await check_premium_status(device_id)
+    if not premium_status.get("is_premium"):
+        raise HTTPException(
+            status_code=403, 
+            detail="Stimmungs-Analyse ist nur für Premium-Nutzer verfügbar."
+        )
+    
+    # Get last 90 days of data
+    start_date = datetime.utcnow() - timedelta(days=90)
+    
+    checkins = await db.daily_checkins.find({
+        "device_id": device_id,
+        "date": {"$gte": start_date.strftime("%Y-%m-%d")}
+    }).to_list(100)
+    
+    if len(checkins) < 7:
+        return {
+            "has_enough_data": False,
+            "message": "Mindestens 7 Tage Daten nötig für die Analyse.",
+            "current_days": len(checkins)
+        }
+    
+    # Analyze by weekday
+    weekday_moods = {i: [] for i in range(7)}
+    weekday_names = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
+    
+    for checkin in checkins:
+        date_str = checkin.get("date")
+        mood = checkin.get("mood", 5)
+        
+        try:
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+            weekday = date_obj.weekday()
+            weekday_moods[weekday].append(mood)
+        except:
+            pass
+    
+    weekday_analysis = []
+    for i in range(7):
+        moods = weekday_moods[i]
+        if moods:
+            avg = sum(moods) / len(moods)
+            weekday_analysis.append({
+                "weekday": weekday_names[i],
+                "weekday_index": i,
+                "average_mood": round(avg, 1),
+                "sample_size": len(moods)
+            })
+    
+    # Find best and worst days
+    if weekday_analysis:
+        best_weekday = max(weekday_analysis, key=lambda x: x["average_mood"])
+        worst_weekday = min(weekday_analysis, key=lambda x: x["average_mood"])
+    else:
+        best_weekday = worst_weekday = None
+    
+    # Correlation: mood vs habit completion
+    high_completion_moods = []
+    low_completion_moods = []
+    
+    for checkin in checkins:
+        results = checkin.get("results", "")
+        mood = checkin.get("mood", 5)
+        completed = sum(1 for c in results if c == "1")
+        total = len(results) if results else 3
+        rate = completed / total if total > 0 else 0
+        
+        if rate >= 0.67:  # 2/3 or more completed
+            high_completion_moods.append(mood)
+        elif rate <= 0.33:  # 1/3 or less completed
+            low_completion_moods.append(mood)
+    
+    correlation_insight = None
+    if high_completion_moods and low_completion_moods:
+        high_avg = sum(high_completion_moods) / len(high_completion_moods)
+        low_avg = sum(low_completion_moods) / len(low_completion_moods)
+        
+        if high_avg > low_avg + 1:
+            correlation_insight = f"Wenn du deine Gewohnheiten schaffst, bist du im Schnitt {round(high_avg - low_avg, 1)} Punkte besser gelaunt! 🎯"
+        elif high_avg < low_avg:
+            correlation_insight = "Interessant: Deine Stimmung scheint unabhängig von den erledigten Gewohnheiten zu sein."
+    
+    return {
+        "has_enough_data": True,
+        "total_days_analyzed": len(checkins),
+        "weekday_analysis": weekday_analysis,
+        "best_weekday": best_weekday,
+        "worst_weekday": worst_weekday,
+        "correlation_insight": correlation_insight,
+        "high_completion_avg_mood": round(sum(high_completion_moods) / len(high_completion_moods), 1) if high_completion_moods else None,
+        "low_completion_avg_mood": round(sum(low_completion_moods) / len(low_completion_moods), 1) if low_completion_moods else None
+    }
+
+# ============================================
+# EXPORT (Premium Feature)
+# ============================================
+
+@api_router.get("/export/{device_id}")
+async def export_data(device_id: str, format: str = "json"):
+    """Export user data as JSON or CSV (Premium Feature)"""
+    premium_status = await check_premium_status(device_id)
+    if not premium_status.get("is_premium"):
+        raise HTTPException(
+            status_code=403, 
+            detail="Daten-Export ist nur für Premium-Nutzer verfügbar."
+        )
+    
+    # Get all data
+    goals_doc = await db.goals.find_one({"device_id": device_id})
+    checkins = await db.daily_checkins.find({"device_id": device_id}).sort("date", -1).to_list(1000)
+    
+    goals = goals_doc.get("goals", []) if goals_doc else []
+    
+    if format == "csv":
+        # Create CSV format
+        csv_lines = ["Datum,Gewohnheit 1,Gewohnheit 2,Gewohnheit 3,Stimmung"]
+        
+        for checkin in checkins:
+            date = checkin.get("date", "")
+            results = checkin.get("results", "000")
+            mood = checkin.get("mood", "")
+            
+            h1 = "Ja" if len(results) > 0 and results[0] == "1" else "Nein"
+            h2 = "Ja" if len(results) > 1 and results[1] == "1" else "Nein"
+            h3 = "Ja" if len(results) > 2 and results[2] == "1" else "Nein"
+            
+            csv_lines.append(f"{date},{h1},{h2},{h3},{mood}")
+        
+        return {
+            "format": "csv",
+            "data": "\n".join(csv_lines),
+            "filename": f"habits_export_{device_id[:8]}_{datetime.utcnow().strftime('%Y%m%d')}.csv"
+        }
+    else:
+        # JSON format
+        return {
+            "format": "json",
+            "data": {
+                "export_date": datetime.utcnow().isoformat(),
+                "goals": goals,
+                "checkins": serialize_doc(checkins)
+            },
+            "filename": f"habits_export_{device_id[:8]}_{datetime.utcnow().strftime('%Y%m%d')}.json"
+        }
+
+# ============================================
+# PREMIUM FEATURE CHECK ENDPOINT
+# ============================================
+
+@api_router.get("/features/{device_id}")
+async def get_available_features(device_id: str):
+    """Get all available features for this device based on subscription"""
+    status = await check_premium_status(device_id)
+    
+    return {
+        "is_premium": status.get("is_premium", False),
+        "subscription_type": status.get("subscription_type"),
+        "expires_at": status.get("expires_at"),
+        "features": status.get("features", FREE_FEATURES),
+        "premium_features_locked": list(PREMIUM_FEATURES.keys()) if not status.get("is_premium") else []
+    }
+
+# ============================================
+# RATE LIMITING & SECURITY
+# ============================================
+
+# Simple in-memory rate limiter (in production, use Redis)
+from collections import defaultdict
+import time
+
+request_counts = defaultdict(list)
+RATE_LIMIT = 100  # requests per minute
+RATE_WINDOW = 60  # seconds
+
+def check_rate_limit(device_id: str) -> bool:
+    """Check if request should be rate limited"""
+    now = time.time()
+    window_start = now - RATE_WINDOW
+    
+    # Clean old requests
+    request_counts[device_id] = [t for t in request_counts[device_id] if t > window_start]
+    
+    if len(request_counts[device_id]) >= RATE_LIMIT:
+        return False  # Rate limited
+    
+    request_counts[device_id].append(now)
+    return True
+
 # Include the router in the main app
 app.include_router(api_router)
 
