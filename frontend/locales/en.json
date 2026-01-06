@@ -384,5 +384,29 @@
     "social_butterfly": { "name": "Social Butterfly", "desc": "Invited a companion" },
     "explorer": { "name": "Explorer", "desc": "Used all features" },
     "immortal": { "name": "Immortal", "desc": "365-day streak" }
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language / Sprache",
+    "coming_soon": "Coming soon",
+    "language_coming_soon": "{{language}} will be added soon!",
+    "appearance": "Appearance",
+    "color_theme": "Color theme",
+    "sound": "Notification sound",
+    "premium_features": "Premium features",
+    "reminders": "Reminders",
+    "habit_reminders": "Habit reminders",
+    "checkin_reminders": "Check-in reminders",
+    "time": "Time",
+    "days": "Days",
+    "location_reminders": "Location reminders",
+    "set_location": "Set location",
+    "radius": "Radius",
+    "save_settings": "Save settings",
+    "saving": "Saving...",
+    "saved": "Saved!",
+    "manage_subscription": "Manage subscription",
+    "your_name": "Your name",
+    "change_name": "Change name"
   }
 }
