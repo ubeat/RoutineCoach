@@ -427,8 +427,8 @@ export default function ProfileScreen() {
               const challenge = challenges.find(c => c.id === profile.active_challenge);
               return challenge ? (
                 <>
-                  <Text style={[styles.challengeName, { color: '#E65100' }]}>{challenge.name}</Text>
-                  <Text style={styles.challengeDesc}>{challenge.description}</Text>
+                  <Text style={[styles.challengeName, { color: '#E65100' }]}>{getChallengeName(challenge)}</Text>
+                  <Text style={styles.challengeDesc}>{getChallengeDesc(challenge)}</Text>
                   <View style={styles.challengeProgress}>
                     <View style={styles.challengeProgressBar}>
                       <View 
