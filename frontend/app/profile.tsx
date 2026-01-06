@@ -620,8 +620,8 @@ export default function ProfileScreen() {
                   onPress={() => startChallenge(challenge.id)}
                 >
                   <View>
-                    <Text style={[styles.challengeOptionName, { color: colors.text }]}>{challenge.name}</Text>
-                    <Text style={[styles.challengeOptionDesc, { color: colors.textLight }]}>{challenge.description}</Text>
+                    <Text style={[styles.challengeOptionName, { color: colors.text }]}>{getChallengeName(challenge)}</Text>
+                    <Text style={[styles.challengeOptionDesc, { color: colors.textLight }]}>{getChallengeDesc(challenge)}</Text>
                   </View>
                   <View style={[styles.xpReward, { backgroundColor: colors.accent }]}>
                     <Text style={styles.xpRewardText}>+{challenge.xp_reward} XP</Text>
