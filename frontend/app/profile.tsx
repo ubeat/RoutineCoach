@@ -806,9 +806,7 @@ export default function ProfileScreen() {
             <View style={[styles.xpTipBox, { backgroundColor: colors.accent + '30' }]}>
               <Ionicons name="heart" size={20} color={colors.primary} />
               <Text style={[styles.xpTipText, { color: colors.text }]}>
-                {isEn 
-                  ? 'Keep going - every small step counts and brings you closer to your goal! 💪'
-                  : 'Bleib dran - jeder kleine Schritt zählt und bringt dich näher ans Ziel! 💪'}
+                {t('profile.xp_tip')} 💪
               </Text>
             </View>
             
