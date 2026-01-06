@@ -25,7 +25,6 @@ const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 export default function PremiumScreen() {
   const router = useRouter();
   const { t, i18n } = useTranslation();
-  const isEn = i18n.language === 'en';
   
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -38,22 +37,22 @@ export default function PremiumScreen() {
   const [deviceId, setDeviceId] = useState<string | null>(null);
 
   const PREMIUM_FEATURES = [
-    { icon: 'sparkles', title: isEn ? 'AI Weekly Analysis' : 'KI-Wochenanalyse', description: isEn ? 'Personalized progress evaluation' : 'Personalisierte Auswertung deiner Fortschritte' },
-    { icon: 'chatbubbles', title: isEn ? 'AI Coach' : 'KI-Coach', description: isEn ? 'Solution-oriented coaching dialog' : 'Lösungsorientierter Coaching-Dialog' },
-    { icon: 'location', title: isEn ? 'Location Reminders' : 'Orts-Erinnerungen', description: isEn ? 'Reminders when you are at specific places' : 'Erinnerungen wenn du an bestimmten Orten bist' },
-    { icon: 'stats-chart', title: isEn ? 'Extended Statistics' : 'Erweiterte Statistiken', description: isEn ? 'Monthly and yearly overviews' : 'Monats- und Jahresübersichten' },
-    { icon: 'analytics', title: isEn ? 'Mood Analysis' : 'Stimmungs-Analyse', description: isEn ? 'Discover when you feel best' : 'Erkenne wann du dich am besten fühlst' },
-    { icon: 'cloud-upload', title: isEn ? 'Cloud Backup' : 'Cloud-Backup', description: isEn ? 'Secure your data in the cloud' : 'Sichere deine Daten in der Cloud' },
-    { icon: 'download', title: isEn ? 'Data Export' : 'Daten-Export', description: isEn ? 'Export as PDF or CSV' : 'Exportiere als PDF oder CSV' },
-    { icon: 'medal', title: isEn ? 'All 20+ Badges' : 'Alle 20+ Badges', description: isEn ? 'Unlock all badges' : 'Schalte alle Abzeichen frei' },
+    { icon: 'sparkles', title: t('premium.feature_ai_analysis'), description: t('premium.feature_ai_analysis_desc') },
+    { icon: 'chatbubbles', title: t('premium.feature_ai_coach'), description: t('premium.feature_ai_coach_desc') },
+    { icon: 'location', title: t('premium.feature_location'), description: t('premium.feature_location_desc') },
+    { icon: 'stats-chart', title: t('premium.feature_stats'), description: t('premium.feature_stats_desc') },
+    { icon: 'analytics', title: t('premium.feature_mood'), description: t('premium.feature_mood_desc') },
+    { icon: 'cloud-upload', title: t('premium.feature_backup'), description: t('premium.feature_backup_desc') },
+    { icon: 'download', title: t('premium.feature_export'), description: t('premium.feature_export_desc') },
+    { icon: 'medal', title: t('premium.feature_badges'), description: t('premium.feature_badges_desc') },
   ];
 
   const FREE_FEATURES = [
-    { icon: 'checkmark-circle', title: isEn ? '3 Habits' : '3 Gewohnheiten', description: isEn ? 'Optimal for sustainable success' : 'Optimal für nachhaltigen Erfolg' },
-    { icon: 'color-palette', title: isEn ? 'All Themes' : 'Alle Themes', description: isEn ? 'Personalize your app' : 'Personalisiere deine App' },
-    { icon: 'time', title: isEn ? 'Time Reminders' : 'Zeit-Erinnerungen', description: isEn ? 'Daily notifications' : 'Tägliche Benachrichtigungen' },
-    { icon: 'bar-chart', title: isEn ? 'Weekly Statistics' : 'Wochen-Statistik', description: isEn ? 'Your progress at a glance' : 'Dein Fortschritt auf einen Blick' },
-    { icon: 'people', title: isEn ? 'Companion' : 'Wegbegleiter/in', description: isEn ? 'Stay strong together' : 'Gemeinsam stark bleiben' },
+    { icon: 'checkmark-circle', title: t('premium.free_habits'), description: t('premium.free_habits_desc') },
+    { icon: 'color-palette', title: t('premium.free_themes'), description: t('premium.free_themes_desc') },
+    { icon: 'time', title: t('premium.free_time'), description: t('premium.free_time_desc') },
+    { icon: 'bar-chart', title: t('premium.free_stats'), description: t('premium.free_stats_desc') },
+    { icon: 'people', title: t('premium.free_companion'), description: t('premium.free_companion_desc') },
   ];
 
   const colors = settings?.appearance?.color_palette 
