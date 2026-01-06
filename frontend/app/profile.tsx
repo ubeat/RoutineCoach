@@ -155,13 +155,13 @@ export default function ProfileScreen() {
       const deviceId = await AsyncStorage.getItem('deviceId');
       await axios.post(`${API_URL}/api/gamification/${deviceId}/start-challenge?challenge_id=${challengeId}`);
       Alert.alert(
-        isEn ? "Let's go! 🚀" : 'Los gehts! 🚀', 
-        isEn ? 'Your challenge has started. You can do it!' : 'Deine Challenge hat begonnen. Du schaffst das!'
+        t('profile.challenge_started_title') + ' 🚀', 
+        t('profile.challenge_started_message')
       );
       setShowChallengeModal(false);
       fetchData();
     } catch (error) {
-      Alert.alert('Hmm', isEn ? 'Challenge could not be started. Try again!' : 'Challenge konnte nicht gestartet werden. Versuch es nochmal!');
+      Alert.alert('Hmm', t('profile.challenge_error'));
     }
   };
 
