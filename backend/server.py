@@ -1546,7 +1546,7 @@ class GamificationProfile(BaseModel):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 @api_router.get("/gamification/{device_id}")
-async def get_gamification_profile(device_id: str):
+async def get_gamification_profile(device_id: str, language: str = "de"):
     profile = await db.gamification.find_one({"device_id": device_id})
     
     if not profile:
@@ -1564,12 +1564,16 @@ async def get_gamification_profile(device_id: str):
             if i + 1 < len(LEVELS):
                 next_level = LEVELS[i + 1]
     
+    # Get localized badges
+    badges_earned = [get_localized_badge(BADGES[b], language) for b in profile.get("badges", []) if b in BADGES]
+    all_badges = get_all_localized_badges(language)
+    
     return {
         "profile": serialize_doc(profile),
         "current_level": current_level,
         "next_level": next_level,
-        "badges_earned": [BADGES[b] for b in profile.get("badges", []) if b in BADGES],
-        "all_badges": list(BADGES.values()),
+        "badges_earned": badges_earned,
+        "all_badges": all_badges,
         "levels": LEVELS
     }
 
