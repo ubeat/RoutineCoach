@@ -72,60 +72,28 @@ export default function ProfileScreen() {
   const [badgeEarned, setBadgeEarned] = useState(false);
   const [showXPInfoModal, setShowXPInfoModal] = useState(false);
 
-  const isEn = i18n.language === 'en';
-
   const XP_REWARDS = [
-    { action: isEn ? 'Daily check-in' : 'Tägliches Check-in', xp: 10, icon: 'checkbox-outline', color: '#4CAF50' },
-    { action: isEn ? 'All 3 habits completed' : 'Alle 3 Gewohnheiten geschafft', xp: 25, icon: 'star', color: '#FFD700' },
-    { action: isEn ? '2 of 3 habits' : '2 von 3 Gewohnheiten', xp: 15, icon: 'star-half', color: '#FFA500' },
-    { action: isEn ? '1 of 3 habits' : '1 von 3 Gewohnheiten', xp: 5, icon: 'star-outline', color: '#9E9E9E' },
-    { action: isEn ? '7-day streak reached' : '7-Tage Streak erreicht', xp: 50, icon: 'flame', color: '#FF4500' },
-    { action: isEn ? '30-day streak reached' : '30-Tage Streak erreicht', xp: 200, icon: 'trophy', color: '#9C27B0' },
-    { action: isEn ? 'Badge earned' : 'Abzeichen verdient', xp: 30, icon: 'ribbon', color: '#2196F3' },
-    { action: isEn ? 'Challenge completed' : 'Challenge abgeschlossen', xp: '50-100', icon: 'flag', color: '#E91E63' },
+    { action: t('profile.xp_daily_checkin'), xp: 10, icon: 'checkbox-outline', color: '#4CAF50' },
+    { action: t('profile.xp_all_habits'), xp: 25, icon: 'star', color: '#FFD700' },
+    { action: t('profile.xp_two_habits'), xp: 15, icon: 'star-half', color: '#FFA500' },
+    { action: t('profile.xp_one_habit'), xp: 5, icon: 'star-outline', color: '#9E9E9E' },
+    { action: t('profile.xp_7day_streak'), xp: 50, icon: 'flame', color: '#FF4500' },
+    { action: t('profile.xp_30day_streak'), xp: 200, icon: 'trophy', color: '#9C27B0' },
+    { action: t('profile.xp_badge_earned'), xp: 30, icon: 'ribbon', color: '#2196F3' },
+    { action: t('profile.xp_challenge_done'), xp: '50-100', icon: 'flag', color: '#E91E63' },
   ];
 
-  const BADGE_IMAGES: Record<string, { emoji: string; description: string }> = {
-    'first_checkin': { 
-      emoji: '🌟', 
-      description: isEn ? 'You made your very first check-in! The first step is always the most important.' : 'Du hast deinen allerersten Check-in gemacht! Der erste Schritt ist immer der wichtigste.' 
-    },
-    'streak_3': { 
-      emoji: '🔥', 
-      description: isEn ? '3 days in a row! You are building a real routine.' : '3 Tage am Stück! Du baust eine echte Routine auf.' 
-    },
-    'streak_7': { 
-      emoji: '💪', 
-      description: isEn ? 'A whole week! Your habit is getting stronger.' : 'Eine ganze Woche! Deine Gewohnheit wird stärker.' 
-    },
-    'streak_14': { 
-      emoji: '⚡', 
-      description: isEn ? '2 weeks going strong! You are on the right track.' : '2 Wochen durchgehalten! Du bist auf dem besten Weg.' 
-    },
-    'streak_30': { 
-      emoji: '👑', 
-      description: isEn ? 'A whole month! You are a true streak master!' : 'Ein ganzer Monat! Du bist ein echter Streak-Meister!' 
-    },
-    'perfect_week': { 
-      emoji: '🏆', 
-      description: isEn ? 'All habits perfectly completed for a week!' : 'Alle Gewohnheiten eine Woche lang perfekt erfüllt!' 
-    },
-    'habit_hero': { 
-      emoji: '🦸', 
-      description: isEn ? 'You completed 100 habits in total!' : 'Du hast 100 Gewohnheiten insgesamt abgeschlossen!' 
-    },
-    'early_bird': { 
-      emoji: '🐦', 
-      description: isEn ? 'Check-in before 8 AM - early bird!' : 'Check-in vor 8 Uhr morgens - Frühaufsteher!' 
-    },
-    'night_owl': { 
-      emoji: '🦉', 
-      description: isEn ? 'Check-in after 10 PM - night owl!' : 'Check-in nach 22 Uhr - Nachtmensch!' 
-    },
-    'comeback': { 
-      emoji: '🔄', 
-      description: isEn ? 'Came back after a break - respect!' : 'Nach einer Pause wieder zurückgekommen - Respekt!' 
-    },
+  const BADGE_EMOJIS: Record<string, string> = {
+    'first_checkin': '🌟',
+    'streak_3': '🔥',
+    'streak_7': '💪',
+    'streak_14': '⚡',
+    'streak_30': '👑',
+    'perfect_week': '🏆',
+    'habit_hero': '🦸',
+    'early_bird': '🐦',
+    'night_owl': '🦉',
+    'comeback': '🔄',
   };
 
   const colors = settings?.appearance?.color_palette 
