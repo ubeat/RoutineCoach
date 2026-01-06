@@ -1145,7 +1145,7 @@ export default function SettingsScreen() {
                 <View style={styles.timeButtonContent}>
                   <Text style={[styles.timeLabel, { color: colors.textLight }]}>{t('settings.reminder_time')}</Text>
                   <Text style={[styles.timeText, { color: colors.text }]}>
-                    {settings.checkin_reminder.time} {i18n.language === 'en' ? "o'clock" : 'Uhr'}
+                    {settings.checkin_reminder.time} {t('settings.oclock')}
                   </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={20} color={colors.textLight} />
