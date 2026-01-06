@@ -300,6 +300,8 @@
     "choose_location_map": "Ort auf Karte wählen",
     "selected_location": "Ausgewählter Ort:",
     "location_set": "Ort gesetzt",
+    "location_web_note": "Hinweis: Orts-Erinnerungen funktionieren nur in der mobilen App.",
+    "location_mobile_note": "Du wirst eine Erinnerung erhalten, wenn du in der Nähe dieses Ortes bist.",
     "location_hint_web": "Hinweis: Orts-Erinnerungen funktionieren nur in der mobilen App.",
     "location_hint_mobile": "Du wirst eine Erinnerung erhalten, wenn du in der Nähe dieses Ortes bist.",
     "location_permission_title": "Standort-Berechtigung",
