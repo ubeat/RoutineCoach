@@ -33,7 +33,6 @@ interface JournalEntry {
 
 export default function JournalScreen() {
   const { t, i18n } = useTranslation();
-  const isEn = i18n.language === 'en';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -110,16 +109,10 @@ export default function JournalScreen() {
         mood_note: moodNote.trim() || null,
       });
 
-      Alert.alert(
-        isEn ? 'Saved!' : 'Gespeichert!', 
-        isEn ? 'Your journal entry has been saved.' : 'Dein Tagebuch-Eintrag wurde gespeichert.'
-      );
+      Alert.alert(t('journal.saved_title'), t('journal.saved_message'));
       fetchData();
     } catch (error) {
-      Alert.alert(
-        t('common.error'), 
-        isEn ? 'Entry could not be saved.' : 'Eintrag konnte nicht gespeichert werden.'
-      );
+      Alert.alert(t('common.error'), t('journal.save_error'));
     } finally {
       setSaving(false);
     }
@@ -133,7 +126,7 @@ export default function JournalScreen() {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString(isEn ? 'en-US' : 'de-DE', {
+    return date.toLocaleDateString(i18n.language === 'en' ? 'en-US' : 'de-DE', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
@@ -161,9 +154,7 @@ export default function JournalScreen() {
           }
         >
           <View style={styles.header}>
-            <Text style={[styles.title, { color: colors.text }]}>
-              {isEn ? 'Journal' : 'Tagebuch'}
-            </Text>
+            <Text style={[styles.title, { color: colors.text }]}>{t('journal.title')}</Text>
             <Text style={[styles.dateText, { color: colors.textLight }]}>
               {formatDate(new Date().toISOString())}
             </Text>
@@ -173,16 +164,14 @@ export default function JournalScreen() {
           <View style={[styles.card, { backgroundColor: colors.accent + '30', borderColor: colors.accent, borderWidth: 1 }]}>
             <View style={styles.cardHeader}>
               <Ionicons name="bulb" size={24} color={colors.accent} />
-              <Text style={[styles.cardTitle, { color: colors.text }]}>
-                {isEn ? 'Reflection Question' : 'Reflexionsfrage'}
-              </Text>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>{t('journal.reflection_question')}</Text>
             </View>
             <Text style={[styles.questionText, { color: colors.text }]}>{reflectionQuestion}</Text>
             <TextInput
               style={[styles.textArea, { backgroundColor: colors.card, color: colors.text, borderColor: colors.accent }]}
               value={reflectionAnswer}
               onChangeText={setReflectionAnswer}
-              placeholder={isEn ? 'Your answer...' : 'Deine Antwort...'}
+              placeholder={t('journal.your_answer')}
               placeholderTextColor={colors.textLight}
               multiline
               numberOfLines={4}
@@ -193,13 +182,9 @@ export default function JournalScreen() {
           <View style={[styles.card, { backgroundColor: colors.card }]}>
             <View style={styles.cardHeader}>
               <Ionicons name="heart" size={24} color="#EC4899" />
-              <Text style={[styles.cardTitle, { color: colors.text }]}>
-                {isEn ? 'Gratitude' : 'Dankbarkeit'}
-              </Text>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>{t('journal.gratitude')}</Text>
             </View>
-            <Text style={[styles.sectionHint, { color: colors.textLight }]}>
-              {isEn ? 'What are you grateful for today?' : 'Wofür bist du heute dankbar?'}
-            </Text>
+            <Text style={[styles.sectionHint, { color: colors.textLight }]}>{t('journal.gratitude_question')}</Text>
             {[0, 1, 2].map((index) => (
               <View key={index} style={styles.gratitudeRow}>
                 <View style={[styles.gratitudeNumber, { backgroundColor: '#EC4899' }]}>
@@ -209,7 +194,7 @@ export default function JournalScreen() {
                   style={[styles.gratitudeInput, { backgroundColor: colors.background, color: colors.text }]}
                   value={gratitudes[index]}
                   onChangeText={(text) => updateGratitude(index, text)}
-                  placeholder={isEn ? `Gratitude ${index + 1}...` : `Dankbarkeit ${index + 1}...`}
+                  placeholder={`${t('journal.gratitude_placeholder')} ${index + 1}...`}
                   placeholderTextColor={colors.textLight}
                 />
               </View>
@@ -220,15 +205,13 @@ export default function JournalScreen() {
           <View style={[styles.card, { backgroundColor: colors.card }]}>
             <View style={styles.cardHeader}>
               <Ionicons name="document-text" size={24} color={colors.secondary} />
-              <Text style={[styles.cardTitle, { color: colors.text }]}>
-                {isEn ? 'Daily Note' : 'Tagesnotiz'}
-              </Text>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>{t('journal.daily_note')}</Text>
             </View>
             <TextInput
               style={[styles.textArea, { backgroundColor: colors.background, color: colors.text }]}
               value={note}
               onChangeText={setNote}
-              placeholder={isEn ? 'What happened today? What was on your mind?' : 'Was ist heute passiert? Was hat dich beschäftigt?'}
+              placeholder={t('journal.daily_note_placeholder')}
               placeholderTextColor={colors.textLight}
               multiline
               numberOfLines={4}
@@ -239,15 +222,13 @@ export default function JournalScreen() {
           <View style={[styles.card, { backgroundColor: colors.card }]}>
             <View style={styles.cardHeader}>
               <Ionicons name="happy" size={24} color={colors.primary} />
-              <Text style={[styles.cardTitle, { color: colors.text }]}>
-                {isEn ? 'Mood Note' : 'Stimmungs-Notiz'}
-              </Text>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>{t('journal.mood_note')}</Text>
             </View>
             <TextInput
               style={[styles.textArea, { backgroundColor: colors.background, color: colors.text }]}
               value={moodNote}
               onChangeText={setMoodNote}
-              placeholder={isEn ? 'How does today feel? Why?' : 'Wie fühlt sich heute an? Warum?'}
+              placeholder={t('journal.mood_note_placeholder')}
               placeholderTextColor={colors.textLight}
               multiline
               numberOfLines={3}
@@ -265,9 +246,7 @@ export default function JournalScreen() {
             ) : (
               <>
                 <Ionicons name="save" size={20} color="#FFF" />
-                <Text style={styles.saveButtonText}>
-                  {isEn ? 'Save entry' : 'Eintrag speichern'}
-                </Text>
+                <Text style={styles.saveButtonText}>{t('journal.save_entry')}</Text>
               </>
             )}
           </TouchableOpacity>
@@ -283,7 +262,7 @@ export default function JournalScreen() {
               color={colors.primary} 
             />
             <Text style={[styles.pastEntriesText, { color: colors.primary }]}>
-              {isEn ? `Previous entries (${pastEntries.length})` : `Frühere Einträge (${pastEntries.length})`}
+              {t('journal.past_entries')} ({pastEntries.length})
             </Text>
           </TouchableOpacity>
 
@@ -291,9 +270,7 @@ export default function JournalScreen() {
           {showPastEntries && (
             <View style={styles.pastEntriesContainer}>
               {pastEntries.length === 0 ? (
-                <Text style={[styles.noEntriesText, { color: colors.textLight }]}>
-                  {isEn ? 'No previous entries yet' : 'Noch keine früheren Einträge'}
-                </Text>
+                <Text style={[styles.noEntriesText, { color: colors.textLight }]}>{t('journal.no_entries')}</Text>
               ) : (
                 pastEntries.map((entry) => (
                   <View key={entry.id} style={[styles.pastEntryCard, { backgroundColor: colors.card }]}>
