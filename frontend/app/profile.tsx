@@ -361,7 +361,7 @@ export default function ProfileScreen() {
             </View>
             <View style={styles.levelInfo}>
               <Text style={styles.levelName}>{t('profile.level')} {currentLevel?.level || 1}</Text>
-              <Text style={styles.levelTitle}>{currentLevel?.name || t('profile.beginner')}</Text>
+              <Text style={styles.levelTitle}>{getLevelName(currentLevel?.level)}</Text>
             </View>
             <TouchableOpacity 
               style={styles.xpBadge}
