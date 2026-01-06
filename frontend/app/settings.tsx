@@ -1019,7 +1019,7 @@ export default function SettingsScreen() {
 
               {/* Days Selection */}
               <Text style={[styles.subLabel, { color: colors.textLight }]}>
-                {i18n.language === 'en' ? 'Remind me on these days:' : 'An diesen Tagen erinnern:'}
+                {t('settings.remind_on_days')}
               </Text>
               <View style={styles.daysRow}>
                 {WEEKDAYS.map((day) => (
