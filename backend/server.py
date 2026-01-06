@@ -94,9 +94,11 @@ class AICoachRequest(BaseModel):
     goals: List[str]
     day_of_week: int  # 0=Monday, 6=Sunday
     week_progress: Optional[List[str]] = []  # Previous days' results
+    language: str = "de"  # User's language preference: "de", "en", etc.
 
 class GoalAdviceRequest(BaseModel):
     device_id: str
+    language: str = "de"  # User's language preference
 
 # ============================================
 # SUBSCRIPTION & PREMIUM SYSTEM
