@@ -411,12 +411,14 @@ export default function ProfileScreen() {
             {allBadges.map((badge) => {
               const isEarned = earnedBadges.some(b => b.id === badge.id);
               return (
-                <View 
+                <TouchableOpacity 
                   key={badge.id} 
                   style={[
                     styles.badgeItem,
                     !isEarned && styles.badgeLocked
                   ]}
+                  onPress={() => openBadgeDetail(badge, isEarned)}
+                  activeOpacity={0.7}
                 >
                   <View style={[styles.badgeIcon, { backgroundColor: isEarned ? badge.color : '#E0E0E0' }]}>
                     <Ionicons 
@@ -431,7 +433,7 @@ export default function ProfileScreen() {
                   ]} numberOfLines={1}>
                     {badge.name}
                   </Text>
-                </View>
+                </TouchableOpacity>
               );
             })}
           </View>
