@@ -42,12 +42,7 @@ import { COLOR_PALETTES } from '../contexts/SettingsContext';
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-const WEEKDAYS = [
-  { short: 'Mo', full: 'Montag', index: 0 },
-  { short: 'Di', full: 'Dienstag', index: 1 },
-  { short: 'Mi', full: 'Mittwoch', index: 2 },
-  { short: 'Do', full: 'Donnerstag', index: 3 },
-  { short: 'Fr', full: 'Freitag', index: 4 },
+// WEEKDAYS will be dynamically translated in the component
   { short: 'Sa', full: 'Samstag', index: 5 },
   { short: 'So', full: 'Sonntag', index: 6 },
 ];
