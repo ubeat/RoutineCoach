@@ -384,5 +384,29 @@
     "social_butterfly": { "name": "Sozialer Schmetterling", "desc": "Wegbegleiter eingeladen" },
     "explorer": { "name": "Entdecker", "desc": "Alle Features genutzt" },
     "immortal": { "name": "Unsterblich", "desc": "365 Tage Serie" }
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache / Language",
+    "coming_soon": "Bald verfügbar",
+    "language_coming_soon": "{{language}} wird bald hinzugefügt!",
+    "appearance": "Aussehen",
+    "color_theme": "Farbschema",
+    "sound": "Benachrichtigungston",
+    "premium_features": "Premium-Features",
+    "reminders": "Erinnerungen",
+    "habit_reminders": "Gewohnheits-Erinnerungen",
+    "checkin_reminders": "Check-In Erinnerungen",
+    "time": "Uhrzeit",
+    "days": "Tage",
+    "location_reminders": "Orts-Erinnerungen",
+    "set_location": "Ort festlegen",
+    "radius": "Radius",
+    "save_settings": "Einstellungen speichern",
+    "saving": "Speichern...",
+    "saved": "Gespeichert!",
+    "manage_subscription": "Abo verwalten",
+    "your_name": "Dein Name",
+    "change_name": "Name ändern"
   }
 }
