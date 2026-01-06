@@ -190,8 +190,8 @@ export default function HomeScreen() {
           ) : (
             <TouchableOpacity style={styles.noGoalsButton} onPress={() => router.push('/goals')}>
               <Ionicons name="heart-circle" size={50} color={COLORS.primary} />
-              <Text style={styles.noGoalsText}>Deine Reise beginnt hier</Text>
-              <Text style={styles.noGoalsHint}>Setze deine ersten Wenn-Dann Ziele</Text>
+              <Text style={styles.noGoalsText}>{t('home.no_habits')}</Text>
+              <Text style={styles.noGoalsHint}>{t('home.set_habits')}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -199,43 +199,43 @@ export default function HomeScreen() {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Ionicons name="today" size={24} color={COLORS.secondary} />
-            <Text style={styles.cardTitle}>Heute</Text>
+            <Text style={styles.cardTitle}>{t('journal.today')}</Text>
           </View>
           {completedToday ? (
             <View style={styles.completedContainer}>
               <Ionicons name="checkmark-circle" size={60} color={COLORS.secondary} />
-              <Text style={styles.completedText}>Check-In erledigt!</Text>
+              <Text style={styles.completedText}>{t('checkin.success_title')}</Text>
               {todayCheckin?.checkin?.mood_emoji && (
                 <Text style={styles.moodDisplay}>
-                  Stimmung: {todayCheckin.checkin.mood_emoji} ({todayCheckin.checkin.mood_scale}/10)
+                  {t('checkin.mood_question')}: {todayCheckin.checkin.mood_emoji} ({todayCheckin.checkin.mood_scale}/10)
                 </Text>
               )}
             </View>
           ) : goals ? (
             <TouchableOpacity style={styles.checkinButton} onPress={() => router.push('/checkin')}>
               <Ionicons name="hand-right" size={32} color="#FFF" />
-              <Text style={styles.checkinButtonText}>Jetzt einchecken!</Text>
+              <Text style={styles.checkinButtonText}>{t('checkin.submit')}</Text>
             </TouchableOpacity>
           ) : (
-            <Text style={styles.setGoalsFirst}>Setze erst deine Wochenziele</Text>
+            <Text style={styles.setGoalsFirst}>{t('checkin.no_goals')}</Text>
           )}
         </View>
 
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Ionicons name="calendar" size={24} color={COLORS.purple} />
-            <Text style={styles.cardTitle}>Diese Woche</Text>
+            <Text style={styles.cardTitle}>{t('progress.this_week')}</Text>
           </View>
           <View style={styles.weekProgress}>
             <Text style={styles.progressNumber}>{daysTracked}/7</Text>
-            <Text style={styles.progressLabel}>Tage erfasst</Text>
+            <Text style={styles.progressLabel}>{t('progress.days')}</Text>
           </View>
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: `${(daysTracked / 7) * 100}%` }]} />
           </View>
           {daysTracked >= 7 && (
             <TouchableOpacity style={styles.viewResultsButton} onPress={() => router.push('/progress')}>
-              <Text style={styles.viewResultsText}>Wochenergebnis ansehen</Text>
+              <Text style={styles.viewResultsText}>{t('progress.weekly_overview')}</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -244,7 +244,7 @@ export default function HomeScreen() {
           <View style={[styles.card, styles.coachCard]}>
             <View style={styles.cardHeader}>
               <Ionicons name="chatbubble-ellipses" size={24} color={COLORS.pink} />
-              <Text style={styles.cardTitle}>Dein Coach sagt</Text>
+              <Text style={styles.cardTitle}>{t('coaching.title')}</Text>
             </View>
             <Text style={styles.coachMessage}>{todayCheckin.checkin.ai_response}</Text>
           </View>
