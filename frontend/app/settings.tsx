@@ -1424,14 +1424,13 @@ export default function SettingsScreen() {
                   styles.locationModalConfirm, 
                   { color: selectedLocation ? colors.primary : colors.textLight }
                 ]}>
-                  Fertig
+                  {t('common.done')}
                 </Text>
               </TouchableOpacity>
             </View>
 
             <Text style={[styles.locationModalHint, { color: colors.textLight }]}>
-              Waehle deinen aktuellen Standort oder suche nach einer Adresse.
-              Du wirst erinnert, wenn du dort ankommst.
+              {t('settings.location_modal_hint')}
             </Text>
 
             {/* Current Location Button */}
