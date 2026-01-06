@@ -22,41 +22,35 @@ import { COLOR_PALETTES } from '../contexts/SettingsContext';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-// Gollwitzer Implementation Intentions - Wenn-Dann Vorschläge
-const WENN_DANN_VORSCHLAEGE = [
-  {
-    wenn: 'Nachdem ich morgens aufgestanden bin',
-    dann: ['ein Glas Wasser trinken', 'mein Bett machen', '3 tiefe Atemzuege nehmen', 'mich kurz strecken'],
-  },
-  {
-    wenn: 'Nachdem ich mir die Zaehne geputzt habe',
-    dann: ['2 Kniebeugen machen', 'mein Gesicht eincremen', 'im Spiegel laecheln', 'eine Affirmation sagen'],
-  },
-  {
-    wenn: 'Bevor ich fruehstuecke',
-    dann: ['ein Glas Wasser trinken', 'kurz meditieren', 'meine Tagesziele anschauen'],
-  },
-  {
-    wenn: 'Wenn ich mich an den Schreibtisch setze',
-    dann: ['3 tiefe Atemzuege nehmen', 'meine wichtigste Aufgabe notieren', 'Wasser bereitstellen'],
-  },
-  {
-    wenn: 'Nachdem ich Mittag gegessen habe',
-    dann: ['5 Minuten spazieren gehen', '10 Schritte gehen', 'mich kurz strecken'],
-  },
-  {
-    wenn: 'Wenn ich nach Hause komme',
-    dann: ['Schuhe ordentlich wegstellen', 'tief durchatmen', 'mich kurz hinsetzen'],
-  },
-  {
-    wenn: 'Bevor ich ins Bett gehe',
-    dann: ['3 Dinge aufschreiben, fuer die ich dankbar bin', 'Handy weglegen', 'einen Moment innehalten'],
-  },
-  {
-    wenn: 'Wenn ich gestresst bin',
-    dann: ['3 tiefe Atemzuege nehmen', 'kurz aus dem Fenster schauen', 'Wasser trinken'],
-  },
-];
+// Get localized suggestions based on current language
+const getLocalizedSuggestions = (t: any) => {
+  const currentLang = t('_lang', { defaultValue: 'de' });
+  
+  if (currentLang === 'en') {
+    return [
+      { wenn: 'After waking up in the morning', dann: ['drink a glass of water', 'make my bed', 'take 3 deep breaths', 'stretch briefly'] },
+      { wenn: 'After brushing my teeth', dann: ['do 2 squats', 'moisturize my face', 'smile in the mirror', 'say an affirmation'] },
+      { wenn: 'Before having breakfast', dann: ['drink a glass of water', 'meditate briefly', 'review my daily goals'] },
+      { wenn: 'When I sit down at my desk', dann: ['take 3 deep breaths', 'write down my most important task', 'prepare water'] },
+      { wenn: 'After lunch', dann: ['go for a 5-minute walk', 'take 10 steps', 'stretch briefly'] },
+      { wenn: 'When I come home', dann: ['put my shoes away neatly', 'take a deep breath', 'sit down briefly'] },
+      { wenn: 'Before going to bed', dann: ['write down 3 things I am grateful for', 'put my phone away', 'pause for a moment'] },
+      { wenn: 'When I feel stressed', dann: ['take 3 deep breaths', 'look out the window briefly', 'drink water'] },
+    ];
+  }
+  
+  // German (default)
+  return [
+    { wenn: 'Nachdem ich morgens aufgestanden bin', dann: ['ein Glas Wasser trinken', 'mein Bett machen', '3 tiefe Atemzuege nehmen', 'mich kurz strecken'] },
+    { wenn: 'Nachdem ich mir die Zaehne geputzt habe', dann: ['2 Kniebeugen machen', 'mein Gesicht eincremen', 'im Spiegel laecheln', 'eine Affirmation sagen'] },
+    { wenn: 'Bevor ich fruehstuecke', dann: ['ein Glas Wasser trinken', 'kurz meditieren', 'meine Tagesziele anschauen'] },
+    { wenn: 'Wenn ich mich an den Schreibtisch setze', dann: ['3 tiefe Atemzuege nehmen', 'meine wichtigste Aufgabe notieren', 'Wasser bereitstellen'] },
+    { wenn: 'Nachdem ich Mittag gegessen habe', dann: ['5 Minuten spazieren gehen', '10 Schritte gehen', 'mich kurz strecken'] },
+    { wenn: 'Wenn ich nach Hause komme', dann: ['Schuhe ordentlich wegstellen', 'tief durchatmen', 'mich kurz hinsetzen'] },
+    { wenn: 'Bevor ich ins Bett gehe', dann: ['3 Dinge aufschreiben, fuer die ich dankbar bin', 'Handy weglegen', 'einen Moment innehalten'] },
+    { wenn: 'Wenn ich gestresst bin', dann: ['3 tiefe Atemzuege nehmen', 'kurz aus dem Fenster schauen', 'Wasser trinken'] },
+  ];
+};
 
 interface Goal {
   wenn: string;
