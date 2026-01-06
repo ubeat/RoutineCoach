@@ -534,6 +534,20 @@ const styles = StyleSheet.create({
   featureDescription: {
     fontSize: 13,
   },
+  noteBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 10,
+    marginTop: 8,
+    marginBottom: 8,
+    gap: 8,
+  },
+  noteText: {
+    flex: 1,
+    fontSize: 12,
+    lineHeight: 16,
+  },
   promoSection: {
     borderRadius: 16,
     padding: 20,
