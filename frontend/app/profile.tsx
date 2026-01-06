@@ -567,7 +567,7 @@ export default function ProfileScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>{isEn ? 'Choose Weekly Challenge' : 'Wochen-Challenge wählen'}</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>{t('profile.choose_challenge')}</Text>
             <ScrollView style={styles.challengeList}>
               {challenges.map((challenge) => (
                 <TouchableOpacity
