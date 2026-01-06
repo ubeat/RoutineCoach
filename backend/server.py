@@ -591,7 +591,16 @@ WICHTIG: Du führst einen Dialog - reagiere auf das, was die Person sagt, und st
 
 @api_router.post("/weekly-review")
 async def get_weekly_review(request: WeeklyReviewRequest):
-    """Generiert einen ehrlichen, aufbauenden Wochen-Auswertungstext"""
+    """Generiert einen ehrlichen, aufbauenden Wochen-Auswertungstext (Premium Feature)"""
+    
+    # Check premium status
+    premium_status = await check_premium_status(request.device_id)
+    if not premium_status.get("is_premium"):
+        raise HTTPException(
+            status_code=403, 
+            detail="Die KI-Wochenanalyse ist nur für Premium-Nutzer verfügbar. Schließe ein Abo ab oder nutze einen Promo-Code."
+        )
+    
     try:
         # Get week's data
         device_id = request.device_id
