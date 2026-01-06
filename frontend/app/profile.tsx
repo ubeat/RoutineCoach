@@ -520,7 +520,7 @@ export default function ProfileScreen() {
                 <Text style={styles.partnerButtonText}>Wegbegleiterin einladen</Text>
               </TouchableOpacity>
             </View>
-          )}}
+          )}
         </View>
 
         {/* Leaderboard */}
