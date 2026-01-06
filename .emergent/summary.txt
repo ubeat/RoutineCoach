@@ -1,174 +1,163 @@
 <analysis>
 
-**original_problem_statement**: The user wants to build a German-language habit tracking app, Schritt für Schritt. The initial goal was to finalize gamification features. This was completed, and the scope expanded significantly to include a full subscription/premium model, enhanced security, and complete localization (internationalization) of the app.
+**original_problem_statement**: The user wants to build a German-language habit tracking app, Schritt für Schritt. The primary, urgent goal is to completely and systematically localize the entire application from German to English using a scalable, key-based i18n system (). This refactor is the top priority due to the user's significant frustration with previous incomplete attempts.
+
+Specific untranslated items pointed out by the user include:
+- Weekly challenge texts
+- Badge texts
+- Leaderboard strings (e.g., Spieler)
+- Various other hardcoded strings throughout the UI.
+
+Secondary, but still important, pending features include implementing a full subscription model, enhancing backend API security (JWT, rate-limiting), and adding other premium features.
 
 **PRODUCT REQUIREMENTS**:
--   **Subscription Model**: The app should be free, but offer a Premium tier for advanced features.
-    -   **Price**: 4.99€/month.
-    -   **Payments**: Integrate Stripe, PayPal, and prepare for RevenueCat (for native app stores).
-    -   **Promo Codes**: An admin area is required to generate promotional codes that grant temporary premium access (e.g., 1 week, 1 month, 1 year).
--   **Premium Feature Tier**:
-    -   **Premium**: AI Weekly Analysis, AI Coaching Chat, Detailed Statistics, Data Export (PDF/CSV), Mood Correlation Analysis, Cloud Backup & Restore, Location-based reminders.
-    -   **Free for All**: Core habit tracking (up to 3 habits), all color themes, daily check-ins, streaks, and basic badges.
--   **Security**: The backend API, especially premium features, must be secured against unauthorized access. The user explicitly requested robust security to prevent hacking or reverse engineering.
--   **Localization (i18n)**: The entire app's text content must be translated from German into English. The system should be prepared for future languages (Spanish, French). A language switcher should be available in settings and on the home screen.
+-   **Localization (i18n)**: The entire app's user-facing text must be translated from German into English using a scalable, key-based system (), preparing it for future languages (Spanish, French). This is the current P0 task.
+-   **Subscription Model**: A freemium model with a 4.99€/month Premium tier. Integrations with Stripe and PayPal are required.
+-   **Premium Features**: AI Weekly Analysis, AI Coaching Chat, Detailed Statistics, Data Export, Mood Correlation, Cloud Backup, Location-based reminders.
+-   **Security**: The backend API must be secured with JWT and rate-limiting.
 
 **User's preferred language**: German. The next agent MUST respond in German.
 
 **what currently exists?**
-A functional Expo/React Native app with a FastAPI backend.
--   Core features like goal setting, daily check-ins, and progress tracking are implemented.
--   Gamification is complete, with a profile screen showing XP, levels, badges (with detail modals), and an XP explanation modal.
--   A full-featured subscription system has been architected on the backend, including database models (, ), premium feature gating (), and an admin system for creating promo codes. The corresponding frontend pages (, ) have been created.
--   An internationalization (i18n) system using  has been set up. Complete translation files for German () and English () have been created, along with placeholders for Spanish and French. A language switcher UI exists in the settings and on the home screen.
+A functional Expo/React Native app with a FastAPI backend. The  internationalization framework is in place. In this session, the agent has begun the major, app-wide refactoring to implement a key-based translation system as demanded by the user.
+
+- The localization files (, ) have been updated with keys for previously missing text like weekly challenges, moods, and badges.
+- The refactoring of individual screens has started. So far,  and  have been successfully converted to use the  function, replacing hardcoded strings and  logic.
 
 **Last working item**:
--   **Last item agent was working**: Systematically replacing all hardcoded text strings in the frontend components with the  function from the  hook to complete the localization feature. The agent had just finished fully translating .
+-   **Last item agent was working**: The agent was in the middle of a large-scale refactoring of the entire frontend to use the key-based  library. It had just successfully refactored  and had planned to continue with the remaining larger screens.
 -   **Status**: IN PROGRESS
 -   **Agent Testing Done**: N
--   **Which testing method agent to use?**: Frontend testing agent. After all text is replaced, the agent should test every screen in both German and English to ensure all text is translated correctly and there are no layout breaks.
+-   **Which testing method agent to use?**: Frontend testing agent. Once the entire refactor is complete, the agent must test every screen in both German and English to verify that all text is correctly translated via i18n keys and there are no UI breakages or missing translations.
 -   **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Incomplete Security Implementation (P1)**: The user requested robust security. While the backend has placeholders and dependencies for JWT and rate limiting, the actual implementation logic is missing. This is a critical gap.
+-   **Issue 1: Incomplete Key-Based i18n Refactor (P0, HIGHEST PRIORITY)**: The app-wide localization refactor is in progress but far from complete. The user expects this to be done for *all* screens and *all* text.
+-   **Issue 2: Incomplete Security Implementation (P1)**: The backend  has placeholders but no functional JWT or rate-limiting logic. This is a critical security gap noted by the user.
+-   **Issue 3: Map-based location selection (P2)**: An earlier user request for a map-based UI for location reminders is still pending.
+-   **Issue 4: System notification sounds (P3)**: The user's request for native system notification sounds has not been implemented; the app uses custom sounds.
 
 **Issues Detail**:
--   **Issue 1: Incomplete Security Implementation**
-    -   **Attempted fixes**: The agent added comments and basic structure in  but did not write the functional code for creating/validating JWTs or for tracking and blocking requests based on rate limits.
+-   **Issue 1: Incomplete Key-Based i18n Refactor**
+    -   **Attempted fixes**: The agent correctly abandoned the unscalable  approach. It has successfully updated the JSON locale files and refactored  and .
     -   **Next debug checklist**:
-        1.  In , implement the  and a token verification dependency using .
-        2.  Create new login/authentication endpoints that return a JWT to the client.
-        3.  Modify the client-side API calls to store the JWT and send it in the  header.
-        4.  Implement a rate-limiting solution (e.g., using a dictionary or a Redis instance if available) to track requests per device ID/IP.
-        5.  Apply the JWT and rate-limiting dependencies to all relevant API endpoints.
-    -   **Why fix this issue and what will be achieved with the fix?**: To fulfill the user's explicit and critical requirement for a secure application, preventing API abuse and unauthorized access to premium features.
+        1.  Systematically open and refactor the remaining screens. The plan was to tackle , , , and  next.
+        2.  The following files still require a full refactor to replace hardcoded text and  logic with  calls:
+            -   
+            -   
+            -   
+            -   
+            -   
+            -   
+            -    (for tab bar labels)
+        3.  For each file, import  and replace all user-facing strings.
+    -   **Why fix this issue and what will be achieved with the fix?**: This will fulfill the user's most critical and repeated request, resolving their main point of frustration and making the app scalable for future languages.
+    -   **Status**: IN PROGRESS
+    -   **Is recurring issue?**: Y (The problem of incomplete localization has been raised multiple times).
+    -   **Should Test frontend/backend/both after fix?**: frontend
+    -   **Blocked on other issue**: None.
+
+-   **Issue 2: Incomplete Security Implementation**
+    -   **Attempted fixes**: None. Only comments and placeholders exist in .
+    -   **Next debug checklist**:
+        1.  Implement JWT token creation and verification middleware in .
+        2.  Protect all relevant API endpoints with the JWT middleware.
+        3.  Implement a rate-limiter for the API.
+    -   **Why fix this issue and what will be achieved with the fix?**: To secure user data and prevent unauthorized API access.
     -   **Status**: NOT STARTED
     -   **Is recurring issue?**: N
     -   **Should Test frontend/backend/both after fix?**: both
-    -   **Blocked on other issue**: None.
+    -   **Blocked on other issue**: Blocked by the P0 localization task.
 
 **In progress Task List**:
--   **Task 1: Complete App-Wide Localization (P0)**
-    -   **Where to resume**: The agent needs to continue going through every  file in  (e.g., , , , etc.), import , and replace every single user-facing string with its corresponding  from the JSON files. The user was very clear they want this task done *completely*.
-    -   **What will be achieved with this?**: The app will be fully bilingual (German/English), and the language switcher will function correctly across the entire application.
+-   **Task 1: Complete App-Wide Key-Based Localization Refactor (P0)**
+    -   **Where to resume**: The agent has finished  and . The next logical step is to start refactoring , and then continue with , , , , , and  until all hardcoded text is removed.
+    -   **What will be achieved with this?**: A professionally localized app that is easy to maintain and extend with new languages, fulfilling the user's primary requirement.
     -   **Status**: IN PROGRESS
     -   **Should Test frontend/backend/both after fix?**: frontend
     -   **Blocked on something**: No.
 
 **Upcoming and Future Tasks**
--   **P1: Implement Payment Provider Integrations**: The backend has placeholder webhook endpoints. The next step is to implement the actual logic for Stripe (Checkout Sessions), PayPal, and RevenueCat to handle real subscription payments and update the user's premium status in the database. This will require user-provided API keys.
--   **P2: Implement Other Premium Features**: The backend has endpoints and feature gates for Detailed Statistics, Data Export, and Mood Correlation. These need to be implemented on both the backend (data processing) and frontend (UI).
--   **P3: Fill Spanish and French Translations**: The placeholder files  and  need to be populated with translations.
--   **P4: Prepare for Google Play Store Launch**: Create the necessary assets (App Icon, Feature Graphic, Screenshots) and legal documents (Privacy Policy, ToS).
+-   **P1: Implement Security (JWT & Rate Limiting)**: After localization is complete, implement the backend security features.
+-   **P2: Implement Payment Provider Integrations (Stripe/PayPal)**: Implement the backend logic and webhooks for subscriptions.
+-   **P3: Implement Remaining Premium Features**: Build out Detailed Statistics, Data Export, and Mood Correlation.
+-   **P4: Populate Spanish and French Translations**: Once the key structure is stable, translate the  and  placeholder files.
 
 **Completed work in this session**
--   **Gamification Modals**: Implemented and tested the clickable Badge Detail Modal and the XP Overview Modal in .
--   **Subscription System Architecture**:
-    -   **Backend**: Created DB models and API endpoints for subscriptions, promo codes, and an admin management system. Protected AI endpoints with a premium-check.
-    -   **Frontend**: Created  and  pages and linked them from settings.
--   **Premium Feature Definition**: Collaborated with the user to define which features are premium (AI, Backup, Advanced Stats) and which remain free (3 habits, themes).
--   **Cloud Backup/Restore**: Implemented the backend endpoints for creating and restoring user data, gated for premium users.
--   **Localization (i18n) Foundation**:
-    -   Installed and configured  and .
-    -   Created complete  and  translation files.
-    -   Added a functional language switcher to the Settings and Home screens.
-    -   Began the process of replacing hardcoded text with i18n keys.
+-   **Localization Files Update**: The  and  files were expanded to include missing keys for weekly challenges, moods, leaderboard, and other UI elements.
+-   **Screen Refactor (Partial)**:
+    -    was fully refactored to use the  i18n system.
+    -    was fully refactored to use the  i18n system.
 
 **Earlier issues found/mentioned but not fixed**
--   **Issue 1: Map-based location selection**: The agent used a text-based input as a workaround for  crashing the web preview. The original user request for a map-based picker for native builds is still pending.
--   **Issue 2: System notification sounds**: The app uses bundled custom sounds, not the native system sounds the user originally requested.
+-   **Map-based location selection**: The original request for a map-based picker for location reminders is still pending due to web preview compatibility issues with .
+-   **System notification sounds**: The app uses custom sounds, not the native system sounds the user originally requested.
 
 **Known issue recurrence from previous fork**
--   N/A
+-   **Issue recurrence in previous fork**: Incomplete localization. The previous agent's attempt using conditional logic () was rejected by the user, leading to the current, more robust refactoring effort.
+-   **Recurrence count**: This is at least the second major attempt to solve the localization problem fully.
+-   **Status**: IN PROGRESS
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Frontend**: React Native, Expo, Expo Router, Zustand/React Context, , , .
--   **Backend**: Python, FastAPI, Motor, Pydantic (for new subscription/promo models).
+-   **Frontend**: React Native, Expo, Expo Router, , . The core task is the correct and complete implementation of  using the  pattern.
+-   **Backend**: Python, FastAPI.
 -   **Database**: MongoDB.
--   **Monetization Strategy**: Freemium model with server-side validation of subscription status and promo codes.
 
 **key DB schema**
--   : 
--   : 
--   : 
--   : 
--   :  (New)
--   :  (New)
--   :  (New)
+-   No changes to the DB schema in this session.
 
 **changes in tech stack**
--   **Backend**: Added  and  python packages.
--   **Frontend**: Added  and  packages.
+-   None.
 
 **All files of reference**
--   **/app/frontend/app/**: All  files in this directory need to be edited to complete the localization task.  is done. Others are in progress or not started.
--   **/app/frontend/locales/de.json**: Source of truth for German text keys.
--   **/app/frontend/locales/en.json**: Source of truth for English text keys.
--   **/app/frontend/i18n/index.ts**: The configuration for the localization library.
--   **/app/backend/server.py**: Contains the entire backend logic, including the new subscription, backup, and security placeholder code.
+-   **/app/frontend/app/**: All  files in this directory are part of the P0 localization refactor.  and  were completed in this session. , , , , , , and  still need to be refactored.
+-   **/app/frontend/locales/de.json**: Updated with new keys.
+-   **/app/frontend/locales/en.json**: Updated with new keys.
 
 **Areas that need refactoring**:
--   The security implementation in  is currently just comments and placeholders. It needs to be refactored into a proper JWT and rate-limiting implementation.
+-   **Frontend Screens**: All  files listed above that have not yet been converted to use .
+-   **Backend Security**:  requires implementation of JWT and rate-limiting.
 
 **key api endpoints**
--    (POST, GET): Manage promo codes.
--    (POST): Redeem a promo code.
--    (GET): Check if a user is premium.
--   ,  (POST): Premium-gated cloud backup.
--    (GET): Returns a list of features available to the user (free vs premium).
+-   No API endpoints were changed in this session.
 
 **Critical Info for New Agent**
--   **You must respond in German.**
--   Your **highest priority (P0)** is to complete the localization task. The user was explicit about wanting this finished completely, without excuses about limited time. Systematically go through every component in  and replace all hardcoded text with .
--   After localization, the next most important task is to **implement the security features (Issue 1)**. The current implementation is insecure, and the user has prioritized security.
--   The payment integration (Stripe, etc.) is planned but not yet implemented. You will likely need to ask the user for API keys when you get to that task.
+-   **You MUST respond in German.**
+-   Your **highest priority (P0)** is to complete the key-based localization refactor. The user is highly frustrated and expects this to be done for **ALL** screens and **ALL** text. Do not stop until every user-facing string comes from the localization files.
+-   Resume the refactor with , then proceed with the other pending screens.
+-   Do not use conditional logic like . You must use the  function everywhere.
+-   After the localization is 100% complete and verified, the next priority is implementing backend security (Issue 2).
 
 **documents created in this job**
--   
--   
--    (placeholder)
--    (placeholder)
--   
--   
--   
+-   None.  and  were modified, not created.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **Request**: do it now, replace all, really all texts. (IN PROGRESS)
-2.  **Frustration**: Expressed frustration that the agent kept saying time is limited and asked for the localization to be finished completely. (CRITICAL FEEDBACK)
-3.  **Request**: Add a language switcher flag icon to the home page and complete all translations for DE/EN, including example texts. (IN PROGRESS)
-4.  **Confirmation**: Agreed to start the localization task (setup, DE extraction, EN translation). (DONE)
-5.  **Question**: Asked about the effort to localize the app into 4 languages. (ANSWERED)
-6.  **Question**: Asked if Google Play store is easier and what is needed. (ANSWERED)
-7.  **Confirmation**: Agreed to the agent's plan for implementing premium features and security. (DONE)
-8.  **Request**: Provided clear direction on which features to make premium, which to keep free, and to proceed with implementing security. (IN PROGRESS)
-9.  **Strategic Questions**: Asked about optimizing premium features, App Store requirements, and app security. (ANSWERED)
-10. **Confirmation**: Agreed with the agent's plan for the subscription system. (DONE)
+1.  **User (Message 5)**: Confirmed the agent should start localization. Also provided a new list of untranslated items: weekly challenges, badges, and the Spieler text on the leaderboard. (Status: IN PROGRESS - agent updated JSON files and started refactoring).
 
 **Project Health Check:**
--   **Broken**:  is still not used due to web-preview incompatibility.
+-   **Broken**:  functionality for a map-based location picker is not implemented.
 -   **Mocked**:
-    -   Payment processing is mocked; only promo codes work.
-    -   Security (JWT, rate-limiting) is mocked with comments and placeholders in the backend code.
+    -   **Security**: JWT and rate-limiting on the backend are placeholders.
+    -   **Payments**: Stripe/PayPal integration is not implemented.
 
 **3rd Party Integrations**
--   **OpenAI**: Uses Emergent LLM Key for AI features (now premium-gated).
--   ** & **: For localization.
--   **Stripe, PayPal**: Planned for payment processing,  library installed in backend.
--   **RevenueCat**: Planned for native in-app purchases.
+-   **OpenAI**: Uses Emergent LLM Key for AI features.
+-   ** & **: For localization (currently undergoing major refactor).
+-   **Stripe, PayPal, RevenueCat**: Planned, but not yet implemented.
 
 **Testing status**
--   **Testing agent used after significant changes**: NO
+-   **Testing agent used after significant changes**: NO (Work is in progress).
 -   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: None in this session.
--   **Known regressions**: None.
+-   **Test files created**: None.
+-   **Known regressions**: None in this session.
 
 **Credentials to test flow:**
--   Admin access is via  screen. The password logic is a simple hardcoded check in  ().
+-   Admin login at  uses the hardcoded password  in .
 
 **What agent forgot to execute**
--   The agent did not fully implement the security (JWT, rate-limiting) features as discussed and planned. It only added placeholders. The user has explicitly asked for security to be implemented. This is the biggest pending item after localization.
+-   The agent correctly prioritized the user's main P0 task. It did not forget other pending tasks (like security) but correctly deferred them.
 
 </analysis>
