@@ -1005,7 +1005,7 @@ export default function SettingsScreen() {
                       </View>
                       <View style={styles.individualTimeContent}>
                         <Text style={[styles.goalText, { color: colors.text }]} numberOfLines={1}>
-                          {goal || `${i18n.language === 'en' ? 'Goal' : 'Ziel'} ${index + 1}`}
+                          {goal || t('settings.goal_number', { number: index + 1 })}
                         </Text>
                         <Text style={[styles.individualTimeText, { color: colors.primary }]}>
                           {settings.habit_reminders.individual_times[index]} {i18n.language === 'en' ? 'o\'clock' : 'Uhr'}
@@ -1074,7 +1074,7 @@ export default function SettingsScreen() {
                           <Text style={styles.goalBadgeText}>{index + 1}</Text>
                         </View>
                         <Text style={[styles.geoGoalText, { color: colors.text }]} numberOfLines={1}>
-                          {goal || `${i18n.language === 'en' ? 'Goal' : 'Ziel'} ${index + 1}`}
+                          {goal || t('settings.goal_number', { number: index + 1 })}
                         </Text>
                       </View>
 
