@@ -915,11 +915,12 @@ KONTEXT DER WOCHE:
         }
 
 @api_router.post("/coaching/start")
-async def start_coaching_session(request: WeeklyReviewRequest):
+@limiter.limit(AI_RATE_LIMIT)
+async def start_coaching_session(request: Request, review_request: WeeklyReviewRequest):
     """Startet eine neue Coaching-Reflexionssitzung mit einer ersten Frage (Premium Feature)"""
     
     # Check premium status
-    premium_status = await check_premium_status(request.device_id)
+    premium_status = await check_premium_status(review_request.device_id)
     if not premium_status.get("is_premium"):
         raise HTTPException(
             status_code=403, 
@@ -927,7 +928,7 @@ async def start_coaching_session(request: WeeklyReviewRequest):
         )
     
     try:
-        device_id = request.device_id
+        device_id = review_request.device_id
         
         # Get week stats for context
         week_start = get_week_start()
