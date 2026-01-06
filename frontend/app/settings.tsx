@@ -1035,7 +1035,7 @@ export default function SettingsScreen() {
                           <Text style={styles.goalBadgeText}>{index + 1}</Text>
                         </View>
                         <Text style={[styles.geoGoalText, { color: colors.text }]} numberOfLines={1}>
-                          {goal || `Ziel ${index + 1}`}
+                          {goal || `${i18n.language === 'en' ? 'Goal' : 'Ziel'} ${index + 1}`}
                         </Text>
                       </View>
 
@@ -1044,7 +1044,7 @@ export default function SettingsScreen() {
                           <View style={styles.locationSetInfo}>
                             <Ionicons name="checkmark-circle" size={16} color={colors.secondary} />
                             <Text style={[styles.locationSetText, { color: colors.text }]} numberOfLines={2}>
-                              {locationData.address || locationData.locationName || 'Ort gesetzt'}
+                              {locationData.address || locationData.locationName || (i18n.language === 'en' ? 'Location set' : 'Ort gesetzt')}
                             </Text>
                           </View>
                           <View style={styles.locationButtons}>
