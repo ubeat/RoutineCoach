@@ -1567,7 +1567,7 @@ export default function SettingsScreen() {
               style={[styles.soundModalClose, { backgroundColor: colors.primary }]}
               onPress={closeSoundPicker}
             >
-              <Text style={styles.soundModalCloseText}>Fertig</Text>
+              <Text style={styles.soundModalCloseText}>{t('common.done')}</Text>
             </TouchableOpacity>
           </View>
         </View>
