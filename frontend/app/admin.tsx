@@ -52,9 +52,10 @@ export default function AdminScreen() {
     if (!authenticated) return;
     
     try {
+      const encodedPassword = encodeURIComponent(password);
       const [codesRes, subsRes] = await Promise.all([
-        axios.get(`${API_URL}/api/admin/promo-codes?admin_password=${password}`),
-        axios.get(`${API_URL}/api/admin/subscriptions?admin_password=${password}`),
+        axios.get(`${API_URL}/api/admin/promo-codes?admin_password=${encodedPassword}`),
+        axios.get(`${API_URL}/api/admin/subscriptions?admin_password=${encodedPassword}`),
       ]);
       
       setPromoCodes(codesRes.data.codes || []);
