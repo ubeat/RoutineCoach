@@ -51,6 +51,18 @@ db = client[os.environ.get('DB_NAME', 'habits_coach_db')]
 # Create the main app
 app = FastAPI()
 
+# Rate Limiting Setup
+# Key function to identify requests by IP address
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
+
+# Rate limit constants
+STANDARD_RATE_LIMIT = "100/minute"  # Normal endpoints
+AI_RATE_LIMIT = "10/minute"         # AI-powered endpoints (cost protection)
+STRICT_RATE_LIMIT = "5/minute"      # Very sensitive endpoints
+
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
