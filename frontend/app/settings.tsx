@@ -1379,7 +1379,7 @@ export default function SettingsScreen() {
                     <View style={[styles.colorOptionDot, { backgroundColor: palette.accent }]} />
                   </View>
                   <Text style={[styles.colorOptionName, { color: palette.text }]}>
-                    {palette.name}
+                    {getColorPaletteName(key)}
                   </Text>
                   {settings.appearance.color_palette === key && (
                     <Ionicons name="checkmark-circle" size={24} color={palette.primary} />
