@@ -21,6 +21,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { COLOR_PALETTES } from '../contexts/SettingsContext';
 import QRCode from 'react-native-qrcode-svg';
+import { useTranslation } from 'react-i18next';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -48,6 +49,7 @@ interface Challenge {
 }
 
 export default function ProfileScreen() {
+  const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [profile, setProfile] = useState<any>(null);
@@ -65,38 +67,65 @@ export default function ProfileScreen() {
   const [settings, setSettings] = useState<any>(null);
   const [userName, setUserName] = useState<string>('');
   
-  // Badge Modal State
   const [showBadgeModal, setShowBadgeModal] = useState(false);
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
   const [badgeEarned, setBadgeEarned] = useState(false);
-  
-  // XP Info Modal State
   const [showXPInfoModal, setShowXPInfoModal] = useState(false);
 
-  // XP-Übersicht: Was gibt wie viele XP
+  const isEn = i18n.language === 'en';
+
   const XP_REWARDS = [
-    { action: 'Tägliches Check-in', xp: 10, icon: 'checkbox-outline', color: '#4CAF50' },
-    { action: 'Alle 3 Gewohnheiten geschafft', xp: 25, icon: 'star', color: '#FFD700' },
-    { action: '2 von 3 Gewohnheiten', xp: 15, icon: 'star-half', color: '#FFA500' },
-    { action: '1 von 3 Gewohnheiten', xp: 5, icon: 'star-outline', color: '#9E9E9E' },
-    { action: '7-Tage Streak erreicht', xp: 50, icon: 'flame', color: '#FF4500' },
-    { action: '30-Tage Streak erreicht', xp: 200, icon: 'trophy', color: '#9C27B0' },
-    { action: 'Abzeichen verdient', xp: 30, icon: 'ribbon', color: '#2196F3' },
-    { action: 'Challenge abgeschlossen', xp: '50-100', icon: 'flag', color: '#E91E63' },
+    { action: isEn ? 'Daily check-in' : 'Tägliches Check-in', xp: 10, icon: 'checkbox-outline', color: '#4CAF50' },
+    { action: isEn ? 'All 3 habits completed' : 'Alle 3 Gewohnheiten geschafft', xp: 25, icon: 'star', color: '#FFD700' },
+    { action: isEn ? '2 of 3 habits' : '2 von 3 Gewohnheiten', xp: 15, icon: 'star-half', color: '#FFA500' },
+    { action: isEn ? '1 of 3 habits' : '1 von 3 Gewohnheiten', xp: 5, icon: 'star-outline', color: '#9E9E9E' },
+    { action: isEn ? '7-day streak reached' : '7-Tage Streak erreicht', xp: 50, icon: 'flame', color: '#FF4500' },
+    { action: isEn ? '30-day streak reached' : '30-Tage Streak erreicht', xp: 200, icon: 'trophy', color: '#9C27B0' },
+    { action: isEn ? 'Badge earned' : 'Abzeichen verdient', xp: 30, icon: 'ribbon', color: '#2196F3' },
+    { action: isEn ? 'Challenge completed' : 'Challenge abgeschlossen', xp: '50-100', icon: 'flag', color: '#E91E63' },
   ];
 
-  // Badge Icons und Bilder
   const BADGE_IMAGES: Record<string, { emoji: string; description: string }> = {
-    'first_checkin': { emoji: '🌟', description: 'Du hast deinen allerersten Check-in gemacht! Der erste Schritt ist immer der wichtigste.' },
-    'streak_3': { emoji: '🔥', description: '3 Tage am Stueck! Du baust eine echte Routine auf.' },
-    'streak_7': { emoji: '💪', description: 'Eine ganze Woche! Deine Gewohnheit wird staerker.' },
-    'streak_14': { emoji: '⚡', description: '2 Wochen durchgehalten! Du bist auf dem besten Weg.' },
-    'streak_30': { emoji: '👑', description: 'Ein ganzer Monat! Du bist ein echter Streak-Meister!' },
-    'perfect_week': { emoji: '🏆', description: 'Alle Gewohnheiten eine Woche lang perfekt erfuellt!' },
-    'habit_hero': { emoji: '🦸', description: 'Du hast 100 Gewohnheiten insgesamt abgeschlossen!' },
-    'early_bird': { emoji: '🐦', description: 'Check-in vor 8 Uhr morgens - Fruehaufsteher!' },
-    'night_owl': { emoji: '🦉', description: 'Check-in nach 22 Uhr - Nachtmensch!' },
-    'comeback': { emoji: '🔄', description: 'Nach einer Pause wieder zurueckgekommen - Respekt!' },
+    'first_checkin': { 
+      emoji: '🌟', 
+      description: isEn ? 'You made your very first check-in! The first step is always the most important.' : 'Du hast deinen allerersten Check-in gemacht! Der erste Schritt ist immer der wichtigste.' 
+    },
+    'streak_3': { 
+      emoji: '🔥', 
+      description: isEn ? '3 days in a row! You are building a real routine.' : '3 Tage am Stück! Du baust eine echte Routine auf.' 
+    },
+    'streak_7': { 
+      emoji: '💪', 
+      description: isEn ? 'A whole week! Your habit is getting stronger.' : 'Eine ganze Woche! Deine Gewohnheit wird stärker.' 
+    },
+    'streak_14': { 
+      emoji: '⚡', 
+      description: isEn ? '2 weeks going strong! You are on the right track.' : '2 Wochen durchgehalten! Du bist auf dem besten Weg.' 
+    },
+    'streak_30': { 
+      emoji: '👑', 
+      description: isEn ? 'A whole month! You are a true streak master!' : 'Ein ganzer Monat! Du bist ein echter Streak-Meister!' 
+    },
+    'perfect_week': { 
+      emoji: '🏆', 
+      description: isEn ? 'All habits perfectly completed for a week!' : 'Alle Gewohnheiten eine Woche lang perfekt erfüllt!' 
+    },
+    'habit_hero': { 
+      emoji: '🦸', 
+      description: isEn ? 'You completed 100 habits in total!' : 'Du hast 100 Gewohnheiten insgesamt abgeschlossen!' 
+    },
+    'early_bird': { 
+      emoji: '🐦', 
+      description: isEn ? 'Check-in before 8 AM - early bird!' : 'Check-in vor 8 Uhr morgens - Frühaufsteher!' 
+    },
+    'night_owl': { 
+      emoji: '🦉', 
+      description: isEn ? 'Check-in after 10 PM - night owl!' : 'Check-in nach 22 Uhr - Nachtmensch!' 
+    },
+    'comeback': { 
+      emoji: '🔄', 
+      description: isEn ? 'Came back after a break - respect!' : 'Nach einer Pause wieder zurückgekommen - Respekt!' 
+    },
   };
 
   const colors = settings?.appearance?.color_palette 
@@ -109,9 +138,10 @@ export default function ProfileScreen() {
     setShowBadgeModal(true);
   };
 
-  // Einladungstext für alle Methoden
   const getInviteMessage = (code: string) => 
-    `💜 Lass uns gemeinsam gute Gewohnheiten aufbauen! Werde meine Wegbegleiterin bei "Schritt fuer Schritt". Dein Code: ${code}`;
+    isEn 
+      ? `💜 Let's build good habits together! Become my companion at "Step by Step". Your code: ${code}`
+      : `💜 Lass uns gemeinsam gute Gewohnheiten aufbauen! Werde meine Wegbegleiterin bei "Schritt für Schritt". Dein Code: ${code}`;
 
   const fetchData = useCallback(async () => {
     try {
@@ -158,11 +188,14 @@ export default function ProfileScreen() {
     try {
       const deviceId = await AsyncStorage.getItem('deviceId');
       await axios.post(`${API_URL}/api/gamification/${deviceId}/start-challenge?challenge_id=${challengeId}`);
-      Alert.alert('Los gehts! 🚀', 'Deine Challenge hat begonnen. Du schaffst das!');
+      Alert.alert(
+        isEn ? "Let's go! 🚀" : 'Los gehts! 🚀', 
+        isEn ? 'Your challenge has started. You can do it!' : 'Deine Challenge hat begonnen. Du schaffst das!'
+      );
       setShowChallengeModal(false);
       fetchData();
     } catch (error) {
-      Alert.alert('Hmm', 'Challenge konnte nicht gestartet werden. Versuch es nochmal!');
+      Alert.alert('Hmm', isEn ? 'Challenge could not be started. Try again!' : 'Challenge konnte nicht gestartet werden. Versuch es nochmal!');
     }
   };
 
@@ -174,16 +207,16 @@ export default function ProfileScreen() {
       setGeneratedCode(code);
       fetchData();
     } catch (error: any) {
-      Alert.alert('Hinweis', error.response?.data?.detail || 'Einladung konnte nicht erstellt werden. Versuch es nochmal!');
+      Alert.alert(
+        isEn ? 'Note' : 'Hinweis', 
+        error.response?.data?.detail || (isEn ? 'Invitation could not be created. Try again!' : 'Einladung konnte nicht erstellt werden. Versuch es nochmal!')
+      );
     }
   };
 
-  // Verschiedene Einladungsmethoden
   const shareViaGeneral = async () => {
     if (!generatedCode) return;
-    Share.share({
-      message: getInviteMessage(generatedCode),
-    });
+    Share.share({ message: getInviteMessage(generatedCode) });
   };
 
   const shareViaWhatsApp = async () => {
@@ -195,35 +228,33 @@ export default function ProfileScreen() {
       if (supported) {
         await Linking.openURL(url);
       } else {
-        Alert.alert('WhatsApp nicht gefunden', 'WhatsApp ist nicht installiert.');
+        Alert.alert(isEn ? 'WhatsApp not found' : 'WhatsApp nicht gefunden', isEn ? 'WhatsApp is not installed.' : 'WhatsApp ist nicht installiert.');
       }
     } catch (error) {
-      Alert.alert('Fehler', 'WhatsApp konnte nicht geoeffnet werden.');
+      Alert.alert(t('common.error'), isEn ? 'WhatsApp could not be opened.' : 'WhatsApp konnte nicht geöffnet werden.');
     }
   };
 
   const shareViaSMS = async () => {
     if (!generatedCode) return;
     const message = encodeURIComponent(getInviteMessage(generatedCode));
-    const url = Platform.OS === 'ios' 
-      ? `sms:&body=${message}`
-      : `sms:?body=${message}`;
+    const url = Platform.OS === 'ios' ? `sms:&body=${message}` : `sms:?body=${message}`;
     try {
       await Linking.openURL(url);
     } catch (error) {
-      Alert.alert('Fehler', 'SMS konnte nicht geoeffnet werden.');
+      Alert.alert(t('common.error'), isEn ? 'SMS could not be opened.' : 'SMS konnte nicht geöffnet werden.');
     }
   };
 
   const shareViaEmail = async () => {
     if (!generatedCode) return;
-    const subject = encodeURIComponent('Werde meine Wegbegleiterin bei Schritt fuer Schritt!');
+    const subject = encodeURIComponent(isEn ? 'Become my companion at Step by Step!' : 'Werde meine Wegbegleiterin bei Schritt für Schritt!');
     const body = encodeURIComponent(getInviteMessage(generatedCode));
     const url = `mailto:?subject=${subject}&body=${body}`;
     try {
       await Linking.openURL(url);
     } catch (error) {
-      Alert.alert('Fehler', 'E-Mail konnte nicht geoeffnet werden.');
+      Alert.alert(t('common.error'), isEn ? 'Email could not be opened.' : 'E-Mail konnte nicht geöffnet werden.');
     }
   };
 
@@ -232,35 +263,41 @@ export default function ProfileScreen() {
     if (Clipboard.setString) {
       Clipboard.setString(generatedCode);
     }
-    Alert.alert('Kopiert! 📋', `Der Code "${generatedCode}" wurde in die Zwischenablage kopiert.`);
+    Alert.alert(
+      isEn ? 'Copied! 📋' : 'Kopiert! 📋', 
+      isEn ? `The code "${generatedCode}" has been copied to the clipboard.` : `Der Code "${generatedCode}" wurde in die Zwischenablage kopiert.`
+    );
   };
 
   const acceptInvite = async () => {
     if (!inviteCode.trim()) {
-      Alert.alert('Moment mal 💭', 'Bitte gib einen Code ein');
+      Alert.alert(isEn ? 'Hold on 💭' : 'Moment mal 💭', isEn ? 'Please enter a code' : 'Bitte gib einen Code ein');
       return;
     }
     
     try {
       const deviceId = await AsyncStorage.getItem('deviceId');
       await axios.post(`${API_URL}/api/social/accept-invite?device_id=${deviceId}&invite_code=${inviteCode}`);
-      Alert.alert('Wunderbar! 🎉', 'Ihr seid jetzt verbunden! Gemeinsam schafft ihr das!');
+      Alert.alert(
+        isEn ? 'Wonderful! 🎉' : 'Wunderbar! 🎉', 
+        isEn ? 'You are now connected! Together you can do it!' : 'Ihr seid jetzt verbunden! Gemeinsam schafft ihr das!'
+      );
       setShowPartnerModal(false);
       setInviteCode('');
       fetchData();
     } catch (error: any) {
-      Alert.alert('Hmm 🤔', error.response?.data?.detail || 'Der Code scheint nicht zu stimmen. Pruef ihn nochmal!');
+      Alert.alert('Hmm 🤔', error.response?.data?.detail || (isEn ? 'The code seems incorrect. Check it again!' : 'Der Code scheint nicht zu stimmen. Prüf ihn nochmal!'));
     }
   };
 
   const removePartner = async () => {
     Alert.alert(
-      'Verbindung loesen?',
-      'Moechtest du die Verbindung zu deiner Wegbegleiterin wirklich loesen?',
+      isEn ? 'Disconnect?' : 'Verbindung lösen?',
+      isEn ? 'Do you really want to disconnect from your companion?' : 'Möchtest du die Verbindung zu deiner Wegbegleiterin wirklich lösen?',
       [
-        { text: 'Abbrechen', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Ja, loesen',
+          text: isEn ? 'Yes, disconnect' : 'Ja, lösen',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -268,7 +305,7 @@ export default function ProfileScreen() {
               await axios.delete(`${API_URL}/api/social/partner/${deviceId}`);
               fetchData();
             } catch (error) {
-              Alert.alert('Hmm', 'Konnte nicht entfernt werden. Versuch es nochmal!');
+              Alert.alert('Hmm', isEn ? 'Could not be removed. Try again!' : 'Konnte nicht entfernt werden. Versuch es nochmal!');
             }
           },
         },
@@ -299,10 +336,10 @@ export default function ProfileScreen() {
       >
         <View style={styles.header}>
           <Text style={[styles.title, { color: colors.text }]}>
-            {userName ? `${userName}s Erfolge` : 'Deine Erfolge'} 🏆
+            {userName ? (isEn ? `${userName}'s Achievements` : `${userName}s Erfolge`) : (isEn ? 'Your Achievements' : 'Deine Erfolge')} 🏆
           </Text>
           <Text style={[styles.subtitle, { color: colors.textLight }]}>
-            Jeder kleine Schritt zaehlt - du machst das grossartig!
+            {isEn ? 'Every small step counts - you are doing great!' : 'Jeder kleine Schritt zählt - du machst das großartig!'}
           </Text>
         </View>
 
@@ -314,7 +351,7 @@ export default function ProfileScreen() {
             </View>
             <View style={styles.levelInfo}>
               <Text style={styles.levelName}>Level {currentLevel?.level || 1}</Text>
-              <Text style={styles.levelTitle}>{currentLevel?.name || 'Anfaenger'}</Text>
+              <Text style={styles.levelTitle}>{currentLevel?.name || (isEn ? 'Beginner' : 'Anfänger')}</Text>
             </View>
             <TouchableOpacity 
               style={styles.xpBadge}
@@ -332,18 +369,17 @@ export default function ProfileScreen() {
                 <View style={[styles.xpProgressFill, { width: `${Math.min(xpProgress, 100)}%` }]} />
               </View>
               <Text style={styles.xpProgressText}>
-                Noch {(nextLevel?.xp_required || 0) - (profile?.xp || 0)} XP bis Level {nextLevel?.level}
+                {isEn ? `${(nextLevel?.xp_required || 0) - (profile?.xp || 0)} XP until Level ${nextLevel?.level}` : `Noch ${(nextLevel?.xp_required || 0) - (profile?.xp || 0)} XP bis Level ${nextLevel?.level}`}
               </Text>
             </View>
           )}
           
-          {/* XP Info Link */}
           <TouchableOpacity 
             style={styles.xpInfoLink}
             onPress={() => setShowXPInfoModal(true)}
           >
             <Ionicons name="information-circle-outline" size={16} color="rgba(255,255,255,0.9)" />
-            <Text style={styles.xpInfoLinkText}>Wie verdiene ich XP-Punkte?</Text>
+            <Text style={styles.xpInfoLinkText}>{isEn ? 'How do I earn XP?' : 'Wie verdiene ich XP-Punkte?'}</Text>
           </TouchableOpacity>
         </View>
 
@@ -353,19 +389,19 @@ export default function ProfileScreen() {
             <View style={styles.streakItem}>
               <Ionicons name="flame" size={32} color="#FF4500" />
               <Text style={[styles.streakNumber, { color: colors.text }]}>{profile?.current_streak || 0}</Text>
-              <Text style={[styles.streakLabel, { color: colors.textLight }]}>Aktueller Streak</Text>
+              <Text style={[styles.streakLabel, { color: colors.textLight }]}>{isEn ? 'Current Streak' : 'Aktueller Streak'}</Text>
             </View>
             <View style={styles.streakDivider} />
             <View style={styles.streakItem}>
               <Ionicons name="trophy" size={32} color="#FFD700" />
               <Text style={[styles.streakNumber, { color: colors.text }]}>{profile?.longest_streak || 0}</Text>
-              <Text style={[styles.streakLabel, { color: colors.textLight }]}>Laengster Streak</Text>
+              <Text style={[styles.streakLabel, { color: colors.textLight }]}>{isEn ? 'Longest Streak' : 'Längster Streak'}</Text>
             </View>
             <View style={styles.streakDivider} />
             <View style={styles.streakItem}>
               <Ionicons name="checkmark-done" size={32} color={colors.secondary} />
               <Text style={[styles.streakNumber, { color: colors.text }]}>{profile?.total_habits_completed || 0}</Text>
-              <Text style={[styles.streakLabel, { color: colors.textLight }]}>Habits erledigt</Text>
+              <Text style={[styles.streakLabel, { color: colors.textLight }]}>{isEn ? 'Habits done' : 'Habits erledigt'}</Text>
             </View>
           </View>
         </View>
@@ -375,7 +411,7 @@ export default function ProfileScreen() {
           <View style={[styles.card, { backgroundColor: '#FFF3E0', borderColor: '#FFB74D', borderWidth: 1 }]}>
             <View style={styles.cardHeader}>
               <Ionicons name="flag" size={24} color="#FF9800" />
-              <Text style={[styles.cardTitle, { color: '#E65100' }]}>Aktive Challenge</Text>
+              <Text style={[styles.cardTitle, { color: '#E65100' }]}>{isEn ? 'Active Challenge' : 'Aktive Challenge'}</Text>
             </View>
             {(() => {
               const challenge = challenges.find(c => c.id === profile.active_challenge);
@@ -409,7 +445,9 @@ export default function ProfileScreen() {
         >
           <Ionicons name="flag" size={24} color={colors.text} />
           <Text style={[styles.challengeButtonText, { color: colors.text }]}>
-            {profile?.active_challenge ? 'Challenge wechseln' : 'Wochen-Challenge starten'}
+            {profile?.active_challenge 
+              ? (isEn ? 'Change Challenge' : 'Challenge wechseln') 
+              : (isEn ? 'Start Weekly Challenge' : 'Wochen-Challenge starten')}
           </Text>
         </TouchableOpacity>
 
@@ -418,7 +456,7 @@ export default function ProfileScreen() {
           <View style={styles.cardHeader}>
             <Ionicons name="medal" size={24} color={colors.primary} />
             <Text style={[styles.cardTitle, { color: colors.text }]}>
-              Abzeichen ({earnedBadges.length}/{allBadges.length})
+              {isEn ? 'Badges' : 'Abzeichen'} ({earnedBadges.length}/{allBadges.length})
             </Text>
           </View>
           <View style={styles.badgesGrid}>
@@ -453,23 +491,23 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Wegbegleiter/in */}
+        {/* Companion */}
         <View style={[styles.card, { backgroundColor: colors.card }]}>
           <View style={styles.cardHeader}>
             <Ionicons name="people" size={24} color={colors.secondary} />
-            <Text style={[styles.cardTitle, { color: colors.text }]}>Deine Wegbegleiterin 💜</Text>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>{isEn ? 'Your Companion 💜' : 'Deine Wegbegleiterin 💜'}</Text>
           </View>
           
           {partnerInfo?.has_partner ? (
             <View style={styles.partnerInfo}>
               <Text style={[styles.partnerConnectedText, { color: colors.text }]}>
-                Ihr seid verbunden! Gemeinsam schafft ihr das.
+                {isEn ? 'You are connected! Together you can do it.' : 'Ihr seid verbunden! Gemeinsam schafft ihr das.'}
               </Text>
               <View style={styles.partnerStats}>
                 <View style={styles.partnerStat}>
                   <Ionicons name="flame" size={20} color="#FF4500" />
                   <Text style={[styles.partnerStatText, { color: colors.text }]}>
-                    {partnerInfo.partner.streak} Tage Streak
+                    {partnerInfo.partner.streak} {isEn ? 'day streak' : 'Tage Streak'}
                   </Text>
                 </View>
                 <View style={styles.partnerStat}>
@@ -485,7 +523,9 @@ export default function ProfileScreen() {
                     color={partnerInfo.partner.checked_in_today ? colors.secondary : colors.primary} 
                   />
                   <Text style={[styles.partnerStatText, { color: colors.text }]}>
-                    {partnerInfo.partner.checked_in_today ? 'Heute eingecheckt' : 'Noch nicht eingecheckt'}
+                    {partnerInfo.partner.checked_in_today 
+                      ? (isEn ? 'Checked in today' : 'Heute eingecheckt') 
+                      : (isEn ? 'Not checked in yet' : 'Noch nicht eingecheckt')}
                   </Text>
                 </View>
               </View>
@@ -493,19 +533,20 @@ export default function ProfileScreen() {
                 style={[styles.removePartnerButton, { borderColor: colors.primary }]}
                 onPress={removePartner}
               >
-                <Text style={[styles.removePartnerText, { color: colors.primary }]}>Verbindung loesen</Text>
+                <Text style={[styles.removePartnerText, { color: colors.primary }]}>{isEn ? 'Disconnect' : 'Verbindung lösen'}</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View>
               <Text style={[styles.partnerExplainText, { color: colors.textLight }]}>
-                Eine Wegbegleiterin motiviert dich und ihr unterstuetzt euch gegenseitig. 
-                Gemeinsam bleibt ihr eher dran!
+                {isEn 
+                  ? 'A companion motivates you and you support each other. Together you stay on track!'
+                  : 'Eine Wegbegleiterin motiviert dich und ihr unterstützt euch gegenseitig. Gemeinsam bleibt ihr eher dran!'}
               </Text>
               {partnerInfo?.pending_invite && (
                 <View style={[styles.pendingInvite, { backgroundColor: colors.background }]}>
                   <Text style={[styles.pendingText, { color: colors.textLight }]}>
-                    Dein Einladungscode: 
+                    {isEn ? 'Your invite code:' : 'Dein Einladungscode:'} 
                   </Text>
                   <Text style={[styles.inviteCodeDisplay, { color: colors.primary }]}>
                     {partnerInfo.pending_invite.invite_code}
@@ -517,7 +558,7 @@ export default function ProfileScreen() {
                 onPress={() => setShowPartnerModal(true)}
               >
                 <Ionicons name="person-add" size={20} color="#FFF" />
-                <Text style={styles.partnerButtonText}>Wegbegleiterin einladen</Text>
+                <Text style={styles.partnerButtonText}>{isEn ? 'Invite Companion' : 'Wegbegleiterin einladen'}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -527,7 +568,7 @@ export default function ProfileScreen() {
         <View style={[styles.card, { backgroundColor: colors.card }]}>
           <View style={styles.cardHeader}>
             <Ionicons name="podium" size={24} color={colors.accent} />
-            <Text style={[styles.cardTitle, { color: colors.text }]}>Rangliste</Text>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>{isEn ? 'Leaderboard' : 'Rangliste'}</Text>
           </View>
           <View style={styles.leaderboard}>
             {leaderboard.slice(0, 5).map((entry, index) => (
@@ -562,7 +603,7 @@ export default function ProfileScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Wochen-Challenge waehlen</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>{isEn ? 'Choose Weekly Challenge' : 'Wochen-Challenge wählen'}</Text>
             <ScrollView style={styles.challengeList}>
               {challenges.map((challenge) => (
                 <TouchableOpacity
@@ -584,13 +625,13 @@ export default function ProfileScreen() {
               style={[styles.modalCloseButton, { backgroundColor: colors.primary }]}
               onPress={() => setShowChallengeModal(false)}
             >
-              <Text style={styles.modalCloseText}>Schliessen</Text>
+              <Text style={styles.modalCloseText}>{t('common.close')}</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/* Wegbegleiter/in Modal */}
+      {/* Partner Modal */}
       <Modal
         transparent
         animationType="slide"
@@ -600,30 +641,29 @@ export default function ProfileScreen() {
         <View style={styles.modalOverlay}>
           <ScrollView>
             <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Wegbegleiterin einladen 💜</Text>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>{isEn ? 'Invite Companion 💜' : 'Wegbegleiterin einladen 💜'}</Text>
               <Text style={[styles.modalSubtitle, { color: colors.textLight }]}>
-                Gemeinsam macht es mehr Spass und ihr bleibt eher dran!
+                {isEn ? 'Together it is more fun and you stay on track!' : 'Gemeinsam macht es mehr Spaß und ihr bleibt eher dran!'}
               </Text>
               
               {!generatedCode ? (
-                // Schritt 1: Code generieren oder eingeben
                 <>
                   <TouchableOpacity
                     style={[styles.inviteButton, { backgroundColor: colors.secondary }]}
                     onPress={createInvite}
                   >
                     <Ionicons name="sparkles" size={20} color="#FFF" />
-                    <Text style={styles.inviteButtonText}>Einladungscode erstellen</Text>
+                    <Text style={styles.inviteButtonText}>{isEn ? 'Create invite code' : 'Einladungscode erstellen'}</Text>
                   </TouchableOpacity>
                   
-                  <Text style={[styles.orText, { color: colors.textLight }]}>- oder -</Text>
+                  <Text style={[styles.orText, { color: colors.textLight }]}>- {isEn ? 'or' : 'oder'} -</Text>
                   
-                  <Text style={[styles.inputLabel, { color: colors.text }]}>Du hast einen Code erhalten?</Text>
+                  <Text style={[styles.inputLabel, { color: colors.text }]}>{isEn ? 'Got a code?' : 'Du hast einen Code erhalten?'}</Text>
                   <TextInput
                     style={[styles.codeInput, { borderColor: colors.primary, color: colors.text }]}
                     value={inviteCode}
                     onChangeText={setInviteCode}
-                    placeholder="z.B. ABC123"
+                    placeholder={isEn ? 'e.g. ABC123' : 'z.B. ABC123'}
                     placeholderTextColor={colors.textLight}
                     autoCapitalize="characters"
                     maxLength={8}
@@ -633,11 +673,10 @@ export default function ProfileScreen() {
                     style={[styles.acceptButton, { backgroundColor: colors.primary }]}
                     onPress={acceptInvite}
                   >
-                    <Text style={styles.acceptButtonText}>Code einloesen</Text>
+                    <Text style={styles.acceptButtonText}>{isEn ? 'Redeem code' : 'Code einlösen'}</Text>
                   </TouchableOpacity>
                 </>
               ) : (
-                // Schritt 2: Code teilen mit allen Optionen
                 <>
                   <View style={[styles.qrCodeContainer, { backgroundColor: '#FFF' }]}>
                     <QRCode
@@ -649,61 +688,40 @@ export default function ProfileScreen() {
                   </View>
                   
                   <View style={[styles.codeDisplayBox, { backgroundColor: colors.background }]}>
-                    <Text style={[styles.codeLabel, { color: colors.textLight }]}>Dein Einladungscode:</Text>
+                    <Text style={[styles.codeLabel, { color: colors.textLight }]}>{isEn ? 'Your invite code:' : 'Dein Einladungscode:'}</Text>
                     <Text style={[styles.generatedCodeText, { color: colors.primary }]}>{generatedCode}</Text>
                   </View>
                   
                   <Text style={[styles.shareMethodsTitle, { color: colors.text }]}>
-                    Teilen via:
+                    {isEn ? 'Share via:' : 'Teilen via:'}
                   </Text>
                   
                   <View style={styles.shareButtonsGrid}>
-                    <TouchableOpacity
-                      style={[styles.shareMethodButton, { backgroundColor: '#25D366' }]}
-                      onPress={shareViaWhatsApp}
-                    >
+                    <TouchableOpacity style={[styles.shareMethodButton, { backgroundColor: '#25D366' }]} onPress={shareViaWhatsApp}>
                       <Ionicons name="logo-whatsapp" size={24} color="#FFF" />
                       <Text style={styles.shareMethodText}>WhatsApp</Text>
                     </TouchableOpacity>
-                    
-                    <TouchableOpacity
-                      style={[styles.shareMethodButton, { backgroundColor: '#007AFF' }]}
-                      onPress={shareViaSMS}
-                    >
+                    <TouchableOpacity style={[styles.shareMethodButton, { backgroundColor: '#007AFF' }]} onPress={shareViaSMS}>
                       <Ionicons name="chatbubble" size={24} color="#FFF" />
                       <Text style={styles.shareMethodText}>SMS</Text>
                     </TouchableOpacity>
-                    
-                    <TouchableOpacity
-                      style={[styles.shareMethodButton, { backgroundColor: '#EA4335' }]}
-                      onPress={shareViaEmail}
-                    >
+                    <TouchableOpacity style={[styles.shareMethodButton, { backgroundColor: '#EA4335' }]} onPress={shareViaEmail}>
                       <Ionicons name="mail" size={24} color="#FFF" />
-                      <Text style={styles.shareMethodText}>E-Mail</Text>
+                      <Text style={styles.shareMethodText}>{isEn ? 'Email' : 'E-Mail'}</Text>
                     </TouchableOpacity>
-                    
-                    <TouchableOpacity
-                      style={[styles.shareMethodButton, { backgroundColor: colors.secondary }]}
-                      onPress={shareViaGeneral}
-                    >
+                    <TouchableOpacity style={[styles.shareMethodButton, { backgroundColor: colors.secondary }]} onPress={shareViaGeneral}>
                       <Ionicons name="share-social" size={24} color="#FFF" />
-                      <Text style={styles.shareMethodText}>Mehr...</Text>
+                      <Text style={styles.shareMethodText}>{isEn ? 'More...' : 'Mehr...'}</Text>
                     </TouchableOpacity>
                   </View>
                   
-                  <TouchableOpacity
-                    style={[styles.copyCodeButton, { borderColor: colors.primary }]}
-                    onPress={copyCodeToClipboard}
-                  >
+                  <TouchableOpacity style={[styles.copyCodeButton, { borderColor: colors.primary }]} onPress={copyCodeToClipboard}>
                     <Ionicons name="copy-outline" size={20} color={colors.primary} />
-                    <Text style={[styles.copyCodeText, { color: colors.primary }]}>Code kopieren</Text>
+                    <Text style={[styles.copyCodeText, { color: colors.primary }]}>{isEn ? 'Copy code' : 'Code kopieren'}</Text>
                   </TouchableOpacity>
                   
-                  <TouchableOpacity
-                    style={styles.newCodeButton}
-                    onPress={() => setGeneratedCode(null)}
-                  >
-                    <Text style={[styles.newCodeText, { color: colors.textLight }]}>Neuen Code erstellen</Text>
+                  <TouchableOpacity style={styles.newCodeButton} onPress={() => setGeneratedCode(null)}>
+                    <Text style={[styles.newCodeText, { color: colors.textLight }]}>{isEn ? 'Create new code' : 'Neuen Code erstellen'}</Text>
                   </TouchableOpacity>
                 </>
               )}
@@ -712,7 +730,7 @@ export default function ProfileScreen() {
                 style={styles.cancelButton}
                 onPress={() => { setShowPartnerModal(false); setGeneratedCode(null); }}
               >
-                <Text style={[styles.cancelButtonText, { color: colors.textLight }]}>Spaeter</Text>
+                <Text style={[styles.cancelButtonText, { color: colors.textLight }]}>{t('common.later')}</Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -756,7 +774,9 @@ export default function ProfileScreen() {
                     styles.badgeStatusText, 
                     { color: badgeEarned ? '#4CAF50' : '#FF9800' }
                   ]}>
-                    {badgeEarned ? 'Freigeschaltet! 🎉' : 'Noch nicht freigeschaltet'}
+                    {badgeEarned 
+                      ? (isEn ? 'Unlocked! 🎉' : 'Freigeschaltet! 🎉') 
+                      : (isEn ? 'Not yet unlocked' : 'Noch nicht freigeschaltet')}
                   </Text>
                 </View>
                 
@@ -768,7 +788,7 @@ export default function ProfileScreen() {
                   <View style={[styles.badgeHintBox, { backgroundColor: colors.background }]}>
                     <Ionicons name="bulb-outline" size={20} color={colors.accent} />
                     <Text style={[styles.badgeHintText, { color: colors.text }]}>
-                      Tipp: {selectedBadge.description}
+                      {isEn ? 'Tip:' : 'Tipp:'} {selectedBadge.description}
                     </Text>
                   </View>
                 )}
@@ -777,7 +797,7 @@ export default function ProfileScreen() {
                   style={[styles.badgeModalCloseButton, { backgroundColor: colors.primary }]}
                   onPress={() => setShowBadgeModal(false)}
                 >
-                  <Text style={styles.badgeModalCloseText}>Verstanden</Text>
+                  <Text style={styles.badgeModalCloseText}>{t('common.understood')}</Text>
                 </TouchableOpacity>
               </>
             )}
@@ -796,11 +816,13 @@ export default function ProfileScreen() {
           <View style={[styles.xpModalContent, { backgroundColor: colors.card }]}>
             <View style={styles.xpModalHeader}>
               <Ionicons name="star" size={32} color="#FFD700" />
-              <Text style={[styles.xpModalTitle, { color: colors.text }]}>So verdienst du XP!</Text>
+              <Text style={[styles.xpModalTitle, { color: colors.text }]}>{isEn ? 'How to earn XP!' : 'So verdienst du XP!'}</Text>
             </View>
             
             <Text style={[styles.xpModalSubtitle, { color: colors.textLight }]}>
-              XP (Erfahrungspunkte) helfen dir, Level aufzusteigen und neue Abzeichen freizuschalten.
+              {isEn 
+                ? 'XP (experience points) help you level up and unlock new badges.'
+                : 'XP (Erfahrungspunkte) helfen dir, Level aufzusteigen und neue Abzeichen freizuschalten.'}
             </Text>
             
             <ScrollView style={styles.xpRewardsList}>
@@ -822,7 +844,9 @@ export default function ProfileScreen() {
             <View style={[styles.xpTipBox, { backgroundColor: colors.accent + '30' }]}>
               <Ionicons name="heart" size={20} color={colors.primary} />
               <Text style={[styles.xpTipText, { color: colors.text }]}>
-                Bleib dran - jeder kleine Schritt zaehlt und bringt dich naeher ans Ziel! 💪
+                {isEn 
+                  ? 'Keep going - every small step counts and brings you closer to your goal! 💪'
+                  : 'Bleib dran - jeder kleine Schritt zählt und bringt dich näher ans Ziel! 💪'}
               </Text>
             </View>
             
@@ -830,7 +854,7 @@ export default function ProfileScreen() {
               style={[styles.xpModalCloseButton, { backgroundColor: colors.primary }]}
               onPress={() => setShowXPInfoModal(false)}
             >
-              <Text style={styles.xpModalCloseText}>Los geht's!</Text>
+              <Text style={styles.xpModalCloseText}>{t('common.letsgo')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -840,643 +864,125 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    padding: 20,
-    paddingTop: 10,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: 14,
-    marginTop: 4,
-  },
-  levelCard: {
-    marginHorizontal: 20,
-    marginBottom: 15,
-    borderRadius: 20,
-    padding: 20,
-  },
-  levelHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  levelIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  levelInfo: {
-    flex: 1,
-    marginLeft: 15,
-  },
-  levelName: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.8)',
-  },
-  levelTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFF',
-  },
-  xpBadge: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  xpText: {
-    color: '#FFF',
-    fontWeight: '700',
-  },
-  xpProgressContainer: {
-    marginTop: 15,
-  },
-  xpProgressBar: {
-    height: 8,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  xpProgressFill: {
-    height: '100%',
-    backgroundColor: '#FFF',
-    borderRadius: 4,
-  },
-  xpProgressText: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 12,
-    marginTop: 5,
-    textAlign: 'center',
-  },
-  card: {
-    marginHorizontal: 20,
-    marginBottom: 15,
-    borderRadius: 20,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 3,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginLeft: 10,
-  },
-  streakRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  streakItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  streakDivider: {
-    width: 1,
-    backgroundColor: '#E0E0E0',
-  },
-  streakNumber: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginTop: 8,
-  },
-  streakLabel: {
-    fontSize: 12,
-    marginTop: 4,
-  },
-  challengeButton: {
-    marginHorizontal: 20,
-    marginBottom: 15,
-    padding: 16,
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-  },
-  challengeButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  challengeName: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 5,
-  },
-  challengeDesc: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 10,
-  },
-  challengeProgress: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  challengeProgressBar: {
-    flex: 1,
-    height: 8,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  challengeProgressFill: {
-    height: '100%',
-    backgroundColor: '#FF9800',
-    borderRadius: 4,
-  },
-  challengeProgressText: {
-    marginLeft: 10,
-    fontWeight: '600',
-    color: '#E65100',
-  },
-  badgesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'flex-start',
-  },
-  badgeItem: {
-    width: '25%',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  badgeLocked: {
-    opacity: 0.5,
-  },
-  badgeIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  badgeName: {
-    fontSize: 10,
-    marginTop: 5,
-    textAlign: 'center',
-  },
-  partnerInfo: {
-    gap: 15,
-  },
-  partnerStats: {
-    gap: 10,
-  },
-  partnerStat: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  partnerStatText: {
-    fontSize: 15,
-  },
-  removePartnerButton: {
-    padding: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  removePartnerText: {
-    fontWeight: '600',
-  },
-  pendingInvite: {
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 15,
-    alignItems: 'center',
-  },
-  pendingText: {
-    fontSize: 14,
-  },
-  inviteCodeDisplay: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 5,
-    letterSpacing: 2,
-  },
-  partnerButton: {
-    padding: 16,
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-  },
-  partnerButtonText: {
-    color: '#FFF',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  leaderboard: {
-    gap: 8,
-  },
-  leaderboardItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 10,
-  },
-  leaderboardRank: {
-    width: 30,
-    fontWeight: 'bold',
-  },
-  leaderboardName: {
-    flex: 1,
-    fontWeight: '600',
-  },
-  leaderboardStats: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  leaderboardStat: {
-    fontSize: 12,
-    marginRight: 8,
-  },
-  leaderboardXP: {
-    fontWeight: '600',
-  },
-  bottomSpacer: {
-    height: 30,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 20,
-    paddingBottom: 40,
-    marginTop: 100,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  modalSubtitle: {
-    fontSize: 14,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  challengeList: {
-    maxHeight: 300,
-  },
-  challengeOption: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 10,
-  },
-  challengeOptionName: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  challengeOptionDesc: {
-    fontSize: 13,
-    marginTop: 4,
-  },
-  xpReward: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
-  },
-  xpRewardText: {
-    fontWeight: '700',
-    fontSize: 12,
-  },
-  modalCloseButton: {
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  modalCloseText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  inviteButton: {
-    padding: 16,
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-  },
-  inviteButtonText: {
-    color: '#FFF',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  orText: {
-    textAlign: 'center',
-    marginVertical: 15,
-  },
-  inputLabel: {
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  codeInput: {
-    borderWidth: 2,
-    borderRadius: 12,
-    padding: 15,
-    fontSize: 20,
-    textAlign: 'center',
-    letterSpacing: 3,
-  },
-  acceptButton: {
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 15,
-  },
-  acceptButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  cancelButton: {
-    padding: 16,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    fontSize: 16,
-  },
-  // New Partner styles
-  partnerExplainText: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  partnerConnectedText: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  qrCodeContainer: {
-    alignSelf: 'center',
-    padding: 15,
-    borderRadius: 16,
-    marginBottom: 20,
-  },
-  codeDisplayBox: {
-    padding: 15,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  codeLabel: {
-    fontSize: 12,
-    marginBottom: 5,
-  },
-  generatedCodeText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    letterSpacing: 4,
-  },
-  shareMethodsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  shareButtonsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom: 15,
-  },
-  shareMethodButton: {
-    width: '48%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 14,
-    borderRadius: 12,
-    marginBottom: 10,
-    gap: 8,
-  },
-  shareMethodText: {
-    color: '#FFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  copyCodeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 14,
-    borderRadius: 12,
-    borderWidth: 2,
-    gap: 8,
-    marginBottom: 10,
-  },
-  copyCodeText: {
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  newCodeButton: {
-    padding: 10,
-    alignItems: 'center',
-  },
-  newCodeText: {
-    fontSize: 14,
-  },
-  // XP Info Link on Level Card
-  xpInfoLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 12,
-    gap: 6,
-  },
-  xpInfoLinkText: {
-    color: 'rgba(255,255,255,0.9)',
-    fontSize: 13,
-    textDecorationLine: 'underline',
-  },
-  // Badge Detail Modal Styles
-  badgeModalContent: {
-    marginHorizontal: 30,
-    marginTop: 'auto',
-    marginBottom: 'auto',
-    borderRadius: 24,
-    padding: 24,
-    alignItems: 'center',
-  },
-  badgeModalIcon: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  badgeModalEmoji: {
-    fontSize: 48,
-  },
-  badgeModalTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  badgeStatusPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginBottom: 16,
-    gap: 6,
-  },
-  badgeStatusText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  badgeModalDescription: {
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  badgeHintBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    padding: 14,
-    borderRadius: 12,
-    marginBottom: 16,
-    gap: 10,
-  },
-  badgeHintText: {
-    flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  badgeModalCloseButton: {
-    width: '100%',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  badgeModalCloseText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  // XP Info Modal Styles
-  xpModalContent: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 20,
-    paddingBottom: 40,
-    marginTop: 60,
-    maxHeight: '85%',
-  },
-  xpModalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    marginBottom: 8,
-  },
-  xpModalTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-  },
-  xpModalSubtitle: {
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 20,
-    lineHeight: 20,
-  },
-  xpRewardsList: {
-    maxHeight: 320,
-    marginBottom: 16,
-  },
-  xpRewardItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 8,
-  },
-  xpRewardIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  xpRewardInfo: {
-    flex: 1,
-  },
-  xpRewardAction: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  xpRewardBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 12,
-  },
-  xpRewardAmount: {
-    color: '#FFF',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  xpTipBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    borderRadius: 12,
-    gap: 10,
-    marginBottom: 16,
-  },
-  xpTipText: {
-    flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  xpModalCloseButton: {
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  xpModalCloseText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  container: { flex: 1 },
+  scrollView: { flex: 1 },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  header: { padding: 20, paddingTop: 10 },
+  title: { fontSize: 28, fontWeight: 'bold' },
+  subtitle: { fontSize: 14, marginTop: 4 },
+  levelCard: { marginHorizontal: 20, marginBottom: 15, borderRadius: 20, padding: 20 },
+  levelHeader: { flexDirection: 'row', alignItems: 'center' },
+  levelIcon: { width: 60, height: 60, borderRadius: 30, backgroundColor: 'rgba(255,255,255,0.2)', justifyContent: 'center', alignItems: 'center' },
+  levelInfo: { flex: 1, marginLeft: 15 },
+  levelName: { fontSize: 14, color: 'rgba(255,255,255,0.8)' },
+  levelTitle: { fontSize: 24, fontWeight: 'bold', color: '#FFF' },
+  xpBadge: { backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, flexDirection: 'row', alignItems: 'center' },
+  xpText: { color: '#FFF', fontWeight: '700' },
+  xpProgressContainer: { marginTop: 15 },
+  xpProgressBar: { height: 8, backgroundColor: 'rgba(255,255,255,0.3)', borderRadius: 4, overflow: 'hidden' },
+  xpProgressFill: { height: '100%', backgroundColor: '#FFF', borderRadius: 4 },
+  xpProgressText: { color: 'rgba(255,255,255,0.8)', fontSize: 12, marginTop: 5, textAlign: 'center' },
+  xpInfoLink: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 12, gap: 6 },
+  xpInfoLinkText: { color: 'rgba(255,255,255,0.9)', fontSize: 13, textDecorationLine: 'underline' },
+  card: { marginHorizontal: 20, marginBottom: 15, borderRadius: 20, padding: 20, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 3 },
+  cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
+  cardTitle: { fontSize: 18, fontWeight: '700', marginLeft: 10 },
+  streakRow: { flexDirection: 'row', justifyContent: 'space-around' },
+  streakItem: { alignItems: 'center', flex: 1 },
+  streakDivider: { width: 1, backgroundColor: '#E0E0E0' },
+  streakNumber: { fontSize: 28, fontWeight: 'bold', marginTop: 8 },
+  streakLabel: { fontSize: 12, marginTop: 4 },
+  challengeButton: { marginHorizontal: 20, marginBottom: 15, padding: 16, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
+  challengeButtonText: { fontSize: 16, fontWeight: '600' },
+  challengeName: { fontSize: 18, fontWeight: '700', marginBottom: 5 },
+  challengeDesc: { fontSize: 14, color: '#666', marginBottom: 10 },
+  challengeProgress: { flexDirection: 'row', alignItems: 'center' },
+  challengeProgressBar: { flex: 1, height: 8, backgroundColor: '#E0E0E0', borderRadius: 4, overflow: 'hidden' },
+  challengeProgressFill: { height: '100%', backgroundColor: '#FF9800', borderRadius: 4 },
+  challengeProgressText: { marginLeft: 10, fontWeight: '600', color: '#E65100' },
+  badgesGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start' },
+  badgeItem: { width: '25%', alignItems: 'center', marginBottom: 15 },
+  badgeLocked: { opacity: 0.5 },
+  badgeIcon: { width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center' },
+  badgeName: { fontSize: 10, marginTop: 5, textAlign: 'center' },
+  partnerInfo: { gap: 15 },
+  partnerStats: { gap: 10 },
+  partnerStat: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  partnerStatText: { fontSize: 15 },
+  removePartnerButton: { padding: 12, borderRadius: 8, borderWidth: 1, alignItems: 'center' },
+  removePartnerText: { fontWeight: '600' },
+  pendingInvite: { padding: 15, borderRadius: 12, marginBottom: 15, alignItems: 'center' },
+  pendingText: { fontSize: 14 },
+  inviteCodeDisplay: { fontSize: 24, fontWeight: 'bold', marginTop: 5, letterSpacing: 2 },
+  partnerButton: { padding: 16, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
+  partnerButtonText: { color: '#FFF', fontSize: 15, fontWeight: '600' },
+  partnerExplainText: { fontSize: 14, lineHeight: 20, marginBottom: 15, textAlign: 'center' },
+  partnerConnectedText: { fontSize: 15, fontWeight: '600', marginBottom: 15, textAlign: 'center' },
+  leaderboard: { gap: 8 },
+  leaderboardItem: { flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 10 },
+  leaderboardRank: { width: 30, fontWeight: 'bold' },
+  leaderboardName: { flex: 1, fontWeight: '600' },
+  leaderboardStats: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  leaderboardStat: { fontSize: 12, marginRight: 8 },
+  leaderboardXP: { fontWeight: '600' },
+  bottomSpacer: { height: 30 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalContent: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, paddingBottom: 40, marginTop: 100 },
+  modalTitle: { fontSize: 20, fontWeight: '700', marginBottom: 8, textAlign: 'center' },
+  modalSubtitle: { fontSize: 14, marginBottom: 20, textAlign: 'center' },
+  challengeList: { maxHeight: 300 },
+  challengeOption: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 15, borderRadius: 12, marginBottom: 10 },
+  challengeOptionName: { fontSize: 16, fontWeight: '600' },
+  challengeOptionDesc: { fontSize: 13, marginTop: 4 },
+  xpReward: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12 },
+  xpRewardText: { fontWeight: '700', fontSize: 12 },
+  modalCloseButton: { padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 10 },
+  modalCloseText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
+  inviteButton: { padding: 16, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
+  inviteButtonText: { color: '#FFF', fontSize: 15, fontWeight: '600' },
+  orText: { textAlign: 'center', marginVertical: 15 },
+  inputLabel: { fontSize: 14, marginBottom: 8 },
+  codeInput: { borderWidth: 2, borderRadius: 12, padding: 15, fontSize: 20, textAlign: 'center', letterSpacing: 3 },
+  acceptButton: { padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 15 },
+  acceptButtonText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
+  cancelButton: { padding: 16, alignItems: 'center' },
+  cancelButtonText: { fontSize: 16 },
+  qrCodeContainer: { alignSelf: 'center', padding: 15, borderRadius: 16, marginBottom: 20 },
+  codeDisplayBox: { padding: 15, borderRadius: 12, alignItems: 'center', marginBottom: 20 },
+  codeLabel: { fontSize: 12, marginBottom: 5 },
+  generatedCodeText: { fontSize: 32, fontWeight: 'bold', letterSpacing: 4 },
+  shareMethodsTitle: { fontSize: 16, fontWeight: '600', marginBottom: 12, textAlign: 'center' },
+  shareButtonsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 15 },
+  shareMethodButton: { width: '48%', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 14, borderRadius: 12, marginBottom: 10, gap: 8 },
+  shareMethodText: { color: '#FFF', fontSize: 14, fontWeight: '600' },
+  copyCodeButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 14, borderRadius: 12, borderWidth: 2, gap: 8, marginBottom: 10 },
+  copyCodeText: { fontSize: 15, fontWeight: '600' },
+  newCodeButton: { padding: 10, alignItems: 'center' },
+  newCodeText: { fontSize: 14 },
+  badgeModalContent: { marginHorizontal: 30, marginTop: 'auto', marginBottom: 'auto', borderRadius: 24, padding: 24, alignItems: 'center' },
+  badgeModalIcon: { width: 100, height: 100, borderRadius: 50, justifyContent: 'center', alignItems: 'center', marginBottom: 16 },
+  badgeModalEmoji: { fontSize: 48 },
+  badgeModalTitle: { fontSize: 22, fontWeight: '700', marginBottom: 12, textAlign: 'center' },
+  badgeStatusPill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, marginBottom: 16, gap: 6 },
+  badgeStatusText: { fontSize: 14, fontWeight: '600' },
+  badgeModalDescription: { fontSize: 15, lineHeight: 22, textAlign: 'center', marginBottom: 16 },
+  badgeHintBox: { flexDirection: 'row', alignItems: 'flex-start', padding: 14, borderRadius: 12, marginBottom: 16, gap: 10 },
+  badgeHintText: { flex: 1, fontSize: 14, lineHeight: 20 },
+  badgeModalCloseButton: { width: '100%', padding: 16, borderRadius: 12, alignItems: 'center' },
+  badgeModalCloseText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
+  xpModalContent: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, paddingBottom: 40, marginTop: 60, maxHeight: '85%' },
+  xpModalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 8 },
+  xpModalTitle: { fontSize: 22, fontWeight: '700' },
+  xpModalSubtitle: { fontSize: 14, textAlign: 'center', marginBottom: 20, lineHeight: 20 },
+  xpRewardsList: { maxHeight: 320, marginBottom: 16 },
+  xpRewardItem: { flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 12, marginBottom: 8 },
+  xpRewardIconContainer: { width: 44, height: 44, borderRadius: 22, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  xpRewardInfo: { flex: 1 },
+  xpRewardAction: { fontSize: 14, fontWeight: '600' },
+  xpRewardBadge: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12 },
+  xpRewardAmount: { color: '#FFF', fontSize: 13, fontWeight: '700' },
+  xpTipBox: { flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: 12, gap: 10, marginBottom: 16 },
+  xpTipText: { flex: 1, fontSize: 14, lineHeight: 20 },
+  xpModalCloseButton: { padding: 16, borderRadius: 12, alignItems: 'center' },
+  xpModalCloseText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
 });
