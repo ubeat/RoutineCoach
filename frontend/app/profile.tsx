@@ -174,8 +174,8 @@ export default function ProfileScreen() {
       fetchData();
     } catch (error: any) {
       Alert.alert(
-        isEn ? 'Note' : 'Hinweis', 
-        error.response?.data?.detail || (isEn ? 'Invitation could not be created. Try again!' : 'Einladung konnte nicht erstellt werden. Versuch es nochmal!')
+        t('common.note'), 
+        error.response?.data?.detail || t('profile.invite_error')
       );
     }
   };
