@@ -1084,7 +1084,7 @@ export default function SettingsScreen() {
         <View style={[styles.section, { backgroundColor: colors.card }]}>
           <View style={styles.sectionHeader}>
             <Ionicons name="checkmark-circle" size={24} color={colors.secondary} />
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Check-In Erinnerung</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('settings.checkin_reminders')}</Text>
             <Switch
               value={settings.checkin_reminder.enabled}
               onValueChange={(value) =>
