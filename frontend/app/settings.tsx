@@ -2155,4 +2155,31 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 12,
   },
+  // Language Selection Styles
+  languageGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginTop: 8,
+  },
+  languageOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 2,
+    gap: 8,
+  },
+  languageFlag: {
+    fontSize: 20,
+  },
+  languageName: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  comingSoon: {
+    fontSize: 10,
+    fontStyle: 'italic',
+  },
 });
