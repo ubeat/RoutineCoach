@@ -1081,7 +1081,7 @@ export default function SettingsScreen() {
                           <View style={styles.locationSetInfo}>
                             <Ionicons name="checkmark-circle" size={16} color={colors.secondary} />
                             <Text style={[styles.locationSetText, { color: colors.text }]} numberOfLines={2}>
-                              {locationData.address || locationData.locationName || (i18n.language === 'en' ? 'Location set' : 'Ort gesetzt')}
+                              {locationData.address || locationData.locationName || t('settings.location_set')}
                             </Text>
                           </View>
                           <View style={styles.locationButtons}>
