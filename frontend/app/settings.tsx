@@ -1184,10 +1184,15 @@ export default function SettingsScreen() {
           </TouchableOpacity>
 
           {/* Language Selection */}
-          <Text style={[styles.subLabel, { color: colors.textLight, marginTop: 15 }]}>
-            Sprache / Language:
-          </Text>
-          <View style={styles.languageGrid}>
+          <View 
+            onLayout={(event) => {
+              languageSectionY.current = event.nativeEvent.layout.y;
+            }}
+          >
+            <Text style={[styles.subLabel, { color: colors.textLight, marginTop: 15 }]}>
+              {t('settings.language')}:
+            </Text>
+            <View style={styles.languageGrid}>
             {(Object.keys(languages) as LanguageCode[]).map((langCode) => {
               const lang = languages[langCode];
               const isSelected = getCurrentLanguage() === langCode;
