@@ -19,7 +19,9 @@
     "you": "du",
     "understood": "Verstanden!",
     "letsgo": "Los geht's!",
-    "retry": "Nochmal versuchen"
+    "retry": "Nochmal versuchen",
+    "note": "Hinweis",
+    "or": "oder"
   },
   "tabs": {
     "home": "Home",
@@ -58,7 +60,8 @@
     "this_week": "Diese Woche",
     "weekly_overview": "Wochenübersicht ansehen",
     "days_tracked": "Tage erfasst",
-    "coach_says": "Dein Coach sagt"
+    "coach_says": "Dein Coach sagt",
+    "set_goals_first": "Bitte setze zuerst deine Wochenziele."
   },
   "welcome": {
     "title": "Willkommen bei",
@@ -109,7 +112,8 @@
     "theory_why_text2": "als Menschen, die nur allgemeine Vorsätze haben.",
     "theory_tips_title": "Tipps für deine Gewohnheiten:",
     "theory_tips": "• Wähle einen konkreten Auslöser (Zeit, Ort, Handlung)\n• Halte die Gewohnheit winzig klein\n• Formuliere es in deinen eigenen Worten\n• Verknüpfe es mit bestehenden Routinen",
-    "got_it": "Verstanden!"
+    "got_it": "Verstanden!",
+    "goal": "Ziel"
   },
   "checkin": {
     "title": "Check-In",
@@ -120,13 +124,28 @@
     "not_completed": "Nicht geschafft",
     "mood_question": "Wie fühlt sich heute an?",
     "mood_scale": "Stimmung auf einer Skala von 1-10",
-    "submit": "Check-In abschließen",
+    "submit": "Check-In abschicken",
     "submitting": "Speichere...",
     "success_title": "Toll gemacht!",
     "success_message": "Dein Check-In wurde gespeichert.",
     "already_done": "Du hast heute bereits eingecheckt!",
     "no_goals": "Bitte setze zuerst deine Wochenziele.",
-    "select_mood": "Bitte wähle deine Stimmung aus"
+    "select_mood": "Bitte wähle deine Stimmung aus",
+    "well_done": "Toll gemacht!",
+    "result": "Ergebnis",
+    "how_did_it_go": "Wie hast du deine Gewohnheiten heute umgesetzt?"
+  },
+  "moods": {
+    "very_sad": "Sehr traurig",
+    "sad": "Traurig",
+    "not_good": "Nicht gut",
+    "confused": "Verwirrt",
+    "neutral": "Neutral",
+    "okay": "Okay",
+    "good": "Gut",
+    "very_good": "Sehr gut",
+    "fantastic": "Fantastisch",
+    "in_love": "Verliebt"
   },
   "profile": {
     "title": "Erfolge",
@@ -143,8 +162,9 @@
     "change_challenge": "Challenge wechseln",
     "start_challenge": "Wochen-Challenge starten",
     "choose_challenge": "Wochen-Challenge wählen",
-    "challenge_started_title": "Los gehts!",
+    "challenge_started_title": "Los geht's!",
     "challenge_started_message": "Deine Challenge hat begonnen. Du schaffst das!",
+    "challenge_error": "Challenge konnte nicht gestartet werden. Versuch es nochmal!",
     "badges": "Abzeichen",
     "badges_count": "{{earned}}/{{total}}",
     "companion": "Deine Wegbegleiterin",
@@ -157,6 +177,7 @@
     "disconnect_confirm_title": "Verbindung lösen?",
     "disconnect_confirm_message": "Möchtest du die Verbindung zu deiner Wegbegleiterin wirklich lösen?",
     "yes_disconnect": "Ja, lösen",
+    "disconnect_error": "Konnte nicht entfernt werden. Versuch es nochmal!",
     "invite_companion": "Wegbegleiterin einladen",
     "invite_title": "Wegbegleiterin einladen",
     "invite_subtitle": "Gemeinsam macht es mehr Spaß und ihr bleibt eher dran!",
@@ -173,10 +194,14 @@
     "connected_title": "Wunderbar!",
     "connected_message": "Ihr seid jetzt verbunden! Gemeinsam schafft ihr das!",
     "leaderboard": "Rangliste",
+    "player": "Spieler",
     "invite_message": "Lass uns gemeinsam gute Gewohnheiten aufbauen! Werde meine Wegbegleiterin bei \"Schritt für Schritt\". Dein Code: {{code}}",
     "invite_subject": "Werde meine Wegbegleiterin bei Schritt für Schritt!",
     "whatsapp_not_found": "WhatsApp nicht gefunden",
     "whatsapp_not_installed": "WhatsApp ist nicht installiert.",
+    "whatsapp_error": "WhatsApp konnte nicht geöffnet werden.",
+    "sms_error": "SMS konnte nicht geöffnet werden.",
+    "email_error": "E-Mail konnte nicht geöffnet werden.",
     "badge_unlocked": "Freigeschaltet!",
     "badge_locked": "Noch nicht freigeschaltet",
     "badge_tip": "Tipp:",
@@ -190,7 +215,12 @@
     "xp_7day_streak": "7-Tage Streak erreicht",
     "xp_30day_streak": "30-Tage Streak erreicht",
     "xp_badge_earned": "Abzeichen verdient",
-    "xp_challenge_done": "Challenge abgeschlossen"
+    "xp_challenge_done": "Challenge abgeschlossen",
+    "invite_error": "Einladung konnte nicht erstellt werden. Versuch es nochmal!",
+    "code_wrong": "Der Code scheint nicht zu stimmen. Prüf ihn nochmal!",
+    "enter_code": "Bitte gib einen Code ein",
+    "more": "Mehr...",
+    "email": "E-Mail"
   },
   "progress": {
     "title": "Woche",
@@ -244,11 +274,12 @@
     "title": "Einstellungen",
     "your_profile": "Dein Profil",
     "name_question": "Wie sollen wir dich nennen?",
-    "name_hint": "Dieser Name wird in der App verwendet.",
+    "name_hint": "Mit diesem Namen wirst du auf der Startseite begrüßt.",
     "your_name": "Dein Name",
     "appearance": "Aussehen",
-    "color_theme": "Farbschema",
+    "color_theme": "Farbpalette wählen",
     "sound": "Benachrichtigungston",
+    "sound_choose": "Benachrichtigungston wählen",
     "language": "Sprache",
     "coming_soon": "Bald verfügbar",
     "language_coming_soon": "{{language}} wird bald hinzugefügt!",
@@ -259,6 +290,7 @@
     "reminder_time": "Erinnerungszeit",
     "remind_on_days": "An diesen Tagen erinnern:",
     "individual_times": "Individuelle Zeiten für jede Gewohnheit",
+    "same_time_all": "Gleiche Zeit für alle",
     "goal_number": "Ziel {{number}}",
     "oclock": "Uhr",
     "location_reminders": "Orts-basierte Erinnerungen",
@@ -270,6 +302,11 @@
     "location_set": "Ort gesetzt",
     "location_hint_web": "Hinweis: Orts-Erinnerungen funktionieren nur in der mobilen App.",
     "location_hint_mobile": "Du wirst eine Erinnerung erhalten, wenn du in der Nähe dieses Ortes bist.",
+    "location_permission_title": "Standort-Berechtigung",
+    "location_permission_text": "Bitte erlaube den Standortzugriff in den Einstellungen.",
+    "location_modal_hint": "Wähle deinen aktuellen Standort oder suche nach einer Adresse. Du wirst erinnert, wenn du dort ankommst.",
+    "use_current_location": "Meinen aktuellen Standort verwenden",
+    "search_address": "Adresse suchen (z.B. Bahnhofstr. 1, Zürich)",
     "premium": "Premium",
     "premium_subtitle": "Erweiterte Features freischalten",
     "admin": "Admin-Bereich",
@@ -277,9 +314,14 @@
     "saving": "Speichern...",
     "saved_title": "Gespeichert!",
     "saved_message": "Deine Einstellungen wurden gespeichert.",
+    "save_error": "Einstellungen konnten nicht gespeichert werden.",
     "test_notification": "Test-Benachrichtigung",
     "test_notification_sent": "Test-Benachrichtigung gesendet!",
-    "notification_blocked": "Benachrichtigungen sind blockiert. Bitte in den Systemeinstellungen aktivieren."
+    "notification_blocked": "Benachrichtigungen sind blockiert. Bitte in den Systemeinstellungen aktivieren.",
+    "quick_select": "Schnellauswahl:",
+    "hour": "Stunde",
+    "minute": "Minute",
+    "choose_time": "Zeit wählen"
   },
   "premium": {
     "title": "Premium",
@@ -296,8 +338,11 @@
     "free_forever": "Immer kostenlos",
     "pay_with_stripe": "Mit Stripe bezahlen",
     "pay_with_paypal": "Mit PayPal bezahlen",
+    "stripe_error": "Stripe-Zahlung konnte nicht gestartet werden.",
+    "paypal_error": "PayPal-Zahlung konnte nicht gestartet werden.",
     "promo_code_title": "Promo-Code vorhanden?",
     "enter_code": "Code eingeben",
+    "enter_code_hint": "Bitte gib einen Promo-Code ein.",
     "redeem": "Einlösen",
     "redeem_success": "Erfolg!",
     "redeem_error": "Code konnte nicht eingelöst werden.",
@@ -335,6 +380,7 @@
     "login": "Anmelden",
     "wrong_password": "Falsches Passwort.",
     "connection_error": "Verbindungsfehler.",
+    "load_error": "Daten konnten nicht geladen werden.",
     "codes": "Codes",
     "premium_users": "Premium",
     "create_code": "Neuen Code erstellen",
@@ -348,19 +394,23 @@
     "no_subscriptions": "Noch keine Abonnements",
     "create_promo_title": "Promo-Code erstellen",
     "code": "Code",
+    "enter_code": "Bitte Code eingeben.",
     "max_uses": "Max. Nutzungen (optional)",
     "max_uses_placeholder": "z.B. 100",
     "description": "Beschreibung (optional)",
     "description_placeholder": "z.B. Für Beta-Tester",
     "create": "Erstellen",
     "code_created": "Code \"{{code}}\" erstellt.",
+    "code_create_error": "Code konnte nicht erstellt werden.",
     "delete_code_title": "Code löschen?",
     "delete_code_message": "Möchtest du \"{{code}}\" wirklich löschen?",
+    "delete_error": "Code konnte nicht gelöscht werden.",
     "duration_week": "1 Woche",
     "duration_month": "1 Monat",
     "duration_3months": "3 Monate",
     "duration_6months": "6 Monate",
-    "duration_year": "1 Jahr"
+    "duration_year": "1 Jahr",
+    "enter_password": "Bitte Passwort eingeben."
   },
   "coaching": {
     "title": "Dein Coach",
@@ -421,5 +471,12 @@
     "streak_30": { "name": "30-Tage Streak", "desc": "Ein ganzer Monat! Du bist ein echter Streak-Meister!" },
     "perfect_week": { "name": "Perfekte Woche", "desc": "Alle Gewohnheiten eine Woche lang perfekt erfüllt!" },
     "first_checkin": { "name": "Erster Check-In", "desc": "Du hast deinen allerersten Check-in gemacht! Der erste Schritt ist immer der wichtigste." }
+  },
+  "challenges": {
+    "perfect_week": { "name": "Perfekte Woche", "desc": "Erledige 7 Tage alle Gewohnheiten" },
+    "early_bird": { "name": "Frühaufsteher", "desc": "5 Check-ins vor 8 Uhr" },
+    "streak_builder": { "name": "Streak-Baumeister", "desc": "Erreiche einen 7-Tage Streak" },
+    "mood_tracker": { "name": "Stimmungs-Tracker", "desc": "Logge 7 Tage deine Stimmung" },
+    "journal_master": { "name": "Tagebuch-Meister", "desc": "Schreibe 5 Tagebucheinträge" }
   }
 }

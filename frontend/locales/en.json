@@ -19,7 +19,9 @@
     "you": "you",
     "understood": "Got it!",
     "letsgo": "Let's go!",
-    "retry": "Try again"
+    "retry": "Try again",
+    "note": "Note",
+    "or": "or"
   },
   "tabs": {
     "home": "Home",
@@ -58,7 +60,8 @@
     "this_week": "This Week",
     "weekly_overview": "View weekly overview",
     "days_tracked": "days tracked",
-    "coach_says": "Your coach says"
+    "coach_says": "Your coach says",
+    "set_goals_first": "Please set your weekly goals first."
   },
   "welcome": {
     "title": "Welcome to",
@@ -109,7 +112,8 @@
     "theory_why_text2": "than people who only have general resolutions.",
     "theory_tips_title": "Tips for your habits:",
     "theory_tips": "• Choose a specific trigger (time, place, action)\n• Keep the habit tiny\n• Formulate it in your own words\n• Link it to existing routines",
-    "got_it": "Got it!"
+    "got_it": "Got it!",
+    "goal": "Goal"
   },
   "checkin": {
     "title": "Check-In",
@@ -126,7 +130,22 @@
     "success_message": "Your check-in has been saved.",
     "already_done": "You already checked in today!",
     "no_goals": "Please set your weekly goals first.",
-    "select_mood": "Please select your mood"
+    "select_mood": "Please select your mood",
+    "well_done": "Well done!",
+    "result": "Result",
+    "how_did_it_go": "How did you do with your habits today?"
+  },
+  "moods": {
+    "very_sad": "Very sad",
+    "sad": "Sad",
+    "not_good": "Not good",
+    "confused": "Confused",
+    "neutral": "Neutral",
+    "okay": "Okay",
+    "good": "Good",
+    "very_good": "Very good",
+    "fantastic": "Fantastic",
+    "in_love": "In love"
   },
   "profile": {
     "title": "Achievements",
@@ -145,6 +164,7 @@
     "choose_challenge": "Choose Weekly Challenge",
     "challenge_started_title": "Let's go!",
     "challenge_started_message": "Your challenge has started. You can do it!",
+    "challenge_error": "Challenge could not be started. Try again!",
     "badges": "Badges",
     "badges_count": "{{earned}}/{{total}}",
     "companion": "Your Companion",
@@ -157,6 +177,7 @@
     "disconnect_confirm_title": "Disconnect?",
     "disconnect_confirm_message": "Do you really want to disconnect from your companion?",
     "yes_disconnect": "Yes, disconnect",
+    "disconnect_error": "Could not be removed. Try again!",
     "invite_companion": "Invite Companion",
     "invite_title": "Invite Companion",
     "invite_subtitle": "Together it's more fun and you stay on track!",
@@ -173,10 +194,14 @@
     "connected_title": "Wonderful!",
     "connected_message": "You are now connected! Together you can do it!",
     "leaderboard": "Leaderboard",
+    "player": "Player",
     "invite_message": "Let's build good habits together! Become my companion at \"Step by Step\". Your code: {{code}}",
     "invite_subject": "Become my companion at Step by Step!",
     "whatsapp_not_found": "WhatsApp not found",
     "whatsapp_not_installed": "WhatsApp is not installed.",
+    "whatsapp_error": "WhatsApp could not be opened.",
+    "sms_error": "SMS could not be opened.",
+    "email_error": "Email could not be opened.",
     "badge_unlocked": "Unlocked!",
     "badge_locked": "Not yet unlocked",
     "badge_tip": "Tip:",
@@ -190,7 +215,12 @@
     "xp_7day_streak": "7-day streak reached",
     "xp_30day_streak": "30-day streak reached",
     "xp_badge_earned": "Badge earned",
-    "xp_challenge_done": "Challenge completed"
+    "xp_challenge_done": "Challenge completed",
+    "invite_error": "Invitation could not be created. Try again!",
+    "code_wrong": "The code seems incorrect. Check it again!",
+    "enter_code": "Please enter a code",
+    "more": "More...",
+    "email": "Email"
   },
   "progress": {
     "title": "Week",
@@ -244,11 +274,12 @@
     "title": "Settings",
     "your_profile": "Your Profile",
     "name_question": "What should we call you?",
-    "name_hint": "This name will be used in the app.",
+    "name_hint": "This name will be used to greet you on the home screen.",
     "your_name": "Your name",
     "appearance": "Appearance",
-    "color_theme": "Color theme",
+    "color_theme": "Choose color palette",
     "sound": "Notification sound",
+    "sound_choose": "Choose notification sound",
     "language": "Language",
     "coming_soon": "Coming soon",
     "language_coming_soon": "{{language}} will be added soon!",
@@ -259,6 +290,7 @@
     "reminder_time": "Reminder time",
     "remind_on_days": "Remind me on these days:",
     "individual_times": "Individual times for each habit",
+    "same_time_all": "Same time for all",
     "goal_number": "Goal {{number}}",
     "oclock": "o'clock",
     "location_reminders": "Location-based Reminders",
@@ -270,6 +302,11 @@
     "location_set": "Location set",
     "location_hint_web": "Note: Location reminders only work in the mobile app.",
     "location_hint_mobile": "You will receive a reminder when you are near this location.",
+    "location_permission_title": "Location Permission",
+    "location_permission_text": "Please allow location access in settings.",
+    "location_modal_hint": "Choose your current location or search for an address. You will be reminded when you arrive there.",
+    "use_current_location": "Use my current location",
+    "search_address": "Search address (e.g. Main St. 1, New York)",
     "premium": "Premium",
     "premium_subtitle": "Unlock advanced features",
     "admin": "Admin area",
@@ -277,9 +314,14 @@
     "saving": "Saving...",
     "saved_title": "Saved!",
     "saved_message": "Your settings have been saved.",
+    "save_error": "Settings could not be saved.",
     "test_notification": "Test notification",
     "test_notification_sent": "Test notification sent!",
-    "notification_blocked": "Notifications are blocked. Please enable in system settings."
+    "notification_blocked": "Notifications are blocked. Please enable in system settings.",
+    "quick_select": "Quick select:",
+    "hour": "Hour",
+    "minute": "Minute",
+    "choose_time": "Choose time"
   },
   "premium": {
     "title": "Premium",
@@ -296,8 +338,11 @@
     "free_forever": "Free forever",
     "pay_with_stripe": "Pay with Stripe",
     "pay_with_paypal": "Pay with PayPal",
+    "stripe_error": "Stripe payment could not be started.",
+    "paypal_error": "PayPal payment could not be started.",
     "promo_code_title": "Got a promo code?",
     "enter_code": "Enter code",
+    "enter_code_hint": "Please enter a promo code.",
     "redeem": "Redeem",
     "redeem_success": "Success!",
     "redeem_error": "Code could not be redeemed.",
@@ -335,6 +380,7 @@
     "login": "Login",
     "wrong_password": "Wrong password.",
     "connection_error": "Connection error.",
+    "load_error": "Data could not be loaded.",
     "codes": "Codes",
     "premium_users": "Premium",
     "create_code": "Create new code",
@@ -348,19 +394,23 @@
     "no_subscriptions": "No subscriptions yet",
     "create_promo_title": "Create Promo Code",
     "code": "Code",
+    "enter_code": "Please enter a code.",
     "max_uses": "Max uses (optional)",
     "max_uses_placeholder": "e.g. 100",
     "description": "Description (optional)",
     "description_placeholder": "e.g. For beta testers",
     "create": "Create",
     "code_created": "Code \"{{code}}\" created.",
+    "code_create_error": "Code could not be created.",
     "delete_code_title": "Delete code?",
     "delete_code_message": "Do you really want to delete \"{{code}}\"?",
+    "delete_error": "Code could not be deleted.",
     "duration_week": "1 Week",
     "duration_month": "1 Month",
     "duration_3months": "3 Months",
     "duration_6months": "6 Months",
-    "duration_year": "1 Year"
+    "duration_year": "1 Year",
+    "enter_password": "Please enter password."
   },
   "coaching": {
     "title": "Your Coach",
@@ -421,5 +471,12 @@
     "streak_30": { "name": "30-Day Streak", "desc": "A whole month! You are a true streak master!" },
     "perfect_week": { "name": "Perfect Week", "desc": "All habits perfectly completed for a week!" },
     "first_checkin": { "name": "First Check-In", "desc": "You made your very first check-in! The first step is always the most important." }
+  },
+  "challenges": {
+    "perfect_week": { "name": "Perfect Week", "desc": "Complete all habits for 7 days" },
+    "early_bird": { "name": "Early Bird", "desc": "5 check-ins before 8 AM" },
+    "streak_builder": { "name": "Streak Builder", "desc": "Reach a 7-day streak" },
+    "mood_tracker": { "name": "Mood Tracker", "desc": "Log your mood for 7 days" },
+    "journal_master": { "name": "Journal Master", "desc": "Write 5 journal entries" }
   }
 }
