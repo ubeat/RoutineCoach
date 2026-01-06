@@ -968,10 +968,10 @@ export default function SettingsScreen() {
                       </View>
                       <View style={styles.individualTimeContent}>
                         <Text style={[styles.goalText, { color: colors.text }]} numberOfLines={1}>
-                          {goal || `Ziel ${index + 1}`}
+                          {goal || `${i18n.language === 'en' ? 'Goal' : 'Ziel'} ${index + 1}`}
                         </Text>
                         <Text style={[styles.individualTimeText, { color: colors.primary }]}>
-                          {settings.habit_reminders.individual_times[index]} Uhr
+                          {settings.habit_reminders.individual_times[index]} {i18n.language === 'en' ? 'o\'clock' : 'Uhr'}
                         </Text>
                       </View>
                       <Ionicons name="alarm" size={20} color={colors.primary} />
@@ -982,7 +982,7 @@ export default function SettingsScreen() {
 
               {/* Days Selection */}
               <Text style={[styles.subLabel, { color: colors.textLight }]}>
-                An diesen Tagen erinnern:
+                {i18n.language === 'en' ? 'Remind me on these days:' : 'An diesen Tagen erinnern:'}
               </Text>
               <View style={styles.daysRow}>
                 {WEEKDAYS.map((day) => (
