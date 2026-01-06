@@ -260,6 +260,48 @@ export default function SettingsScreen() {
   const router = useRouter();
   const searchParams = useLocalSearchParams<{ scrollTo?: string }>();
   const { t, i18n } = useTranslation();
+
+  // Translated weekdays
+  const WEEKDAYS = [
+    { short: t('days.mon'), full: t('days.monday'), index: 0 },
+    { short: t('days.tue'), full: t('days.tuesday'), index: 1 },
+    { short: t('days.wed'), full: t('days.wednesday'), index: 2 },
+    { short: t('days.thu'), full: t('days.thursday'), index: 3 },
+    { short: t('days.fri'), full: t('days.friday'), index: 4 },
+    { short: t('days.sat'), full: t('days.saturday'), index: 5 },
+    { short: t('days.sun'), full: t('days.sunday'), index: 6 },
+  ];
+
+  // Translated color palette names
+  const getColorPaletteName = (key: string) => {
+    const names: Record<string, { de: string; en: string }> = {
+      'sonnenuntergang': { de: 'Sonnenuntergang', en: 'Sunset' },
+      'ozean': { de: 'Ozean', en: 'Ocean' },
+      'wald': { de: 'Wald', en: 'Forest' },
+      'lavendel': { de: 'Lavendel', en: 'Lavender' },
+      'mitternacht': { de: 'Mitternacht', en: 'Midnight' },
+      'rose': { de: 'Rosé', en: 'Rose' },
+      'minze': { de: 'Minze', en: 'Mint' },
+      'herbst': { de: 'Herbst', en: 'Autumn' },
+    };
+    return names[key]?.[i18n.language === 'en' ? 'en' : 'de'] || key;
+  };
+
+  // Translated sound names
+  const getSoundName = (key: string) => {
+    const names: Record<string, { de: string; en: string }> = {
+      'default': { de: 'Standard', en: 'Default' },
+      'gentle': { de: 'Sanft', en: 'Gentle' },
+      'chime': { de: 'Glockenspiel', en: 'Chime' },
+      'bell': { de: 'Glocke', en: 'Bell' },
+      'soft': { de: 'Weich', en: 'Soft' },
+      'bright': { de: 'Hell', en: 'Bright' },
+      'calm': { de: 'Ruhig', en: 'Calm' },
+      'positive': { de: 'Positiv', en: 'Positive' },
+    };
+    return names[key]?.[i18n.language === 'en' ? 'en' : 'de'] || key;
+  };
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState<Settings>(defaultSettings);
