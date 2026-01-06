@@ -728,6 +728,30 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 2,
   },
+  // Warum nur 3 Gewohnheiten Box
+  whyThreeBox: {
+    marginHorizontal: 20,
+    marginBottom: 15,
+    borderRadius: 16,
+    padding: 16,
+  },
+  whyThreeHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  brainEmoji: {
+    fontSize: 20,
+    marginRight: 8,
+  },
+  whyThreeTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  whyThreeText: {
+    fontSize: 13,
+    lineHeight: 19,
+  },
   adviceBanner: {
     marginHorizontal: 20,
     marginBottom: 15,
