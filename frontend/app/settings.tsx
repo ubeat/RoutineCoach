@@ -1016,7 +1016,7 @@ export default function SettingsScreen() {
                 <View style={styles.geoHeader}>
                   <Ionicons name="location" size={20} color={colors.secondary} />
                   <Text style={[styles.subLabel, { color: colors.text, marginLeft: 8 }]}>
-                    Orts-basierte Erinnerungen
+                    {t('settings.location_reminders')}
                   </Text>
                 </View>
                 <Text style={[styles.geoHint, { color: colors.textLight }]}>
