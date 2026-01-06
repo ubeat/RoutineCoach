@@ -18,30 +18,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { COLOR_PALETTES } from '../contexts/SettingsContext';
+import { useTranslation } from 'react-i18next';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-const PREMIUM_FEATURES = [
-  { icon: 'sparkles', title: 'KI-Wochenanalyse', description: 'Personalisierte Auswertung deiner Fortschritte' },
-  { icon: 'chatbubbles', title: 'KI-Coach', description: 'Lösungsorientierter Coaching-Dialog' },
-  { icon: 'location', title: 'Orts-Erinnerungen', description: 'Erinnerungen wenn du an bestimmten Orten bist' },
-  { icon: 'stats-chart', title: 'Erweiterte Statistiken', description: 'Monats- und Jahresübersichten' },
-  { icon: 'analytics', title: 'Stimmungs-Analyse', description: 'Erkenne wann du dich am besten fühlst' },
-  { icon: 'cloud-upload', title: 'Cloud-Backup', description: 'Sichere deine Daten in der Cloud' },
-  { icon: 'download', title: 'Daten-Export', description: 'Exportiere als PDF oder CSV' },
-  { icon: 'medal', title: 'Alle 20+ Badges', description: 'Schalte alle Abzeichen frei' },
-];
-
-const FREE_FEATURES = [
-  { icon: 'checkmark-circle', title: '3 Gewohnheiten', description: 'Optimal für nachhaltigen Erfolg' },
-  { icon: 'color-palette', title: 'Alle Themes', description: 'Personalisiere deine App' },
-  { icon: 'time', title: 'Zeit-Erinnerungen', description: 'Tägliche Benachrichtigungen' },
-  { icon: 'bar-chart', title: 'Wochen-Statistik', description: 'Dein Fortschritt auf einen Blick' },
-  { icon: 'people', title: 'Wegbegleiter/in', description: 'Gemeinsam stark bleiben' },
-];
-
 export default function PremiumScreen() {
   const router = useRouter();
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language === 'en';
+  
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
@@ -51,6 +36,25 @@ export default function PremiumScreen() {
   const [paymentLoading, setPaymentLoading] = useState<string | null>(null);
   const [settings, setSettings] = useState<any>(null);
   const [deviceId, setDeviceId] = useState<string | null>(null);
+
+  const PREMIUM_FEATURES = [
+    { icon: 'sparkles', title: isEn ? 'AI Weekly Analysis' : 'KI-Wochenanalyse', description: isEn ? 'Personalized progress evaluation' : 'Personalisierte Auswertung deiner Fortschritte' },
+    { icon: 'chatbubbles', title: isEn ? 'AI Coach' : 'KI-Coach', description: isEn ? 'Solution-oriented coaching dialog' : 'Lösungsorientierter Coaching-Dialog' },
+    { icon: 'location', title: isEn ? 'Location Reminders' : 'Orts-Erinnerungen', description: isEn ? 'Reminders when you are at specific places' : 'Erinnerungen wenn du an bestimmten Orten bist' },
+    { icon: 'stats-chart', title: isEn ? 'Extended Statistics' : 'Erweiterte Statistiken', description: isEn ? 'Monthly and yearly overviews' : 'Monats- und Jahresübersichten' },
+    { icon: 'analytics', title: isEn ? 'Mood Analysis' : 'Stimmungs-Analyse', description: isEn ? 'Discover when you feel best' : 'Erkenne wann du dich am besten fühlst' },
+    { icon: 'cloud-upload', title: isEn ? 'Cloud Backup' : 'Cloud-Backup', description: isEn ? 'Secure your data in the cloud' : 'Sichere deine Daten in der Cloud' },
+    { icon: 'download', title: isEn ? 'Data Export' : 'Daten-Export', description: isEn ? 'Export as PDF or CSV' : 'Exportiere als PDF oder CSV' },
+    { icon: 'medal', title: isEn ? 'All 20+ Badges' : 'Alle 20+ Badges', description: isEn ? 'Unlock all badges' : 'Schalte alle Abzeichen frei' },
+  ];
+
+  const FREE_FEATURES = [
+    { icon: 'checkmark-circle', title: isEn ? '3 Habits' : '3 Gewohnheiten', description: isEn ? 'Optimal for sustainable success' : 'Optimal für nachhaltigen Erfolg' },
+    { icon: 'color-palette', title: isEn ? 'All Themes' : 'Alle Themes', description: isEn ? 'Personalize your app' : 'Personalisiere deine App' },
+    { icon: 'time', title: isEn ? 'Time Reminders' : 'Zeit-Erinnerungen', description: isEn ? 'Daily notifications' : 'Tägliche Benachrichtigungen' },
+    { icon: 'bar-chart', title: isEn ? 'Weekly Statistics' : 'Wochen-Statistik', description: isEn ? 'Your progress at a glance' : 'Dein Fortschritt auf einen Blick' },
+    { icon: 'people', title: isEn ? 'Companion' : 'Wegbegleiter/in', description: isEn ? 'Stay strong together' : 'Gemeinsam stark bleiben' },
+  ];
 
   const colors = settings?.appearance?.color_palette 
     ? (COLOR_PALETTES[settings.appearance.color_palette] || COLOR_PALETTES.sonnenuntergang)
@@ -92,7 +96,7 @@ export default function PremiumScreen() {
 
   const redeemPromoCode = async () => {
     if (!promoCode.trim()) {
-      Alert.alert('Hinweis', 'Bitte gib einen Promo-Code ein.');
+      Alert.alert(isEn ? 'Note' : 'Hinweis', isEn ? 'Please enter a promo code.' : 'Bitte gib einen Promo-Code ein.');
       return;
     }
 
@@ -103,12 +107,12 @@ export default function PremiumScreen() {
         code: promoCode.trim().toUpperCase(),
       });
 
-      Alert.alert('Erfolg! 🎉', response.data.message);
+      Alert.alert(isEn ? 'Success! 🎉' : 'Erfolg! 🎉', response.data.message);
       setPromoCode('');
       fetchSubscriptionStatus();
     } catch (error: any) {
-      const message = error.response?.data?.detail || 'Code konnte nicht eingelöst werden.';
-      Alert.alert('Fehler', message);
+      const message = error.response?.data?.detail || (isEn ? 'Code could not be redeemed.' : 'Code konnte nicht eingelöst werden.');
+      Alert.alert(t('common.error'), message);
     } finally {
       setRedeeming(false);
     }
@@ -127,8 +131,8 @@ export default function PremiumScreen() {
         await Linking.openURL(response.data.checkout_url);
       }
     } catch (error: any) {
-      const message = error.response?.data?.detail || 'Stripe-Zahlung konnte nicht gestartet werden.';
-      Alert.alert('Fehler', message);
+      const message = error.response?.data?.detail || (isEn ? 'Stripe payment could not be started.' : 'Stripe-Zahlung konnte nicht gestartet werden.');
+      Alert.alert(t('common.error'), message);
     } finally {
       setPaymentLoading(null);
     }
@@ -147,8 +151,8 @@ export default function PremiumScreen() {
         await Linking.openURL(response.data.approval_url);
       }
     } catch (error: any) {
-      const message = error.response?.data?.detail || 'PayPal-Zahlung konnte nicht gestartet werden.';
-      Alert.alert('Fehler', message);
+      const message = error.response?.data?.detail || (isEn ? 'PayPal payment could not be started.' : 'PayPal-Zahlung konnte nicht gestartet werden.');
+      Alert.alert(t('common.error'), message);
     } finally {
       setPaymentLoading(null);
     }
@@ -157,7 +161,7 @@ export default function PremiumScreen() {
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('de-DE', {
+    return date.toLocaleDateString(isEn ? 'en-US' : 'de-DE', {
       day: '2-digit',
       month: 'long',
       year: 'numeric',
@@ -191,25 +195,24 @@ export default function PremiumScreen() {
         </View>
 
         {isPremium ? (
-          // Premium User View
           <View style={styles.content}>
             <View style={[styles.premiumBadge, { backgroundColor: '#FFD700' }]}>
               <Ionicons name="star" size={40} color="#FFF" />
             </View>
             <Text style={[styles.premiumTitle, { color: colors.text }]}>
-              Du bist Premium! 🎉
+              {isEn ? 'You are Premium! 🎉' : 'Du bist Premium! 🎉'}
             </Text>
             <Text style={[styles.premiumSubtitle, { color: colors.textLight }]}>
-              Vielen Dank für deine Unterstützung!
+              {isEn ? 'Thank you for your support!' : 'Vielen Dank für deine Unterstützung!'}
             </Text>
 
             <View style={[styles.subscriptionCard, { backgroundColor: colors.card }]}>
               <View style={styles.subscriptionRow}>
                 <Text style={[styles.subscriptionLabel, { color: colors.textLight }]}>Status</Text>
-                <Text style={[styles.subscriptionValue, { color: colors.secondary }]}>Aktiv ✓</Text>
+                <Text style={[styles.subscriptionValue, { color: colors.secondary }]}>{isEn ? 'Active ✓' : 'Aktiv ✓'}</Text>
               </View>
               <View style={styles.subscriptionRow}>
-                <Text style={[styles.subscriptionLabel, { color: colors.textLight }]}>Typ</Text>
+                <Text style={[styles.subscriptionLabel, { color: colors.textLight }]}>{isEn ? 'Type' : 'Typ'}</Text>
                 <Text style={[styles.subscriptionValue, { color: colors.text }]}>
                   {subscriptionInfo?.subscription_type === 'promo' ? 'Promo-Code' :
                    subscriptionInfo?.subscription_type === 'stripe' ? 'Stripe' :
@@ -220,7 +223,7 @@ export default function PremiumScreen() {
               </View>
               {subscriptionInfo?.expires_at && (
                 <View style={styles.subscriptionRow}>
-                  <Text style={[styles.subscriptionLabel, { color: colors.textLight }]}>Gültig bis</Text>
+                  <Text style={[styles.subscriptionLabel, { color: colors.textLight }]}>{isEn ? 'Valid until' : 'Gültig bis'}</Text>
                   <Text style={[styles.subscriptionValue, { color: colors.text }]}>
                     {formatDate(subscriptionInfo.expires_at)}
                   </Text>
@@ -228,7 +231,7 @@ export default function PremiumScreen() {
               )}
             </View>
 
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Deine Features</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{isEn ? 'Your Features' : 'Deine Features'}</Text>
             {PREMIUM_FEATURES.map((feature, index) => (
               <View key={index} style={[styles.featureItem, { backgroundColor: colors.card }]}>
                 <View style={[styles.featureIcon, { backgroundColor: colors.secondary + '20' }]}>
@@ -245,21 +248,21 @@ export default function PremiumScreen() {
             ))}
           </View>
         ) : (
-          // Non-Premium User View
           <View style={styles.content}>
             {/* Premium Banner */}
             <View style={[styles.premiumBanner, { backgroundColor: colors.primary }]}>
-              <Ionicons name="diamond" size={48} color="#FFF" />
-              <Text style={styles.bannerTitle}>Schritt für Schritt Premium</Text>
-              <Text style={styles.bannerSubtitle}>Dein persönlicher KI-Coach</Text>
-              <View style={styles.priceContainer}>
-                <Text style={styles.price}>4,99€</Text>
-                <Text style={styles.priceUnit}>/Monat</Text>
-              </View>
+              <Ionicons name="sparkles" size={48} color="#FFF" />
+              <Text style={styles.premiumBannerTitle}>Premium</Text>
+              <Text style={styles.premiumBannerPrice}>€4,99/{isEn ? 'month' : 'Monat'}</Text>
+              <Text style={styles.premiumBannerSubtitle}>
+                {isEn ? 'Unlock all features' : 'Schalte alle Features frei'}
+              </Text>
             </View>
 
-            {/* Features */}
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Premium beinhaltet</Text>
+            {/* Premium Features */}
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {isEn ? 'Premium Features' : 'Premium-Features'}
+            </Text>
             {PREMIUM_FEATURES.map((feature, index) => (
               <View key={index} style={[styles.featureItem, { backgroundColor: colors.card }]}>
                 <View style={[styles.featureIcon, { backgroundColor: colors.primary + '20' }]}>
@@ -271,20 +274,80 @@ export default function PremiumScreen() {
                     {feature.description}
                   </Text>
                 </View>
-                <Ionicons name="lock-closed" size={16} color={colors.textLight} />
+                <Ionicons name="lock-closed" size={20} color={colors.textLight} />
               </View>
             ))}
-            
-            {/* Location reminder note */}
-            <View style={[styles.noteBox, { backgroundColor: colors.accent + '30' }]}>
-              <Ionicons name="information-circle" size={18} color={colors.text} />
-              <Text style={[styles.noteText, { color: colors.text }]}>
-                Orts-Erinnerungen funktionieren nur auf dem Handy (nicht im Web-Browser).
+
+            {/* Payment Buttons */}
+            <View style={styles.paymentSection}>
+              <TouchableOpacity
+                style={[styles.paymentButton, { backgroundColor: '#635BFF' }]}
+                onPress={startStripeCheckout}
+                disabled={paymentLoading !== null}
+              >
+                {paymentLoading === 'stripe' ? (
+                  <ActivityIndicator color="#FFF" />
+                ) : (
+                  <>
+                    <Ionicons name="card" size={24} color="#FFF" />
+                    <Text style={styles.paymentButtonText}>
+                      {isEn ? 'Pay with Stripe' : 'Mit Stripe bezahlen'}
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.paymentButton, { backgroundColor: '#0070BA' }]}
+                onPress={startPayPalCheckout}
+                disabled={paymentLoading !== null}
+              >
+                {paymentLoading === 'paypal' ? (
+                  <ActivityIndicator color="#FFF" />
+                ) : (
+                  <>
+                    <Ionicons name="logo-paypal" size={24} color="#FFF" />
+                    <Text style={styles.paymentButtonText}>
+                      {isEn ? 'Pay with PayPal' : 'Mit PayPal bezahlen'}
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {/* Promo Code */}
+            <View style={[styles.promoSection, { backgroundColor: colors.card }]}>
+              <Text style={[styles.promoTitle, { color: colors.text }]}>
+                {isEn ? 'Got a promo code?' : 'Promo-Code vorhanden?'}
               </Text>
+              <View style={styles.promoInputRow}>
+                <TextInput
+                  style={[styles.promoInput, { backgroundColor: colors.background, color: colors.text }]}
+                  value={promoCode}
+                  onChangeText={setPromoCode}
+                  placeholder={isEn ? 'Enter code' : 'Code eingeben'}
+                  placeholderTextColor={colors.textLight}
+                  autoCapitalize="characters"
+                  maxLength={20}
+                />
+                <TouchableOpacity
+                  style={[styles.promoButton, { backgroundColor: colors.secondary }]}
+                  onPress={redeemPromoCode}
+                  disabled={redeeming}
+                >
+                  {redeeming ? (
+                    <ActivityIndicator color="#FFF" size="small" />
+                  ) : (
+                    <Text style={styles.promoButtonText}>{isEn ? 'Redeem' : 'Einlösen'}</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
             </View>
 
             {/* Free Features */}
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Immer kostenlos ✓</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {isEn ? 'Free forever' : 'Immer kostenlos'}
+            </Text>
             {FREE_FEATURES.map((feature, index) => (
               <View key={index} style={[styles.featureItem, { backgroundColor: colors.card }]}>
                 <View style={[styles.featureIcon, { backgroundColor: colors.secondary + '20' }]}>
@@ -296,105 +359,9 @@ export default function PremiumScreen() {
                     {feature.description}
                   </Text>
                 </View>
-                <Ionicons name="checkmark-circle" size={20} color={colors.secondary} />
+                <Ionicons name="checkmark-circle" size={24} color={colors.secondary} />
               </View>
             ))}
-
-            {/* Promo Code */}
-            <View style={[styles.promoSection, { backgroundColor: colors.card }]}>
-              <Text style={[styles.promoTitle, { color: colors.text }]}>
-                Hast du einen Promo-Code?
-              </Text>
-              <View style={styles.promoInputRow}>
-                <TextInput
-                  style={[styles.promoInput, { 
-                    borderColor: colors.primary, 
-                    color: colors.text,
-                    backgroundColor: colors.background 
-                  }]}
-                  value={promoCode}
-                  onChangeText={setPromoCode}
-                  placeholder="CODE EINGEBEN"
-                  placeholderTextColor={colors.textLight}
-                  autoCapitalize="characters"
-                  maxLength={20}
-                />
-                <TouchableOpacity
-                  style={[styles.promoButton, { backgroundColor: colors.secondary }]}
-                  onPress={redeemPromoCode}
-                  disabled={redeeming}
-                >
-                  {redeeming ? (
-                    <ActivityIndicator size="small" color="#FFF" />
-                  ) : (
-                    <Text style={styles.promoButtonText}>Einlösen</Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Payment Options */}
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Zahlungsmethode wählen</Text>
-
-            {/* Stripe */}
-            <TouchableOpacity
-              style={[styles.paymentButton, { backgroundColor: '#635BFF' }]}
-              onPress={startStripeCheckout}
-              disabled={paymentLoading !== null}
-            >
-              {paymentLoading === 'stripe' ? (
-                <ActivityIndicator size="small" color="#FFF" />
-              ) : (
-                <>
-                  <Ionicons name="card" size={24} color="#FFF" />
-                  <View style={styles.paymentButtonContent}>
-                    <Text style={styles.paymentButtonTitle}>Kreditkarte / SEPA</Text>
-                    <Text style={styles.paymentButtonSubtitle}>via Stripe</Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={20} color="#FFF" />
-                </>
-              )}
-            </TouchableOpacity>
-
-            {/* PayPal */}
-            <TouchableOpacity
-              style={[styles.paymentButton, { backgroundColor: '#003087' }]}
-              onPress={startPayPalCheckout}
-              disabled={paymentLoading !== null}
-            >
-              {paymentLoading === 'paypal' ? (
-                <ActivityIndicator size="small" color="#FFF" />
-              ) : (
-                <>
-                  <Ionicons name="logo-paypal" size={24} color="#FFF" />
-                  <View style={styles.paymentButtonContent}>
-                    <Text style={styles.paymentButtonTitle}>PayPal</Text>
-                    <Text style={styles.paymentButtonSubtitle}>Schnell & sicher</Text>
-                  </View>
-                  <Ionicons name="chevron-forward" size={20} color="#FFF" />
-                </>
-              )}
-            </TouchableOpacity>
-
-            {/* In-App Purchase hint for native */}
-            {Platform.OS !== 'web' && (
-              <TouchableOpacity
-                style={[styles.paymentButton, { backgroundColor: colors.text }]}
-                disabled={true}
-              >
-                <Ionicons name="phone-portrait" size={24} color="#FFF" />
-                <View style={styles.paymentButtonContent}>
-                  <Text style={styles.paymentButtonTitle}>In-App Kauf</Text>
-                  <Text style={styles.paymentButtonSubtitle}>Demnächst verfügbar</Text>
-                </View>
-              </TouchableOpacity>
-            )}
-
-            {/* Terms */}
-            <Text style={[styles.termsText, { color: colors.textLight }]}>
-              Mit dem Kauf stimmst du unseren Nutzungsbedingungen zu. Das Abo verlängert sich automatisch, 
-              kann aber jederzeit gekündigt werden. Preise inkl. MwSt.
-            </Text>
           </View>
         )}
 
@@ -405,216 +372,38 @@ export default function PremiumScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 20,
-    paddingTop: 10,
-  },
-  backButton: {
-    marginRight: 15,
-    padding: 4,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  content: {
-    paddingHorizontal: 20,
-  },
-  premiumBadge: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'center',
-    marginBottom: 16,
-  },
-  premiumTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  premiumSubtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  subscriptionCard: {
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
-  },
-  subscriptionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  subscriptionLabel: {
-    fontSize: 14,
-  },
-  subscriptionValue: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  premiumBanner: {
-    borderRadius: 20,
-    padding: 24,
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  bannerTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#FFF',
-    marginTop: 12,
-  },
-  bannerSubtitle: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.9)',
-    marginTop: 4,
-  },
-  priceContainer: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginTop: 16,
-  },
-  price: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#FFF',
-  },
-  priceUnit: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.9)',
-    marginLeft: 4,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 16,
-    marginTop: 8,
-  },
-  featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 10,
-  },
-  featureIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  featureText: {
-    flex: 1,
-  },
-  featureTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  featureDescription: {
-    fontSize: 13,
-  },
-  noteBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 12,
-    borderRadius: 10,
-    marginTop: 8,
-    marginBottom: 8,
-    gap: 8,
-  },
-  noteText: {
-    flex: 1,
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  promoSection: {
-    borderRadius: 16,
-    padding: 20,
-    marginTop: 16,
-    marginBottom: 24,
-  },
-  promoTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  promoInputRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  promoInput: {
-    flex: 1,
-    borderWidth: 2,
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 16,
-    textAlign: 'center',
-    letterSpacing: 2,
-    fontWeight: '600',
-  },
-  promoButton: {
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    minWidth: 100,
-  },
-  promoButtonText: {
-    color: '#FFF',
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  paymentButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 18,
-    borderRadius: 14,
-    marginBottom: 12,
-  },
-  paymentButtonContent: {
-    flex: 1,
-    marginLeft: 14,
-  },
-  paymentButtonTitle: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  paymentButtonSubtitle: {
-    color: 'rgba(255,255,255,0.8)',
-    fontSize: 12,
-    marginTop: 2,
-  },
-  termsText: {
-    fontSize: 11,
-    textAlign: 'center',
-    marginTop: 16,
-    lineHeight: 16,
-    paddingHorizontal: 10,
-  },
-  bottomSpacer: {
-    height: 40,
-  },
+  container: { flex: 1 },
+  scrollView: { flex: 1 },
+  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 10 },
+  backButton: { marginRight: 15 },
+  title: { fontSize: 24, fontWeight: 'bold' },
+  content: { paddingHorizontal: 20 },
+  premiumBadge: { width: 80, height: 80, borderRadius: 40, justifyContent: 'center', alignItems: 'center', alignSelf: 'center', marginBottom: 16 },
+  premiumTitle: { fontSize: 28, fontWeight: 'bold', textAlign: 'center' },
+  premiumSubtitle: { fontSize: 16, textAlign: 'center', marginTop: 8, marginBottom: 24 },
+  subscriptionCard: { borderRadius: 16, padding: 20, marginBottom: 24 },
+  subscriptionRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 },
+  subscriptionLabel: { fontSize: 14 },
+  subscriptionValue: { fontSize: 14, fontWeight: '600' },
+  premiumBanner: { borderRadius: 20, padding: 24, alignItems: 'center', marginBottom: 24 },
+  premiumBannerTitle: { fontSize: 32, fontWeight: 'bold', color: '#FFF', marginTop: 12 },
+  premiumBannerPrice: { fontSize: 24, fontWeight: '600', color: '#FFF', marginTop: 8 },
+  premiumBannerSubtitle: { fontSize: 14, color: 'rgba(255,255,255,0.9)', marginTop: 8 },
+  sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 16, marginTop: 8 },
+  featureItem: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 12, marginBottom: 10 },
+  featureIcon: { width: 48, height: 48, borderRadius: 24, justifyContent: 'center', alignItems: 'center', marginRight: 14 },
+  featureText: { flex: 1 },
+  featureTitle: { fontSize: 16, fontWeight: '600' },
+  featureDescription: { fontSize: 13, marginTop: 2 },
+  paymentSection: { marginVertical: 24, gap: 12 },
+  paymentButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 18, borderRadius: 12, gap: 10 },
+  paymentButtonText: { color: '#FFF', fontSize: 17, fontWeight: '600' },
+  promoSection: { borderRadius: 16, padding: 20, marginBottom: 24 },
+  promoTitle: { fontSize: 16, fontWeight: '600', marginBottom: 12 },
+  promoInputRow: { flexDirection: 'row', gap: 10 },
+  promoInput: { flex: 1, borderRadius: 10, padding: 14, fontSize: 16 },
+  promoButton: { paddingHorizontal: 20, borderRadius: 10, justifyContent: 'center' },
+  promoButtonText: { color: '#FFF', fontSize: 15, fontWeight: '600' },
+  bottomSpacer: { height: 30 },
 });

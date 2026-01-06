@@ -16,20 +16,23 @@ import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { COLOR_PALETTES } from '../contexts/SettingsContext';
+import { useTranslation } from 'react-i18next';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
-const DURATION_OPTIONS = [
-  { value: 7, label: '1 Woche' },
-  { value: 30, label: '1 Monat' },
-  { value: 90, label: '3 Monate' },
-  { value: 180, label: '6 Monate' },
-  { value: 365, label: '1 Jahr' },
-];
-
 export default function AdminScreen() {
   const router = useRouter();
+  const { t, i18n } = useTranslation();
+  const isEn = i18n.language === 'en';
   const colors = COLOR_PALETTES.sonnenuntergang;
+
+  const DURATION_OPTIONS = [
+    { value: 7, label: isEn ? '1 Week' : '1 Woche' },
+    { value: 30, label: isEn ? '1 Month' : '1 Monat' },
+    { value: 90, label: isEn ? '3 Months' : '3 Monate' },
+    { value: 180, label: isEn ? '6 Months' : '6 Monate' },
+    { value: 365, label: isEn ? '1 Year' : '1 Jahr' },
+  ];
   
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
@@ -39,7 +42,6 @@ export default function AdminScreen() {
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   
-  // New promo code form
   const [newCode, setNewCode] = useState('');
   const [newDuration, setNewDuration] = useState(30);
   const [newDescription, setNewDescription] = useState('');
@@ -59,12 +61,12 @@ export default function AdminScreen() {
       setSubscriptions(subsRes.data.subscriptions || []);
     } catch (error) {
       console.error('Error fetching admin data:', error);
-      Alert.alert('Fehler', 'Daten konnten nicht geladen werden.');
+      Alert.alert(t('common.error'), isEn ? 'Data could not be loaded.' : 'Daten konnten nicht geladen werden.');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [authenticated, password]);
+  }, [authenticated, password, isEn]);
 
   useEffect(() => {
     if (authenticated) {
@@ -80,20 +82,19 @@ export default function AdminScreen() {
 
   const handleLogin = async () => {
     if (!password.trim()) {
-      Alert.alert('Hinweis', 'Bitte Passwort eingeben.');
+      Alert.alert(isEn ? 'Note' : 'Hinweis', isEn ? 'Please enter password.' : 'Bitte Passwort eingeben.');
       return;
     }
     
     setLoading(true);
     try {
-      // Test the password by trying to fetch promo codes
       await axios.get(`${API_URL}/api/admin/promo-codes?admin_password=${password}`);
       setAuthenticated(true);
     } catch (error: any) {
       if (error.response?.status === 403) {
-        Alert.alert('Fehler', 'Falsches Passwort.');
+        Alert.alert(t('common.error'), isEn ? 'Wrong password.' : 'Falsches Passwort.');
       } else {
-        Alert.alert('Fehler', 'Verbindungsfehler.');
+        Alert.alert(t('common.error'), isEn ? 'Connection error.' : 'Verbindungsfehler.');
       }
       setLoading(false);
     }
@@ -101,65 +102,49 @@ export default function AdminScreen() {
 
   const createPromoCode = async () => {
     if (!newCode.trim()) {
-      Alert.alert('Hinweis', 'Bitte Code eingeben.');
+      Alert.alert(isEn ? 'Note' : 'Hinweis', isEn ? 'Please enter a code.' : 'Bitte Code eingeben.');
       return;
     }
-    
+
     setCreating(true);
     try {
-      await axios.post(
-        `${API_URL}/api/admin/promo-codes?admin_password=${password}`,
-        {
-          code: newCode.trim().toUpperCase(),
-          duration_days: newDuration,
-          description: newDescription || null,
-          max_uses: newMaxUses ? parseInt(newMaxUses) : null,
-        }
-      );
-      
-      Alert.alert('Erfolg! ✓', `Code "${newCode.toUpperCase()}" wurde erstellt.`);
+      await axios.post(`${API_URL}/api/admin/promo-codes`, {
+        admin_password: password,
+        code: newCode.trim().toUpperCase(),
+        duration_days: newDuration,
+        description: newDescription.trim() || null,
+        max_uses: newMaxUses ? parseInt(newMaxUses) : null,
+      });
+
+      Alert.alert(isEn ? 'Success!' : 'Erfolg!', isEn ? `Code "${newCode.toUpperCase()}" created.` : `Code "${newCode.toUpperCase()}" erstellt.`);
       setShowCreateModal(false);
       setNewCode('');
       setNewDescription('');
       setNewMaxUses('');
-      setNewDuration(30);
       fetchData();
     } catch (error: any) {
-      const message = error.response?.data?.detail || 'Code konnte nicht erstellt werden.';
-      Alert.alert('Fehler', message);
+      const message = error.response?.data?.detail || (isEn ? 'Code could not be created.' : 'Code konnte nicht erstellt werden.');
+      Alert.alert(t('common.error'), message);
     } finally {
       setCreating(false);
     }
   };
 
-  const toggleCodeActive = async (code: string, isActive: boolean) => {
-    try {
-      await axios.put(
-        `${API_URL}/api/admin/promo-codes/${code}?admin_password=${password}&is_active=${!isActive}`
-      );
-      fetchData();
-    } catch (error) {
-      Alert.alert('Fehler', 'Status konnte nicht geändert werden.');
-    }
-  };
-
-  const deleteCode = async (code: string) => {
+  const deletePromoCode = async (code: string) => {
     Alert.alert(
-      'Code löschen?',
-      `Möchtest du den Code "${code}" wirklich löschen?`,
+      isEn ? 'Delete code?' : 'Code löschen?',
+      isEn ? `Do you really want to delete "${code}"?` : `Möchtest du "${code}" wirklich löschen?`,
       [
-        { text: 'Abbrechen', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Löschen',
+          text: isEn ? 'Delete' : 'Löschen',
           style: 'destructive',
           onPress: async () => {
             try {
-              await axios.delete(
-                `${API_URL}/api/admin/promo-codes/${code}?admin_password=${password}`
-              );
+              await axios.delete(`${API_URL}/api/admin/promo-codes/${code}?admin_password=${password}`);
               fetchData();
             } catch (error) {
-              Alert.alert('Fehler', 'Code konnte nicht gelöscht werden.');
+              Alert.alert(t('common.error'), isEn ? 'Code could not be deleted.' : 'Code konnte nicht gelöscht werden.');
             }
           },
         },
@@ -170,14 +155,13 @@ export default function AdminScreen() {
   const formatDate = (dateString: string) => {
     if (!dateString) return '-';
     const date = new Date(dateString);
-    return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return date.toLocaleDateString(isEn ? 'en-US' : 'de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
   };
 
-  const getDurationLabel = (days: number) => {
-    return DURATION_OPTIONS.find(d => d.value === days)?.label || `${days} Tage`;
-  };
-
-  // Login Screen
   if (!authenticated) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -187,16 +171,18 @@ export default function AdminScreen() {
           </TouchableOpacity>
           
           <Ionicons name="shield-checkmark" size={64} color={colors.primary} />
-          <Text style={[styles.loginTitle, { color: colors.text }]}>Admin-Bereich</Text>
+          <Text style={[styles.loginTitle, { color: colors.text }]}>
+            {isEn ? 'Admin Area' : 'Admin-Bereich'}
+          </Text>
           <Text style={[styles.loginSubtitle, { color: colors.textLight }]}>
-            Promo-Codes und Abonnements verwalten
+            {isEn ? 'Please enter the admin password' : 'Bitte Admin-Passwort eingeben'}
           </Text>
           
           <TextInput
-            style={[styles.passwordInput, { borderColor: colors.primary, color: colors.text }]}
+            style={[styles.passwordInput, { backgroundColor: colors.card, color: colors.text }]}
             value={password}
             onChangeText={setPassword}
-            placeholder="Admin-Passwort"
+            placeholder={isEn ? 'Password' : 'Passwort'}
             placeholderTextColor={colors.textLight}
             secureTextEntry
             autoCapitalize="none"
@@ -210,7 +196,7 @@ export default function AdminScreen() {
             {loading ? (
               <ActivityIndicator color="#FFF" />
             ) : (
-              <Text style={styles.loginButtonText}>Anmelden</Text>
+              <Text style={styles.loginButtonText}>{isEn ? 'Login' : 'Anmelden'}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -226,226 +212,224 @@ export default function AdminScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} />
         }
       >
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.text }]}>Admin</Text>
-          <TouchableOpacity onPress={() => setAuthenticated(false)} style={styles.logoutButton}>
+          <Text style={[styles.title, { color: colors.text }]}>{isEn ? 'Admin' : 'Admin'}</Text>
+          <TouchableOpacity onPress={() => setAuthenticated(false)}>
             <Ionicons name="log-out-outline" size={24} color={colors.primary} />
           </TouchableOpacity>
         </View>
 
-        {loading ? (
-          <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />
-        ) : (
-          <>
-            {/* Stats */}
-            <View style={styles.statsRow}>
-              <View style={[styles.statCard, { backgroundColor: colors.card }]}>
-                <Text style={[styles.statNumber, { color: colors.primary }]}>{promoCodes.length}</Text>
-                <Text style={[styles.statLabel, { color: colors.textLight }]}>Promo-Codes</Text>
-              </View>
-              <View style={[styles.statCard, { backgroundColor: colors.card }]}>
-                <Text style={[styles.statNumber, { color: colors.secondary }]}>{subscriptions.length}</Text>
-                <Text style={[styles.statLabel, { color: colors.textLight }]}>Abonnements</Text>
-              </View>
-            </View>
+        {/* Stats */}
+        <View style={styles.statsRow}>
+          <View style={[styles.statCard, { backgroundColor: colors.secondary + '20' }]}>
+            <Ionicons name="pricetag" size={28} color={colors.secondary} />
+            <Text style={[styles.statNumber, { color: colors.text }]}>{promoCodes.length}</Text>
+            <Text style={[styles.statLabel, { color: colors.textLight }]}>
+              {isEn ? 'Codes' : 'Codes'}
+            </Text>
+          </View>
+          <View style={[styles.statCard, { backgroundColor: colors.primary + '20' }]}>
+            <Ionicons name="star" size={28} color={colors.primary} />
+            <Text style={[styles.statNumber, { color: colors.text }]}>{subscriptions.length}</Text>
+            <Text style={[styles.statLabel, { color: colors.textLight }]}>
+              {isEn ? 'Premium' : 'Premium'}
+            </Text>
+          </View>
+        </View>
 
-            {/* Promo Codes Section */}
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>Promo-Codes</Text>
-                <TouchableOpacity
-                  style={[styles.addButton, { backgroundColor: colors.secondary }]}
-                  onPress={() => setShowCreateModal(true)}
-                >
-                  <Ionicons name="add" size={20} color="#FFF" />
-                  <Text style={styles.addButtonText}>Neu</Text>
+        {/* Create Code Button */}
+        <TouchableOpacity
+          style={[styles.createButton, { backgroundColor: colors.secondary }]}
+          onPress={() => setShowCreateModal(true)}
+        >
+          <Ionicons name="add-circle" size={24} color="#FFF" />
+          <Text style={styles.createButtonText}>
+            {isEn ? 'Create new code' : 'Neuen Code erstellen'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Promo Codes List */}
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          {isEn ? 'Promo Codes' : 'Promo-Codes'}
+        </Text>
+        {loading ? (
+          <ActivityIndicator color={colors.primary} style={{ marginTop: 20 }} />
+        ) : promoCodes.length === 0 ? (
+          <Text style={[styles.emptyText, { color: colors.textLight }]}>
+            {isEn ? 'No codes yet' : 'Noch keine Codes vorhanden'}
+          </Text>
+        ) : (
+          promoCodes.map((code, index) => (
+            <View key={index} style={[styles.codeCard, { backgroundColor: colors.card }]}>
+              <View style={styles.codeHeader}>
+                <Text style={[styles.codeText, { color: colors.primary }]}>{code.code}</Text>
+                <TouchableOpacity onPress={() => deletePromoCode(code.code)}>
+                  <Ionicons name="trash-outline" size={20} color={colors.primary} />
                 </TouchableOpacity>
               </View>
-
-              {promoCodes.length === 0 ? (
-                <Text style={[styles.emptyText, { color: colors.textLight }]}>
-                  Noch keine Promo-Codes erstellt.
-                </Text>
-              ) : (
-                promoCodes.map((code, index) => (
-                  <View key={index} style={[styles.codeCard, { backgroundColor: colors.card }]}>
-                    <View style={styles.codeHeader}>
-                      <Text style={[styles.codeText, { color: colors.primary }]}>{code.code}</Text>
-                      <View style={[
-                        styles.statusBadge, 
-                        { backgroundColor: code.is_active ? '#E8F5E9' : '#FFEBEE' }
-                      ]}>
-                        <Text style={{ color: code.is_active ? '#4CAF50' : '#F44336', fontSize: 12 }}>
-                          {code.is_active ? 'Aktiv' : 'Inaktiv'}
-                        </Text>
-                      </View>
-                    </View>
-                    <Text style={[styles.codeInfo, { color: colors.textLight }]}>
-                      Dauer: {getDurationLabel(code.duration_days)} • 
-                      Verwendet: {code.current_uses || 0}/{code.max_uses || '∞'}
-                    </Text>
-                    {code.description && (
-                      <Text style={[styles.codeDescription, { color: colors.text }]}>
-                        {code.description}
-                      </Text>
-                    )}
-                    <View style={styles.codeActions}>
-                      <TouchableOpacity
-                        style={[styles.codeActionButton, { backgroundColor: colors.background }]}
-                        onPress={() => toggleCodeActive(code.code, code.is_active)}
-                      >
-                        <Ionicons 
-                          name={code.is_active ? "pause" : "play"} 
-                          size={16} 
-                          color={colors.primary} 
-                        />
-                        <Text style={[styles.codeActionText, { color: colors.primary }]}>
-                          {code.is_active ? 'Deaktivieren' : 'Aktivieren'}
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.codeActionButton, { backgroundColor: '#FFEBEE' }]}
-                        onPress={() => deleteCode(code.code)}
-                      >
-                        <Ionicons name="trash-outline" size={16} color="#F44336" />
-                        <Text style={[styles.codeActionText, { color: '#F44336' }]}>Löschen</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                ))
-              )}
+              <View style={styles.codeDetails}>
+                <View style={styles.codeDetailRow}>
+                  <Text style={[styles.codeLabel, { color: colors.textLight }]}>
+                    {isEn ? 'Duration' : 'Dauer'}
+                  </Text>
+                  <Text style={[styles.codeValue, { color: colors.text }]}>
+                    {code.duration_days} {isEn ? 'days' : 'Tage'}
+                  </Text>
+                </View>
+                <View style={styles.codeDetailRow}>
+                  <Text style={[styles.codeLabel, { color: colors.textLight }]}>
+                    {isEn ? 'Uses' : 'Nutzungen'}
+                  </Text>
+                  <Text style={[styles.codeValue, { color: colors.text }]}>
+                    {code.uses || 0}/{code.max_uses || '∞'}
+                  </Text>
+                </View>
+                <View style={styles.codeDetailRow}>
+                  <Text style={[styles.codeLabel, { color: colors.textLight }]}>
+                    {isEn ? 'Created' : 'Erstellt'}
+                  </Text>
+                  <Text style={[styles.codeValue, { color: colors.text }]}>
+                    {formatDate(code.created_at)}
+                  </Text>
+                </View>
+                {code.description && (
+                  <Text style={[styles.codeDescription, { color: colors.textLight }]}>
+                    {code.description}
+                  </Text>
+                )}
+              </View>
             </View>
+          ))
+        )}
 
-            {/* Subscriptions Section */}
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Aktive Abonnements</Text>
-              
-              {subscriptions.length === 0 ? (
-                <Text style={[styles.emptyText, { color: colors.textLight }]}>
-                  Noch keine Abonnements.
+        {/* Subscriptions List */}
+        <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 24 }]}>
+          {isEn ? 'Active Subscriptions' : 'Aktive Abonnements'}
+        </Text>
+        {subscriptions.length === 0 ? (
+          <Text style={[styles.emptyText, { color: colors.textLight }]}>
+            {isEn ? 'No subscriptions yet' : 'Noch keine Abonnements'}
+          </Text>
+        ) : (
+          subscriptions.map((sub, index) => (
+            <View key={index} style={[styles.subCard, { backgroundColor: colors.card }]}>
+              <View style={styles.subHeader}>
+                <Text style={[styles.subDevice, { color: colors.text }]} numberOfLines={1}>
+                  {sub.device_id}
                 </Text>
-              ) : (
-                subscriptions.slice(0, 10).map((sub, index) => (
-                  <View key={index} style={[styles.subCard, { backgroundColor: colors.card }]}>
-                    <View style={styles.subRow}>
-                      <Text style={[styles.subDevice, { color: colors.text }]}>
-                        {sub.device_id?.substring(0, 20)}...
-                      </Text>
-                      <View style={[
-                        styles.statusBadge,
-                        { backgroundColor: sub.is_premium ? '#E8F5E9' : '#FFF3E0' }
-                      ]}>
-                        <Text style={{ 
-                          color: sub.is_premium ? '#4CAF50' : '#FF9800', 
-                          fontSize: 11,
-                          fontWeight: '600'
-                        }}>
-                          {sub.is_premium ? 'Premium' : 'Abgelaufen'}
-                        </Text>
-                      </View>
-                    </View>
-                    <Text style={[styles.subInfo, { color: colors.textLight }]}>
-                      Typ: {sub.subscription_type} • Bis: {formatDate(sub.expires_at)}
-                    </Text>
-                  </View>
-                ))
-              )}
-              
-              {subscriptions.length > 10 && (
-                <Text style={[styles.moreText, { color: colors.textLight }]}>
-                  ... und {subscriptions.length - 10} weitere
-                </Text>
-              )}
+                <View style={[styles.subTypeBadge, { backgroundColor: colors.secondary + '20' }]}>
+                  <Text style={[styles.subTypeText, { color: colors.secondary }]}>
+                    {sub.subscription_type}
+                  </Text>
+                </View>
+              </View>
+              <Text style={[styles.subExpires, { color: colors.textLight }]}>
+                {isEn ? 'Valid until' : 'Gültig bis'}: {formatDate(sub.expires_at)}
+              </Text>
             </View>
-          </>
+          ))
         )}
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
 
-      {/* Create Promo Code Modal */}
+      {/* Create Code Modal */}
       <Modal
-        visible={showCreateModal}
         transparent
         animationType="slide"
+        visible={showCreateModal}
         onRequestClose={() => setShowCreateModal(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
-            <Text style={[styles.modalTitle, { color: colors.text }]}>Neuen Promo-Code erstellen</Text>
-            
-            <Text style={[styles.inputLabel, { color: colors.text }]}>Code *</Text>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              {isEn ? 'Create Promo Code' : 'Promo-Code erstellen'}
+            </Text>
+
+            <Text style={[styles.inputLabel, { color: colors.text }]}>
+              {isEn ? 'Code' : 'Code'}
+            </Text>
             <TextInput
-              style={[styles.modalInput, { borderColor: colors.primary, color: colors.text }]}
+              style={[styles.modalInput, { backgroundColor: colors.background, color: colors.text }]}
               value={newCode}
               onChangeText={setNewCode}
-              placeholder="z.B. GESCHENK2025"
+              placeholder="SUMMER2024"
               placeholderTextColor={colors.textLight}
               autoCapitalize="characters"
               maxLength={20}
             />
-            
-            <Text style={[styles.inputLabel, { color: colors.text }]}>Gültigkeitsdauer *</Text>
-            <View style={styles.durationOptions}>
+
+            <Text style={[styles.inputLabel, { color: colors.text }]}>
+              {isEn ? 'Duration' : 'Dauer'}
+            </Text>
+            <View style={styles.durationPicker}>
               {DURATION_OPTIONS.map((option) => (
                 <TouchableOpacity
                   key={option.value}
                   style={[
                     styles.durationOption,
-                    { borderColor: colors.primary },
+                    { backgroundColor: colors.background },
                     newDuration === option.value && { backgroundColor: colors.primary }
                   ]}
                   onPress={() => setNewDuration(option.value)}
                 >
                   <Text style={[
-                    styles.durationOptionText,
-                    { color: newDuration === option.value ? '#FFF' : colors.primary }
+                    styles.durationText,
+                    { color: colors.text },
+                    newDuration === option.value && { color: '#FFF' }
                   ]}>
                     {option.label}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
-            
-            <Text style={[styles.inputLabel, { color: colors.text }]}>Beschreibung (optional)</Text>
+
+            <Text style={[styles.inputLabel, { color: colors.text }]}>
+              {isEn ? 'Max uses (optional)' : 'Max. Nutzungen (optional)'}
+            </Text>
             <TextInput
-              style={[styles.modalInput, { borderColor: colors.primary, color: colors.text }]}
-              value={newDescription}
-              onChangeText={setNewDescription}
-              placeholder="z.B. Influencer-Kampagne März"
-              placeholderTextColor={colors.textLight}
-            />
-            
-            <Text style={[styles.inputLabel, { color: colors.text }]}>Max. Verwendungen (optional)</Text>
-            <TextInput
-              style={[styles.modalInput, { borderColor: colors.primary, color: colors.text }]}
+              style={[styles.modalInput, { backgroundColor: colors.background, color: colors.text }]}
               value={newMaxUses}
               onChangeText={setNewMaxUses}
-              placeholder="Leer = unbegrenzt"
+              placeholder={isEn ? 'e.g. 100' : 'z.B. 100'}
               placeholderTextColor={colors.textLight}
               keyboardType="number-pad"
             />
-            
+
+            <Text style={[styles.inputLabel, { color: colors.text }]}>
+              {isEn ? 'Description (optional)' : 'Beschreibung (optional)'}
+            </Text>
+            <TextInput
+              style={[styles.modalInput, { backgroundColor: colors.background, color: colors.text }]}
+              value={newDescription}
+              onChangeText={setNewDescription}
+              placeholder={isEn ? 'e.g. For beta testers' : 'z.B. Für Beta-Tester'}
+              placeholderTextColor={colors.textLight}
+            />
+
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={[styles.modalCancelButton, { borderColor: colors.textLight }]}
+                style={[styles.modalButtonCancel, { borderColor: colors.textLight }]}
                 onPress={() => setShowCreateModal(false)}
               >
-                <Text style={[styles.modalCancelText, { color: colors.textLight }]}>Abbrechen</Text>
+                <Text style={[styles.modalButtonCancelText, { color: colors.textLight }]}>
+                  {t('common.cancel')}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.modalCreateButton, { backgroundColor: colors.secondary }]}
+                style={[styles.modalButtonCreate, { backgroundColor: colors.primary }]}
                 onPress={createPromoCode}
                 disabled={creating}
               >
                 {creating ? (
                   <ActivityIndicator color="#FFF" size="small" />
                 ) : (
-                  <Text style={styles.modalCreateText}>Erstellen</Text>
+                  <Text style={styles.modalButtonCreateText}>
+                    {isEn ? 'Create' : 'Erstellen'}
+                  </Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -457,262 +441,52 @@ export default function AdminScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  loginContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 30,
-  },
-  backButtonLogin: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-  },
-  loginTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 20,
-    marginBottom: 8,
-  },
-  loginSubtitle: {
-    fontSize: 14,
-    marginBottom: 30,
-    textAlign: 'center',
-  },
-  passwordInput: {
-    width: '100%',
-    borderWidth: 2,
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    marginBottom: 20,
-  },
-  loginButton: {
-    width: '100%',
-    padding: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  loginButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 20,
-    paddingTop: 10,
-  },
-  backButton: {
-    marginRight: 15,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    flex: 1,
-  },
-  logoutButton: {
-    padding: 4,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    gap: 12,
-    marginBottom: 24,
-  },
-  statCard: {
-    flex: 1,
-    padding: 20,
-    borderRadius: 16,
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 32,
-    fontWeight: 'bold',
-  },
-  statLabel: {
-    fontSize: 12,
-    marginTop: 4,
-  },
-  section: {
-    paddingHorizontal: 20,
-    marginBottom: 24,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 4,
-  },
-  addButtonText: {
-    color: '#FFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  emptyText: {
-    textAlign: 'center',
-    padding: 20,
-  },
-  codeCard: {
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 10,
-  },
-  codeHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  codeText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    letterSpacing: 1,
-  },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  codeInfo: {
-    fontSize: 13,
-    marginBottom: 4,
-  },
-  codeDescription: {
-    fontSize: 13,
-    marginTop: 4,
-  },
-  codeActions: {
-    flexDirection: 'row',
-    marginTop: 12,
-    gap: 10,
-  },
-  codeActionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    gap: 6,
-  },
-  codeActionText: {
-    fontSize: 13,
-    fontWeight: '500',
-  },
-  subCard: {
-    padding: 14,
-    borderRadius: 12,
-    marginBottom: 8,
-  },
-  subRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  subDevice: {
-    fontSize: 13,
-    fontWeight: '500',
-    fontFamily: 'monospace',
-  },
-  subInfo: {
-    fontSize: 12,
-  },
-  moreText: {
-    textAlign: 'center',
-    marginTop: 10,
-    fontSize: 13,
-  },
-  bottomSpacer: {
-    height: 40,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  modalContent: {
-    borderRadius: 20,
-    padding: 24,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  inputLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-    marginTop: 12,
-  },
-  modalInput: {
-    borderWidth: 2,
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 16,
-  },
-  durationOptions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  durationOption: {
-    borderWidth: 2,
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-  },
-  durationOptionText: {
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    marginTop: 24,
-    gap: 12,
-  },
-  modalCancelButton: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 12,
-    borderWidth: 2,
-    alignItems: 'center',
-  },
-  modalCancelText: {
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  modalCreateButton: {
-    flex: 1,
-    padding: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  modalCreateText: {
-    color: '#FFF',
-    fontSize: 15,
-    fontWeight: '600',
-  },
+  container: { flex: 1 },
+  scrollView: { flex: 1 },
+  loginContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 40 },
+  backButtonLogin: { position: 'absolute', top: 20, left: 20 },
+  loginTitle: { fontSize: 28, fontWeight: 'bold', marginTop: 20 },
+  loginSubtitle: { fontSize: 14, marginTop: 8, marginBottom: 30 },
+  passwordInput: { width: '100%', borderRadius: 12, padding: 16, fontSize: 16 },
+  loginButton: { width: '100%', padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 16 },
+  loginButtonText: { color: '#FFF', fontSize: 17, fontWeight: '600' },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 20, paddingTop: 10 },
+  backButton: { marginRight: 15 },
+  title: { fontSize: 24, fontWeight: 'bold', flex: 1 },
+  statsRow: { flexDirection: 'row', paddingHorizontal: 20, gap: 15, marginBottom: 20 },
+  statCard: { flex: 1, borderRadius: 16, padding: 16, alignItems: 'center' },
+  statNumber: { fontSize: 28, fontWeight: 'bold', marginTop: 8 },
+  statLabel: { fontSize: 12, marginTop: 4 },
+  createButton: { marginHorizontal: 20, padding: 16, borderRadius: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 },
+  createButtonText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
+  sectionTitle: { fontSize: 18, fontWeight: '700', marginHorizontal: 20, marginTop: 24, marginBottom: 12 },
+  emptyText: { textAlign: 'center', padding: 20 },
+  codeCard: { marginHorizontal: 20, borderRadius: 12, padding: 16, marginBottom: 12 },
+  codeHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  codeText: { fontSize: 20, fontWeight: 'bold', letterSpacing: 1 },
+  codeDetails: { gap: 6 },
+  codeDetailRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  codeLabel: { fontSize: 13 },
+  codeValue: { fontSize: 13, fontWeight: '500' },
+  codeDescription: { fontSize: 12, marginTop: 8, fontStyle: 'italic' },
+  subCard: { marginHorizontal: 20, borderRadius: 12, padding: 16, marginBottom: 12 },
+  subHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  subDevice: { flex: 1, fontSize: 12, fontWeight: '500' },
+  subTypeBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginLeft: 10 },
+  subTypeText: { fontSize: 11, fontWeight: '600' },
+  subExpires: { fontSize: 12 },
+  bottomSpacer: { height: 30 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalContent: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24 },
+  modalTitle: { fontSize: 20, fontWeight: '700', marginBottom: 20, textAlign: 'center' },
+  inputLabel: { fontSize: 14, fontWeight: '600', marginBottom: 8, marginTop: 12 },
+  modalInput: { borderRadius: 12, padding: 14, fontSize: 16 },
+  durationPicker: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  durationOption: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: 8 },
+  durationText: { fontSize: 13, fontWeight: '500' },
+  modalButtons: { flexDirection: 'row', gap: 12, marginTop: 24 },
+  modalButtonCancel: { flex: 1, padding: 16, borderRadius: 12, alignItems: 'center', borderWidth: 1 },
+  modalButtonCancelText: { fontSize: 16, fontWeight: '600' },
+  modalButtonCreate: { flex: 1, padding: 16, borderRadius: 12, alignItems: 'center' },
+  modalButtonCreateText: { color: '#FFF', fontSize: 16, fontWeight: '600' },
 });
