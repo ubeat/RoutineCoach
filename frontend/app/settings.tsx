@@ -1325,7 +1325,7 @@ export default function SettingsScreen() {
                 {tempTime.hour}:{tempTime.minute}
               </Text>
               <Text style={[styles.timeDisplayLabel, { color: colors.textLight }]}>
-                {i18n.language === 'en' ? "o'clock" : 'Uhr'}
+                {t('settings.oclock')}
               </Text>
             </View>
 
