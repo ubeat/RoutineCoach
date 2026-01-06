@@ -141,6 +141,13 @@ export default function HomeScreen() {
     return t('home.greeting_evening');
   };
 
+  // Get current language flag
+  const getCurrentFlag = () => {
+    const lang = t('_lang', { defaultValue: 'de' });
+    const flags: Record<string, string> = { de: '🇩🇪', en: '🇬🇧', es: '🇪🇸', fr: '🇫🇷' };
+    return flags[lang] || '🇩🇪';
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -150,8 +157,17 @@ export default function HomeScreen() {
         }
       >
         <View style={styles.header}>
-          <Text style={styles.appName}>Schritt für Schritt</Text>
-          <Text style={styles.greeting}>{getGreeting()}, {userName || 'du'}! 💜</Text>
+          <View style={styles.headerTopRow}>
+            <Text style={styles.appName}>Schritt für Schritt</Text>
+            <TouchableOpacity 
+              style={styles.languageButton}
+              onPress={() => router.push('/settings')}
+            >
+              <Text style={styles.languageFlag}>{getCurrentFlag()}</Text>
+              <Ionicons name="chevron-down" size={14} color={COLORS.textLight} />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.greeting}>{getGreeting()}, {userName || t('common.you')}! 💜</Text>
           <Text style={styles.dayText}>{getLocalizedWeekday()} - {t('home.motivational_quote')}</Text>
         </View>
 
