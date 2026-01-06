@@ -1073,7 +1073,7 @@ export default function SettingsScreen() {
                         >
                           <Ionicons name="add-circle-outline" size={18} color={colors.secondary} />
                           <Text style={[styles.setLocationText, { color: colors.secondary }]}>
-                            Ort auf Karte waehlen
+                            {i18n.language === 'en' ? 'Choose location on map' : 'Ort auf Karte waehlen'}
                           </Text>
                         </TouchableOpacity>
                       )}
