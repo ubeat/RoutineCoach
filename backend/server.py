@@ -504,7 +504,8 @@ async def create_checkin(input: DailyCheckInCreate):
         mood_scale=input.mood_scale,
         goals=goals,
         day_of_week=datetime.utcnow().weekday(),
-        week_progress=week_progress
+        week_progress=week_progress,
+        language=input.language or "de"
     )
     ai_response = await get_ai_coach_response(ai_request)
     
