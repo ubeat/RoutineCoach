@@ -936,7 +936,7 @@ export default function SettingsScreen() {
               </View>
             </View>
             <Text style={[styles.profileNameHint, { color: colors.textLight }]}>
-              Mit diesem Namen wirst du auf der Startseite begruesst
+              {t('settings.name_hint')}
             </Text>
           </View>
         </View>
@@ -963,7 +963,7 @@ export default function SettingsScreen() {
               {/* Same Time Toggle */}
               <View style={styles.settingRow}>
                 <Text style={[styles.settingLabel, { color: colors.text }]}>
-                  Gleiche Zeit fuer alle
+                  {t('settings.same_time_all')}
                 </Text>
                 <Switch
                   value={settings.habit_reminders.use_same_time}
