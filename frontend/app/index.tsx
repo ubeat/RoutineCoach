@@ -18,6 +18,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { languages, setLanguage, getCurrentLanguage, LanguageCode } from '../i18n';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -35,13 +36,16 @@ const COLORS = {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [deviceId, setDeviceId] = useState('');
   const [goals, setGoals] = useState<string[] | null>(null);
   const [todayCheckin, setTodayCheckin] = useState<any>(null);
   const [weekSummary, setWeekSummary] = useState<any>(null);
+  
+  // Language Picker Modal
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
   
   // Name modal state
   const [userName, setUserName] = useState<string | null>(null);
@@ -121,6 +125,12 @@ export default function HomeScreen() {
     fetchData();
   }, []);
 
+  // Handle language change
+  const handleLanguageChange = async (langCode: LanguageCode) => {
+    await setLanguage(langCode);
+    setShowLanguageModal(false);
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -143,7 +153,7 @@ export default function HomeScreen() {
 
   // Get current language flag
   const getCurrentFlag = () => {
-    const lang = t('_lang', { defaultValue: 'de' });
+    const lang = getCurrentLanguage();
     const flags: Record<string, string> = { de: '🇩🇪', en: '🇬🇧', es: '🇪🇸', fr: '🇫🇷' };
     return flags[lang] || '🇩🇪';
   };
@@ -161,7 +171,7 @@ export default function HomeScreen() {
             <Text style={styles.appName}>Schritt für Schritt</Text>
             <TouchableOpacity 
               style={styles.languageButton}
-              onPress={() => router.push('/settings')}
+              onPress={() => setShowLanguageModal(true)}
             >
               <Text style={styles.languageFlag}>{getCurrentFlag()}</Text>
               <Ionicons name="chevron-down" size={14} color={COLORS.textLight} />
@@ -282,16 +292,16 @@ export default function HomeScreen() {
         >
           <View style={styles.welcomeModalContent}>
             <Text style={styles.welcomeEmoji}>💜</Text>
-            <Text style={styles.welcomeTitle}>Willkommen bei</Text>
+            <Text style={styles.welcomeTitle}>{t('welcome.title').split('!')[0].replace('Welcome to ', '').replace('Willkommen bei ', '')}</Text>
             <Text style={styles.welcomeAppName}>Schritt für Schritt</Text>
-            <Text style={styles.welcomeSubtitle}>Dein Gewohnheits-Tracker mit Herz</Text>
+            <Text style={styles.welcomeSubtitle}>{t('welcome.subtitle')}</Text>
             
             <View style={styles.welcomeDivider} />
             
-            <Text style={styles.welcomeQuestion}>Wie darf ich dich nennen?</Text>
+            <Text style={styles.welcomeQuestion}>{t('welcome.name_question')}</Text>
             <TextInput
               style={styles.nameInput}
-              placeholder="Dein Name"
+              placeholder={t('welcome.name_placeholder')}
               placeholderTextColor={COLORS.textLight}
               value={nameInput}
               onChangeText={setNameInput}
@@ -307,14 +317,64 @@ export default function HomeScreen() {
               onPress={saveUserName}
               disabled={nameInput.trim().length < 1}
             >
-              <Text style={styles.welcomeButtonText}>Los geht's! 🚀</Text>
+              <Text style={styles.welcomeButtonText}>{t('welcome.continue')} 🚀</Text>
             </TouchableOpacity>
             
             <Text style={styles.welcomeNote}>
-              Du kannst deinen Namen jederzeit in den Einstellungen aendern.
+              {getCurrentLanguage() === 'de' 
+                ? 'Du kannst deinen Namen jederzeit in den Einstellungen ändern.'
+                : 'You can change your name anytime in settings.'}
             </Text>
           </View>
         </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Language Selection Modal */}
+      <Modal
+        transparent
+        animationType="fade"
+        visible={showLanguageModal}
+        onRequestClose={() => setShowLanguageModal(false)}
+      >
+        <TouchableOpacity 
+          style={styles.languageModalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowLanguageModal(false)}
+        >
+          <View style={styles.languageModalContent}>
+            <Text style={styles.languageModalTitle}>{t('settings.language')}</Text>
+            {(Object.keys(languages) as LanguageCode[]).map((langCode) => {
+              const lang = languages[langCode];
+              const isSelected = getCurrentLanguage() === langCode;
+              const isAvailable = langCode === 'de' || langCode === 'en';
+              
+              return (
+                <TouchableOpacity
+                  key={langCode}
+                  style={[
+                    styles.languageOptionItem,
+                    isSelected && styles.languageOptionSelected,
+                    !isAvailable && styles.languageOptionDisabled,
+                  ]}
+                  onPress={() => isAvailable && handleLanguageChange(langCode)}
+                  disabled={!isAvailable}
+                >
+                  <Text style={styles.languageOptionFlag}>{lang.flag}</Text>
+                  <Text style={[
+                    styles.languageOptionName,
+                    isSelected && styles.languageOptionNameSelected
+                  ]}>{lang.nativeName}</Text>
+                  {isSelected && (
+                    <Ionicons name="checkmark-circle" size={20} color={COLORS.primary} />
+                  )}
+                  {!isAvailable && (
+                    <Text style={styles.languageComingSoon}>Soon</Text>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </TouchableOpacity>
       </Modal>
     </SafeAreaView>
   );
@@ -638,5 +698,61 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     marginTop: 16,
     textAlign: 'center',
+  },
+  // Language Modal Styles
+  languageModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  languageModalContent: {
+    backgroundColor: COLORS.card,
+    borderRadius: 20,
+    padding: 20,
+    width: '100%',
+    maxWidth: 320,
+  },
+  languageModalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  languageOptionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    borderRadius: 12,
+    backgroundColor: COLORS.background,
+    marginBottom: 10,
+    gap: 12,
+  },
+  languageOptionSelected: {
+    backgroundColor: COLORS.primary + '15',
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+  },
+  languageOptionDisabled: {
+    opacity: 0.5,
+  },
+  languageOptionFlag: {
+    fontSize: 24,
+  },
+  languageOptionName: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  languageOptionNameSelected: {
+    color: COLORS.primary,
+  },
+  languageComingSoon: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    fontStyle: 'italic',
   },
 });
