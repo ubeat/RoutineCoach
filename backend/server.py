@@ -1864,6 +1864,516 @@ async def update_smart_features(device_id: str, settings: SmartFeaturesSettings)
     )
     return {"updated": True, "settings": settings.dict()}
 
+# ============================================
+# SUBSCRIPTION & PREMIUM ENDPOINTS
+# ============================================
+
+# Get subscription status
+@api_router.get("/subscription/{device_id}")
+async def get_subscription_status(device_id: str):
+    """Get the current subscription status for a device"""
+    status = await check_premium_status(device_id)
+    return status
+
+# Redeem promo code
+@api_router.post("/subscription/redeem-promo")
+async def redeem_promo_code(request: PromoCodeRedeem):
+    """Redeem a promo code for premium access"""
+    code_doc = await db.promo_codes.find_one({"code": request.code.upper()})
+    
+    if not code_doc:
+        raise HTTPException(status_code=404, detail="Ungültiger Code. Bitte überprüfe die Eingabe.")
+    
+    if not code_doc.get("is_active", True):
+        raise HTTPException(status_code=400, detail="Dieser Code ist nicht mehr aktiv.")
+    
+    if code_doc.get("max_uses") and code_doc.get("current_uses", 0) >= code_doc["max_uses"]:
+        raise HTTPException(status_code=400, detail="Dieser Code wurde bereits zu oft verwendet.")
+    
+    # Check if user already has an active subscription
+    existing = await db.subscriptions.find_one({"device_id": request.device_id})
+    current_expiry = datetime.utcnow()
+    
+    if existing and existing.get("expires_at"):
+        exp = existing["expires_at"]
+        if isinstance(exp, str):
+            exp = datetime.fromisoformat(exp.replace('Z', '+00:00'))
+        if exp > datetime.utcnow():
+            # Extend from current expiry
+            current_expiry = exp
+    
+    # Calculate new expiry
+    duration_days = code_doc.get("duration_days", 30)
+    new_expiry = current_expiry + timedelta(days=duration_days)
+    
+    # Create/update subscription
+    await db.subscriptions.update_one(
+        {"device_id": request.device_id},
+        {"$set": {
+            "device_id": request.device_id,
+            "is_premium": True,
+            "subscription_type": "promo",
+            "promo_code_used": request.code.upper(),
+            "expires_at": new_expiry,
+            "updated_at": datetime.utcnow()
+        }},
+        upsert=True
+    )
+    
+    # Increment code usage
+    await db.promo_codes.update_one(
+        {"code": request.code.upper()},
+        {"$inc": {"current_uses": 1}}
+    )
+    
+    # Log redemption
+    await db.promo_redemptions.insert_one({
+        "device_id": request.device_id,
+        "code": request.code.upper(),
+        "redeemed_at": datetime.utcnow(),
+        "duration_days": duration_days
+    })
+    
+    duration_text = {
+        7: "1 Woche",
+        30: "1 Monat",
+        90: "3 Monate",
+        180: "6 Monate",
+        365: "1 Jahr"
+    }.get(duration_days, f"{duration_days} Tage")
+    
+    return {
+        "success": True,
+        "message": f"🎉 Code eingelöst! Du hast jetzt {duration_text} Premium-Zugang.",
+        "expires_at": new_expiry.isoformat(),
+        "duration_days": duration_days
+    }
+
+# ============================================
+# STRIPE INTEGRATION (Test Mode)
+# ============================================
+
+@api_router.post("/subscription/stripe/create-checkout")
+async def create_stripe_checkout(request: StripeCheckoutRequest):
+    """Create a Stripe checkout session for subscription"""
+    import stripe
+    
+    stripe_key = os.environ.get('STRIPE_SECRET_KEY')
+    if not stripe_key:
+        raise HTTPException(status_code=503, detail="Stripe ist noch nicht konfiguriert. Bitte später versuchen.")
+    
+    stripe.api_key = stripe_key
+    
+    try:
+        # Create Stripe checkout session
+        session = stripe.checkout.Session.create(
+            mode='subscription',
+            payment_method_types=['card', 'sepa_debit'],
+            line_items=[{
+                'price_data': {
+                    'currency': 'eur',
+                    'product_data': {
+                        'name': 'Schritt für Schritt Premium',
+                        'description': 'KI-Coaching & Wochenanalysen',
+                    },
+                    'unit_amount': 499,  # 4.99 EUR in cents
+                    'recurring': {
+                        'interval': 'month',
+                    },
+                },
+                'quantity': 1,
+            }],
+            success_url=request.success_url + '?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=request.cancel_url,
+            metadata={
+                'device_id': request.device_id
+            }
+        )
+        
+        return {
+            "checkout_url": session.url,
+            "session_id": session.id
+        }
+    except Exception as e:
+        logger.error(f"Stripe checkout error: {e}")
+        raise HTTPException(status_code=500, detail="Fehler beim Erstellen der Zahlung.")
+
+@api_router.post("/subscription/stripe/webhook")
+async def stripe_webhook(request: dict):
+    """Handle Stripe webhooks"""
+    import stripe
+    
+    stripe_key = os.environ.get('STRIPE_SECRET_KEY')
+    if not stripe_key:
+        raise HTTPException(status_code=503, detail="Stripe nicht konfiguriert")
+    
+    stripe.api_key = stripe_key
+    
+    event_type = request.get('type')
+    data = request.get('data', {}).get('object', {})
+    
+    if event_type == 'checkout.session.completed':
+        device_id = data.get('metadata', {}).get('device_id')
+        subscription_id = data.get('subscription')
+        
+        if device_id:
+            # Get subscription details
+            sub = stripe.Subscription.retrieve(subscription_id)
+            current_period_end = datetime.fromtimestamp(sub.current_period_end)
+            
+            await db.subscriptions.update_one(
+                {"device_id": device_id},
+                {"$set": {
+                    "device_id": device_id,
+                    "is_premium": True,
+                    "subscription_type": "stripe",
+                    "subscription_id": subscription_id,
+                    "stripe_customer_id": data.get('customer'),
+                    "expires_at": current_period_end,
+                    "updated_at": datetime.utcnow()
+                }},
+                upsert=True
+            )
+    
+    elif event_type == 'customer.subscription.updated':
+        subscription_id = data.get('id')
+        current_period_end = datetime.fromtimestamp(data.get('current_period_end', 0))
+        status = data.get('status')
+        
+        await db.subscriptions.update_one(
+            {"subscription_id": subscription_id},
+            {"$set": {
+                "expires_at": current_period_end,
+                "stripe_status": status,
+                "is_premium": status == 'active',
+                "updated_at": datetime.utcnow()
+            }}
+        )
+    
+    elif event_type == 'customer.subscription.deleted':
+        subscription_id = data.get('id')
+        
+        await db.subscriptions.update_one(
+            {"subscription_id": subscription_id},
+            {"$set": {
+                "is_premium": False,
+                "stripe_status": "canceled",
+                "updated_at": datetime.utcnow()
+            }}
+        )
+    
+    return {"received": True}
+
+# ============================================
+# PAYPAL INTEGRATION
+# ============================================
+
+@api_router.post("/subscription/paypal/create-order")
+async def create_paypal_order(request: PayPalCheckoutRequest):
+    """Create a PayPal subscription order"""
+    import httpx
+    
+    client_id = os.environ.get('PAYPAL_CLIENT_ID')
+    client_secret = os.environ.get('PAYPAL_CLIENT_SECRET')
+    
+    if not client_id or not client_secret:
+        raise HTTPException(status_code=503, detail="PayPal ist noch nicht konfiguriert.")
+    
+    # Use sandbox for testing
+    paypal_base = os.environ.get('PAYPAL_BASE_URL', 'https://api-m.sandbox.paypal.com')
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            # Get access token
+            auth_response = await client.post(
+                f"{paypal_base}/v1/oauth2/token",
+                auth=(client_id, client_secret),
+                data={"grant_type": "client_credentials"}
+            )
+            access_token = auth_response.json().get('access_token')
+            
+            # Create subscription
+            headers = {
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json"
+            }
+            
+            plan_id = os.environ.get('PAYPAL_PLAN_ID')
+            
+            if plan_id:
+                # Use existing plan
+                subscription_data = {
+                    "plan_id": plan_id,
+                    "application_context": {
+                        "return_url": request.return_url,
+                        "cancel_url": request.cancel_url,
+                        "brand_name": "Schritt für Schritt",
+                        "user_action": "SUBSCRIBE_NOW"
+                    },
+                    "custom_id": request.device_id
+                }
+                
+                response = await client.post(
+                    f"{paypal_base}/v1/billing/subscriptions",
+                    headers=headers,
+                    json=subscription_data
+                )
+            else:
+                # Create order for one-time monthly payment
+                order_data = {
+                    "intent": "CAPTURE",
+                    "purchase_units": [{
+                        "amount": {
+                            "currency_code": "EUR",
+                            "value": "4.99"
+                        },
+                        "description": "Schritt für Schritt Premium (1 Monat)",
+                        "custom_id": request.device_id
+                    }],
+                    "application_context": {
+                        "return_url": request.return_url,
+                        "cancel_url": request.cancel_url,
+                        "brand_name": "Schritt für Schritt"
+                    }
+                }
+                
+                response = await client.post(
+                    f"{paypal_base}/v2/checkout/orders",
+                    headers=headers,
+                    json=order_data
+                )
+            
+            result = response.json()
+            
+            # Find approval URL
+            approval_url = None
+            for link in result.get('links', []):
+                if link.get('rel') == 'approve':
+                    approval_url = link.get('href')
+                    break
+            
+            return {
+                "order_id": result.get('id'),
+                "approval_url": approval_url
+            }
+            
+    except Exception as e:
+        logger.error(f"PayPal error: {e}")
+        raise HTTPException(status_code=500, detail="Fehler bei PayPal-Verbindung.")
+
+@api_router.post("/subscription/paypal/capture")
+async def capture_paypal_order(order_id: str, device_id: str):
+    """Capture a PayPal order after approval"""
+    import httpx
+    
+    client_id = os.environ.get('PAYPAL_CLIENT_ID')
+    client_secret = os.environ.get('PAYPAL_CLIENT_SECRET')
+    paypal_base = os.environ.get('PAYPAL_BASE_URL', 'https://api-m.sandbox.paypal.com')
+    
+    if not client_id or not client_secret:
+        raise HTTPException(status_code=503, detail="PayPal nicht konfiguriert")
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            # Get access token
+            auth_response = await client.post(
+                f"{paypal_base}/v1/oauth2/token",
+                auth=(client_id, client_secret),
+                data={"grant_type": "client_credentials"}
+            )
+            access_token = auth_response.json().get('access_token')
+            
+            # Capture the order
+            headers = {"Authorization": f"Bearer {access_token}"}
+            response = await client.post(
+                f"{paypal_base}/v2/checkout/orders/{order_id}/capture",
+                headers=headers
+            )
+            
+            result = response.json()
+            
+            if result.get('status') == 'COMPLETED':
+                # Grant premium access for 1 month
+                expires_at = datetime.utcnow() + timedelta(days=30)
+                
+                await db.subscriptions.update_one(
+                    {"device_id": device_id},
+                    {"$set": {
+                        "device_id": device_id,
+                        "is_premium": True,
+                        "subscription_type": "paypal",
+                        "paypal_order_id": order_id,
+                        "expires_at": expires_at,
+                        "updated_at": datetime.utcnow()
+                    }},
+                    upsert=True
+                )
+                
+                return {
+                    "success": True,
+                    "message": "Zahlung erfolgreich! Premium aktiviert.",
+                    "expires_at": expires_at.isoformat()
+                }
+            else:
+                raise HTTPException(status_code=400, detail="Zahlung konnte nicht abgeschlossen werden.")
+                
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"PayPal capture error: {e}")
+        raise HTTPException(status_code=500, detail="Fehler beim Abschließen der Zahlung.")
+
+# ============================================
+# REVENUECAT INTEGRATION (for Native Apps)
+# ============================================
+
+@api_router.post("/subscription/revenuecat/webhook")
+async def revenuecat_webhook(request: dict):
+    """Handle RevenueCat webhooks for iOS/Android subscriptions"""
+    event = request.get('event', {})
+    event_type = event.get('type')
+    
+    app_user_id = event.get('app_user_id')  # This should be the device_id
+    
+    if not app_user_id:
+        return {"received": True, "processed": False}
+    
+    if event_type in ['INITIAL_PURCHASE', 'RENEWAL', 'PRODUCT_CHANGE']:
+        # User subscribed or renewed
+        expiration_at = event.get('expiration_at_ms')
+        if expiration_at:
+            expires_at = datetime.fromtimestamp(expiration_at / 1000)
+        else:
+            expires_at = datetime.utcnow() + timedelta(days=30)
+        
+        await db.subscriptions.update_one(
+            {"device_id": app_user_id},
+            {"$set": {
+                "device_id": app_user_id,
+                "is_premium": True,
+                "subscription_type": "revenuecat",
+                "revenuecat_event": event_type,
+                "expires_at": expires_at,
+                "updated_at": datetime.utcnow()
+            }},
+            upsert=True
+        )
+    
+    elif event_type in ['CANCELLATION', 'EXPIRATION']:
+        # Subscription ended
+        await db.subscriptions.update_one(
+            {"device_id": app_user_id},
+            {"$set": {
+                "is_premium": False,
+                "revenuecat_event": event_type,
+                "updated_at": datetime.utcnow()
+            }}
+        )
+    
+    return {"received": True, "processed": True}
+
+# ============================================
+# ADMIN ENDPOINTS FOR PROMO CODES
+# ============================================
+
+@api_router.post("/admin/promo-codes")
+async def create_promo_code(code_data: PromoCodeCreate, admin_password: str):
+    """Create a new promo code (Admin only)"""
+    if not verify_admin(admin_password):
+        raise HTTPException(status_code=403, detail="Ungültiges Admin-Passwort")
+    
+    # Check if code already exists
+    existing = await db.promo_codes.find_one({"code": code_data.code.upper()})
+    if existing:
+        raise HTTPException(status_code=400, detail="Dieser Code existiert bereits.")
+    
+    promo = PromoCode(
+        code=code_data.code.upper(),
+        duration_days=code_data.duration_days,
+        description=code_data.description,
+        max_uses=code_data.max_uses
+    )
+    
+    await db.promo_codes.insert_one(promo.dict())
+    
+    duration_text = {
+        7: "1 Woche",
+        30: "1 Monat",
+        90: "3 Monate",
+        180: "6 Monate",
+        365: "1 Jahr"
+    }.get(code_data.duration_days, f"{code_data.duration_days} Tage")
+    
+    return {
+        "success": True,
+        "code": promo.code,
+        "duration": duration_text,
+        "max_uses": promo.max_uses or "Unbegrenzt"
+    }
+
+@api_router.get("/admin/promo-codes")
+async def list_promo_codes(admin_password: str):
+    """List all promo codes (Admin only)"""
+    if not verify_admin(admin_password):
+        raise HTTPException(status_code=403, detail="Ungültiges Admin-Passwort")
+    
+    codes = await db.promo_codes.find().to_list(100)
+    return {"codes": serialize_doc(codes)}
+
+@api_router.put("/admin/promo-codes/{code}")
+async def update_promo_code(code: str, admin_password: str, is_active: bool = None, max_uses: int = None):
+    """Update a promo code (Admin only)"""
+    if not verify_admin(admin_password):
+        raise HTTPException(status_code=403, detail="Ungültiges Admin-Passwort")
+    
+    update_data = {}
+    if is_active is not None:
+        update_data["is_active"] = is_active
+    if max_uses is not None:
+        update_data["max_uses"] = max_uses
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="Keine Änderungen angegeben")
+    
+    result = await db.promo_codes.update_one(
+        {"code": code.upper()},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Code nicht gefunden")
+    
+    return {"success": True, "updated": update_data}
+
+@api_router.delete("/admin/promo-codes/{code}")
+async def delete_promo_code(code: str, admin_password: str):
+    """Delete a promo code (Admin only)"""
+    if not verify_admin(admin_password):
+        raise HTTPException(status_code=403, detail="Ungültiges Admin-Passwort")
+    
+    result = await db.promo_codes.delete_one({"code": code.upper()})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Code nicht gefunden")
+    
+    return {"success": True, "deleted": code.upper()}
+
+@api_router.get("/admin/subscriptions")
+async def list_subscriptions(admin_password: str, skip: int = 0, limit: int = 50):
+    """List all subscriptions (Admin only)"""
+    if not verify_admin(admin_password):
+        raise HTTPException(status_code=403, detail="Ungültiges Admin-Passwort")
+    
+    subscriptions = await db.subscriptions.find().skip(skip).limit(limit).to_list(limit)
+    total = await db.subscriptions.count_documents({})
+    
+    return {
+        "subscriptions": serialize_doc(subscriptions),
+        "total": total,
+        "skip": skip,
+        "limit": limit
+    }
+
 # Include the router in the main app
 app.include_router(api_router)
 
