@@ -1919,7 +1919,7 @@ async def remove_partner(device_id: str):
 
 # Anonymous Group Comparison
 @api_router.get("/social/leaderboard")
-async def get_anonymous_leaderboard(device_id: str):
+async def get_anonymous_leaderboard(device_id: str, language: str = "de"):
     # Get top 20 users by XP
     top_users = await db.gamification.find().sort("xp", -1).limit(20).to_list(20)
     
@@ -1928,13 +1928,16 @@ async def get_anonymous_leaderboard(device_id: str):
     user_xp = user_profile.get("xp", 0) if user_profile else 0
     user_rank = await db.gamification.count_documents({"xp": {"$gt": user_xp}}) + 1
     
-    # Anonymize leaderboard
+    # Anonymize leaderboard with localized names
+    you_text = "You" if language == "en" else "Du"
+    player_text = "Player" if language == "en" else "Spieler"
+    
     leaderboard = []
     for i, user in enumerate(top_users):
         is_current_user = user.get("device_id") == device_id
         leaderboard.append({
             "rank": i + 1,
-            "name": "Du" if is_current_user else f"Spieler {i + 1}",
+            "name": you_text if is_current_user else f"{player_text} {i + 1}",
             "xp": user.get("xp", 0),
             "level": user.get("level", 1),
             "streak": user.get("current_streak", 0),
