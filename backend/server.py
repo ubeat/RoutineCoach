@@ -1763,7 +1763,7 @@ async def get_journal_entries(device_id: str, limit: int = 30):
     return {"entries": serialize_doc(entries)}
 
 @api_router.get("/journal/{device_id}/today")
-async def get_today_journal(device_id: str):
+async def get_today_journal(device_id: str, language: str = "de"):
     today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
     today_end = today_start + timedelta(days=1)
     
@@ -1772,9 +1772,8 @@ async def get_today_journal(device_id: str):
         "date": {"$gte": today_start, "$lt": today_end}
     })
     
-    # Get a random reflection question
-    import random
-    question = random.choice(REFLECTION_QUESTIONS)
+    # Get a random reflection question in the correct language
+    question = get_reflection_question(language)
     
     return {
         "entry": serialize_doc(entry),
