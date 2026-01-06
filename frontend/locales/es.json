@@ -1,0 +1,43 @@
+{
+  "_note": "Spanish translation - TODO: Translate from German",
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "done": "Hecho",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "yes": "Sí",
+    "no": "No",
+    "ok": "OK",
+    "close": "Cerrar",
+    "retry": "Reintentar",
+    "understood": "Entendido",
+    "later": "Más tarde"
+  },
+  "tabs": {
+    "home": "Inicio",
+    "goals": "Metas",
+    "checkin": "Check-In",
+    "progress": "Progreso",
+    "profile": "Perfil",
+    "settings": "Ajustes",
+    "journal": "Diario"
+  },
+  "home": {
+    "greeting_morning": "Buenos días",
+    "greeting_afternoon": "Buenas tardes",
+    "greeting_evening": "Buenas noches",
+    "welcome_back": "¡Qué bueno verte!",
+    "todays_habits": "Tus hábitos de hoy",
+    "no_habits": "Aún no hay hábitos",
+    "set_habits": "Establecer hábitos",
+    "checkin_reminder": "¡No olvides tu check-in!",
+    "streak_message": "¡Llevas {{days}} días!",
+    "motivational_quote": "Pequeños pasos llevan a grandes cambios"
+  }
+}
