@@ -1215,7 +1215,10 @@ export default function SettingsScreen() {
                       // Force re-render
                       setSettings({...settings});
                     } else {
-                      Alert.alert('Bald verfügbar', `${lang.nativeName} wird bald hinzugefügt!`);
+                      Alert.alert(
+                        t('settings.coming_soon'),
+                        t('settings.language_coming_soon', { language: lang.nativeName })
+                      );
                     }
                   }}
                   disabled={!isAvailable}
