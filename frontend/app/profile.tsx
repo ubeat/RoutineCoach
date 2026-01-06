@@ -164,7 +164,7 @@ export default function ProfileScreen() {
         axios.get(`${API_URL}/api/gamification/${deviceId}`),
         axios.get(`${API_URL}/api/challenges`),
         axios.get(`${API_URL}/api/social/partner/${deviceId}`),
-        axios.get(`${API_URL}/api/social/leaderboard?device_id=${deviceId}`),
+        axios.get(`${API_URL}/api/social/leaderboard?device_id=${deviceId}&language=${i18n.language}`),
         axios.get(`${API_URL}/api/settings/${deviceId}`),
       ]);
 
