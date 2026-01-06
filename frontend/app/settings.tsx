@@ -1512,12 +1512,8 @@ export default function SettingsScreen() {
               <Ionicons name="information-circle" size={20} color={colors.textLight} />
               <Text style={[styles.locationInfoText, { color: colors.textLight }]}>
                 {Platform.OS === 'web' 
-                  ? (i18n.language === 'en' 
-                      ? 'Note: Location reminders only work in the mobile app.'
-                      : 'Hinweis: Orts-Erinnerungen funktionieren nur in der mobilen App.')
-                  : (i18n.language === 'en'
-                      ? 'You will receive a reminder when you are near this location.'
-                      : 'Du wirst eine Erinnerung erhalten, wenn du in der Naehe dieses Ortes bist.')
+                  ? t('settings.location_web_note')
+                  : t('settings.location_mobile_note')
                 }
               </Text>
             </View>
