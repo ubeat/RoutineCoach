@@ -907,7 +907,7 @@ export default function SettingsScreen() {
         <View style={[styles.section, { backgroundColor: colors.card }]}>
           <View style={styles.sectionHeader}>
             <Ionicons name="notifications" size={24} color={colors.primary} />
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>Habit-Erinnerungen</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('settings.habit_reminders')}</Text>
             <Switch
               value={settings.habit_reminders.enabled}
               onValueChange={(value) =>
