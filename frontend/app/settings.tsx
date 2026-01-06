@@ -1291,7 +1291,9 @@ export default function SettingsScreen() {
               <Text style={[styles.timeDisplayText, { color: colors.primary }]}>
                 {tempTime.hour}:{tempTime.minute}
               </Text>
-              <Text style={[styles.timeDisplayLabel, { color: colors.textLight }]}>Uhr</Text>
+              <Text style={[styles.timeDisplayLabel, { color: colors.textLight }]}>
+                {i18n.language === 'en' ? "o'clock" : 'Uhr'}
+              </Text>
             </View>
 
             {/* Time Picker Wheels */}
