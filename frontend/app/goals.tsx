@@ -323,7 +323,9 @@ export default function GoalsScreen() {
           {/* Goals Input Card */}
           <View style={[styles.card, { backgroundColor: colors.card }]}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Deine 3 winzigen Gewohnheiten
+              {t('_lang', { defaultValue: 'de' }) === 'en' 
+                ? 'Your 3 tiny habits'
+                : 'Deine 3 winzigen Gewohnheiten'}
             </Text>
             
             {/* Mode Selector */}
@@ -345,7 +347,7 @@ export default function GoalsScreen() {
                   styles.modeButtonText,
                   { color: goalMode === 'simple' ? '#FFF' : colors.textLight }
                 ]}>
-                  Einfach
+                  {t('goals.mode_simple')}
                 </Text>
               </TouchableOpacity>
               
@@ -366,15 +368,19 @@ export default function GoalsScreen() {
                   styles.modeButtonText,
                   { color: goalMode === 'wenn-dann' ? '#FFF' : colors.textLight }
                 ]}>
-                  Wenn-Dann
+                  {t('goals.mode_wenn_dann')}
                 </Text>
               </TouchableOpacity>
             </View>
             
             <Text style={[styles.sectionHint, { color: colors.textLight }]}>
               {goalMode === 'wenn-dann' 
-                ? 'Verknuepfe deine Gewohnheit mit einem Ausloeser - das verdreifacht den Erfolg! 🎯'
-                : 'Beschreibe einfach, was du tun moechtest - kurz und knapp! 🎯'
+                ? (t('_lang', { defaultValue: 'de' }) === 'en' 
+                    ? 'Link your habit to a trigger - this triples success! 🎯'
+                    : 'Verknuepfe deine Gewohnheit mit einem Ausloeser - das verdreifacht den Erfolg! 🎯')
+                : (t('_lang', { defaultValue: 'de' }) === 'en'
+                    ? 'Simply describe what you want to do - short and sweet! 🎯'
+                    : 'Beschreibe einfach, was du tun moechtest - kurz und knapp! 🎯')
               }
             </Text>
 
