@@ -631,7 +631,7 @@ export default function GoalsScreen() {
             </Text>
 
             <ScrollView style={styles.suggestionsList}>
-              {WENN_DANN_VORSCHLAEGE.map((item, index) => (
+              {getLocalizedSuggestions(t).map((item, index) => (
                 <View key={index} style={[styles.suggestionGroup, { backgroundColor: colors.background }]}>
                   <Text style={[styles.suggestionWenn, { color: colors.primary }]}>
                     {item.wenn}...
