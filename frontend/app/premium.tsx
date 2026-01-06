@@ -290,7 +290,7 @@ export default function PremiumScreen() {
                   <>
                     <Ionicons name="card" size={24} color="#FFF" />
                     <Text style={styles.paymentButtonText}>
-                      {isEn ? 'Pay with Stripe' : 'Mit Stripe bezahlen'}
+                      {t('premium.pay_with_stripe')}
                     </Text>
                   </>
                 )}
@@ -307,7 +307,7 @@ export default function PremiumScreen() {
                   <>
                     <Ionicons name="logo-paypal" size={24} color="#FFF" />
                     <Text style={styles.paymentButtonText}>
-                      {isEn ? 'Pay with PayPal' : 'Mit PayPal bezahlen'}
+                      {t('premium.pay_with_paypal')}
                     </Text>
                   </>
                 )}
@@ -317,14 +317,14 @@ export default function PremiumScreen() {
             {/* Promo Code */}
             <View style={[styles.promoSection, { backgroundColor: colors.card }]}>
               <Text style={[styles.promoTitle, { color: colors.text }]}>
-                {isEn ? 'Got a promo code?' : 'Promo-Code vorhanden?'}
+                {t('premium.promo_code_title')}
               </Text>
               <View style={styles.promoInputRow}>
                 <TextInput
                   style={[styles.promoInput, { backgroundColor: colors.background, color: colors.text }]}
                   value={promoCode}
                   onChangeText={setPromoCode}
-                  placeholder={isEn ? 'Enter code' : 'Code eingeben'}
+                  placeholder={t('premium.enter_code')}
                   placeholderTextColor={colors.textLight}
                   autoCapitalize="characters"
                   maxLength={20}
@@ -337,7 +337,7 @@ export default function PremiumScreen() {
                   {redeeming ? (
                     <ActivityIndicator color="#FFF" size="small" />
                   ) : (
-                    <Text style={styles.promoButtonText}>{isEn ? 'Redeem' : 'Einlösen'}</Text>
+                    <Text style={styles.promoButtonText}>{t('premium.redeem')}</Text>
                   )}
                 </TouchableOpacity>
               </View>
@@ -345,7 +345,7 @@ export default function PremiumScreen() {
 
             {/* Free Features */}
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {isEn ? 'Free forever' : 'Immer kostenlos'}
+              {t('premium.free_forever')}
             </Text>
             {FREE_FEATURES.map((feature, index) => (
               <View key={index} style={[styles.featureItem, { backgroundColor: colors.card }]}>
