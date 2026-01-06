@@ -194,10 +194,10 @@ export default function ProfileScreen() {
       if (supported) {
         await Linking.openURL(url);
       } else {
-        Alert.alert(isEn ? 'WhatsApp not found' : 'WhatsApp nicht gefunden', isEn ? 'WhatsApp is not installed.' : 'WhatsApp ist nicht installiert.');
+        Alert.alert(t('profile.whatsapp_not_found'), t('profile.whatsapp_not_installed'));
       }
     } catch (error) {
-      Alert.alert(t('common.error'), isEn ? 'WhatsApp could not be opened.' : 'WhatsApp konnte nicht geöffnet werden.');
+      Alert.alert(t('common.error'), t('profile.whatsapp_error'));
     }
   };
 
@@ -208,19 +208,19 @@ export default function ProfileScreen() {
     try {
       await Linking.openURL(url);
     } catch (error) {
-      Alert.alert(t('common.error'), isEn ? 'SMS could not be opened.' : 'SMS konnte nicht geöffnet werden.');
+      Alert.alert(t('common.error'), t('profile.sms_error'));
     }
   };
 
   const shareViaEmail = async () => {
     if (!generatedCode) return;
-    const subject = encodeURIComponent(isEn ? 'Become my companion at Step by Step!' : 'Werde meine Wegbegleiterin bei Schritt für Schritt!');
+    const subject = encodeURIComponent(t('profile.invite_subject'));
     const body = encodeURIComponent(getInviteMessage(generatedCode));
     const url = `mailto:?subject=${subject}&body=${body}`;
     try {
       await Linking.openURL(url);
     } catch (error) {
-      Alert.alert(t('common.error'), isEn ? 'Email could not be opened.' : 'E-Mail konnte nicht geöffnet werden.');
+      Alert.alert(t('common.error'), t('profile.email_error'));
     }
   };
 
@@ -230,14 +230,14 @@ export default function ProfileScreen() {
       Clipboard.setString(generatedCode);
     }
     Alert.alert(
-      isEn ? 'Copied! 📋' : 'Kopiert! 📋', 
-      isEn ? `The code "${generatedCode}" has been copied to the clipboard.` : `Der Code "${generatedCode}" wurde in die Zwischenablage kopiert.`
+      t('profile.copied_title') + ' 📋', 
+      t('profile.copied_message', { code: generatedCode })
     );
   };
 
   const acceptInvite = async () => {
     if (!inviteCode.trim()) {
-      Alert.alert(isEn ? 'Hold on 💭' : 'Moment mal 💭', isEn ? 'Please enter a code' : 'Bitte gib einen Code ein');
+      Alert.alert(t('common.note') + ' 💭', t('profile.enter_code'));
       return;
     }
     
@@ -245,25 +245,25 @@ export default function ProfileScreen() {
       const deviceId = await AsyncStorage.getItem('deviceId');
       await axios.post(`${API_URL}/api/social/accept-invite?device_id=${deviceId}&invite_code=${inviteCode}`);
       Alert.alert(
-        isEn ? 'Wonderful! 🎉' : 'Wunderbar! 🎉', 
-        isEn ? 'You are now connected! Together you can do it!' : 'Ihr seid jetzt verbunden! Gemeinsam schafft ihr das!'
+        t('profile.connected_title') + ' 🎉', 
+        t('profile.connected_message')
       );
       setShowPartnerModal(false);
       setInviteCode('');
       fetchData();
     } catch (error: any) {
-      Alert.alert('Hmm 🤔', error.response?.data?.detail || (isEn ? 'The code seems incorrect. Check it again!' : 'Der Code scheint nicht zu stimmen. Prüf ihn nochmal!'));
+      Alert.alert('Hmm 🤔', error.response?.data?.detail || t('profile.code_wrong'));
     }
   };
 
   const removePartner = async () => {
     Alert.alert(
-      isEn ? 'Disconnect?' : 'Verbindung lösen?',
-      isEn ? 'Do you really want to disconnect from your companion?' : 'Möchtest du die Verbindung zu deiner Wegbegleiterin wirklich lösen?',
+      t('profile.disconnect_confirm_title'),
+      t('profile.disconnect_confirm_message'),
       [
         { text: t('common.cancel'), style: 'cancel' },
         {
-          text: isEn ? 'Yes, disconnect' : 'Ja, lösen',
+          text: t('profile.yes_disconnect'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -271,7 +271,7 @@ export default function ProfileScreen() {
               await axios.delete(`${API_URL}/api/social/partner/${deviceId}`);
               fetchData();
             } catch (error) {
-              Alert.alert('Hmm', isEn ? 'Could not be removed. Try again!' : 'Konnte nicht entfernt werden. Versuch es nochmal!');
+              Alert.alert('Hmm', t('profile.disconnect_error'));
             }
           },
         },
