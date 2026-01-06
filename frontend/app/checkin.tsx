@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
@@ -32,21 +33,9 @@ const COLORS = {
   warning: '#FDCB6E',
 };
 
-const MOOD_EMOJIS = [
-  { emoji: String.fromCodePoint(0x1F62D), label: 'Sehr traurig' },
-  { emoji: String.fromCodePoint(0x1F614), label: 'Traurig' },
-  { emoji: String.fromCodePoint(0x1F641), label: 'Nicht gut' },
-  { emoji: String.fromCodePoint(0x1F615), label: 'Verwirrt' },
-  { emoji: String.fromCodePoint(0x1F610), label: 'Neutral' },
-  { emoji: String.fromCodePoint(0x1F642), label: 'Okay' },
-  { emoji: String.fromCodePoint(0x1F60A), label: 'Gut' },
-  { emoji: String.fromCodePoint(0x1F604), label: 'Sehr gut' },
-  { emoji: String.fromCodePoint(0x1F929), label: 'Fantastisch' },
-  { emoji: String.fromCodePoint(0x1F970), label: 'Verliebt' },
-];
-
 export default function CheckinScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [goals, setGoals] = useState<string[]>([]);
@@ -56,6 +45,20 @@ export default function CheckinScreen() {
   const [moodScale, setMoodScale] = useState(5);
   const [aiResponse, setAiResponse] = useState('');
   const [alreadyCheckedIn, setAlreadyCheckedIn] = useState(false);
+
+  // Mood emojis with translations
+  const getMoodEmojis = () => [
+    { emoji: String.fromCodePoint(0x1F62D), label: t('moods.very_sad', 'Sehr traurig') },
+    { emoji: String.fromCodePoint(0x1F614), label: t('moods.sad', 'Traurig') },
+    { emoji: String.fromCodePoint(0x1F641), label: t('moods.not_good', 'Nicht gut') },
+    { emoji: String.fromCodePoint(0x1F615), label: t('moods.confused', 'Verwirrt') },
+    { emoji: String.fromCodePoint(0x1F610), label: t('moods.neutral', 'Neutral') },
+    { emoji: String.fromCodePoint(0x1F642), label: t('moods.okay', 'Okay') },
+    { emoji: String.fromCodePoint(0x1F60A), label: t('moods.good', 'Gut') },
+    { emoji: String.fromCodePoint(0x1F604), label: t('moods.very_good', 'Sehr gut') },
+    { emoji: String.fromCodePoint(0x1F929), label: t('moods.fantastic', 'Fantastisch') },
+    { emoji: String.fromCodePoint(0x1F970), label: t('moods.in_love', 'Verliebt') },
+  ];
 
   useEffect(() => {
     fetchGoals();
